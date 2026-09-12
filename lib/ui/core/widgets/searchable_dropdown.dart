@@ -1,0 +1,239 @@
+import 'package:flutter/material.dart';
+
+/// A text field with a dropdown button that shows all options.
+/// Typing filters the options; tapping the dropdown always shows all.
+class SearchableDropdown extends StatefulWidget {
+  final List<String> options;
+  final String? initialValue;
+  final ValueChanged<String> onChanged;
+  final InputDecoration? decoration;
+  final String? Function(String?)? validator;
+
+  /// Optional builder for each option row (e.g. to add badges).
+  final Widget Function(String option, bool isHighlighted)? optionBuilder;
+
+  const SearchableDropdown({
+    super.key,
+    required this.options,
+    this.initialValue,
+    required this.onChanged,
+    this.decoration,
+    this.validator,
+    this.optionBuilder,
+  });
+
+  @override
+  State<SearchableDropdown> createState() => SearchableDropdownState();
+}
+
+class SearchableDropdownState extends State<SearchableDropdown> {
+  late TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+  List<String> _filtered = [];
+  bool _showAll = false;
+
+  /// True when overlay was opened via dropdown arrow (no keyboard).
+  bool _dropdownMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue ?? '');
+    _filtered = widget.options;
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchableDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.options != widget.options) {
+      // Defer to avoid markNeedsBuild during build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateFiltered();
+      });
+    }
+  }
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus) {
+      // Only show overlay on real focus (typing), not dropdown-arrow tap
+      if (!_dropdownMode) {
+        _updateFiltered();
+        _showOverlay();
+      }
+    } else {
+      if (!_dropdownMode) {
+        _removeOverlay();
+      }
+    }
+  }
+
+  void _updateFiltered() {
+    final query = _controller.text.toLowerCase();
+    setState(() {
+      if (_showAll || query.isEmpty) {
+        _filtered = widget.options;
+      } else {
+        _filtered = widget.options
+            .where((o) => o.toLowerCase().contains(query))
+            .toList();
+      }
+    });
+    _overlayEntry?.markNeedsBuild();
+  }
+
+  void _showOverlay() {
+    _removeOverlay();
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final size = renderBox.size;
+    final position = renderBox.localToGlobal(Offset.zero);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final availableBelow =
+        screenHeight - keyboardHeight - position.dy - size.height - 8;
+    const double maxDropdownHeight = 240;
+
+    // If not enough space below, show above
+    final showAbove = availableBelow < maxDropdownHeight * 0.5;
+    final effectiveMaxHeight = showAbove
+        ? (position.dy - 8).clamp(100.0, maxDropdownHeight)
+        : availableBelow.clamp(100.0, maxDropdownHeight);
+    final yOffset = showAbove ? -effectiveMaxHeight - 4 : size.height + 4;
+
+    _overlayEntry = OverlayEntry(
+      builder: (ctx) => Stack(
+        children: [
+          if (_dropdownMode)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: _dismissDropdown,
+              ),
+            ),
+          Positioned(
+            width: size.width,
+            child: CompositedTransformFollower(
+              link: _layerLink,
+              showWhenUnlinked: false,
+              offset: Offset(0, yOffset),
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: effectiveMaxHeight),
+                  child: _filtered.isEmpty
+                      ? const SizedBox.shrink()
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: _filtered.length,
+                          itemBuilder: (_, i) {
+                            final option = _filtered[i];
+                            return InkWell(
+                              onTap: () => _selectOption(option),
+                              child: widget.optionBuilder != null
+                                  ? widget.optionBuilder!(option, false)
+                                  : Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 12),
+                                      child: Text(option),
+                                    ),
+                            );
+                          },
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _selectOption(String option) {
+    _controller.text = option;
+    _controller.selection = TextSelection.collapsed(offset: option.length);
+    _showAll = false;
+    _dropdownMode = false;
+    widget.onChanged(option);
+    _focusNode.unfocus();
+    _removeOverlay();
+  }
+
+  void _dismissDropdown() {
+    _dropdownMode = false;
+    _showAll = false;
+    _removeOverlay();
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _onDropdownTap() {
+    if (_overlayEntry != null) {
+      // Already showing — dismiss
+      _dismissDropdown();
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+
+    // Show list without keyboard
+    _dropdownMode = true;
+    _showAll = true;
+    _filtered = widget.options;
+    // Clear focus from any active field on the page, not only this dropdown.
+    // Otherwise the iOS keyboard can keep covering the dropdown list.
+    FocusManager.instance.primaryFocus?.unfocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_dropdownMode || _overlayEntry != null) return;
+      _showOverlay();
+    });
+  }
+
+  /// Allow parent to update the text programmatically.
+  void setText(String text) {
+    _controller.text = text;
+    _controller.selection = TextSelection.collapsed(offset: text.length);
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveDecoration =
+        (widget.decoration ?? const InputDecoration()).copyWith(
+      suffixIcon: IconButton(
+        icon: const Icon(Icons.arrow_drop_down),
+        onPressed: _onDropdownTap,
+      ),
+    );
+
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: TextFormField(
+        controller: _controller,
+        focusNode: _focusNode,
+        decoration: effectiveDecoration,
+        validator: widget.validator,
+        onChanged: (value) {
+          _showAll = false;
+          widget.onChanged(value);
+          _updateFiltered();
+        },
+      ),
+    );
+  }
+}

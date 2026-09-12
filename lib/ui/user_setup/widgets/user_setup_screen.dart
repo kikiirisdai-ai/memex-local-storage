@@ -1,0 +1,457 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'dart:ui' show PlatformDispatcher;
+import 'package:google_fonts/google_fonts.dart';
+import 'package:memex/config/app_config.dart';
+import 'package:memex/data/repositories/memex_router.dart';
+import 'package:memex/data/services/file_system_service.dart';
+import 'package:memex/data/services/media_service.dart';
+import 'package:memex/utils/user_storage.dart';
+import 'package:memex/utils/toast_helper.dart';
+
+import 'package:memex/ui/settings/widgets/data_storage_page.dart';
+import 'package:memex/ui/settings/widgets/ai_service_setup_page.dart';
+import 'package:memex/ui/core/widgets/avatar_picker.dart';
+import 'package:memex/ui/core/widgets/character_avatar.dart';
+import 'package:memex/ui/core/widgets/language_picker.dart';
+import 'package:memex/ui/core/themes/app_colors.dart';
+
+/// User setup screen. Shown when user opens app for the first time or no local userId.
+class UserSetupScreen extends StatefulWidget {
+  final VoidCallback onUserCreated;
+
+  const UserSetupScreen({
+    super.key,
+    required this.onUserCreated,
+  });
+
+  @override
+  State<UserSetupScreen> createState() => _UserSetupScreenState();
+}
+
+class _UserSetupScreenState extends State<UserSetupScreen> {
+  final MemexRouter _memexRouter = MemexRouter();
+  final _formKey = GlobalKey<FormState>();
+  final _userIdController = TextEditingController();
+  bool _isSubmitting = false;
+  String _selectedLocaleTag = 'en';
+  String _selectedAvatar = UserStorage.defaultAvatarSeed;
+  String? _pendingAvatarImagePath;
+  bool _hasPickedAvatar = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _detectSystemLanguage();
+    _loadExistingUserId();
+    _loadExistingAvatar();
+    _userIdController.addListener(_onNicknameChanged);
+  }
+
+  void _onNicknameChanged() {
+    // Auto-update avatar seed to match nickname if user hasn't explicitly picked one
+    if (!_hasPickedAvatar && _userIdController.text.trim().isNotEmpty) {
+      setState(() => _selectedAvatar = _userIdController.text.trim());
+    }
+  }
+
+  void _detectSystemLanguage() {
+    final systemLocale = PlatformDispatcher.instance.locale;
+    final localeTag = UserStorage.localeTag(
+      UserStorage.resolveToSupportedLocale(systemLocale),
+    );
+    setState(() {
+      _selectedLocaleTag = localeTag;
+    });
+    _applyLanguage(_selectedLocaleTag);
+  }
+
+  Future<void> _loadExistingUserId() async {
+    final existingId = await UserStorage.getUserId();
+    if (existingId != null && existingId.isNotEmpty && mounted) {
+      _userIdController.text = existingId;
+    }
+  }
+
+  Future<void> _loadExistingAvatar() async {
+    final avatar = await _memexRouter.getUserAvatar();
+    if (avatar != null && mounted) {
+      setState(() {
+        _selectedAvatar = avatar;
+        _hasPickedAvatar = true;
+      });
+    }
+  }
+
+  Future<void> _applyLanguage(String localeTag) async {
+    final locale = UserStorage.localeFromTag(localeTag);
+    await UserStorage.setLocale(locale);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _showLanguagePicker() async {
+    final localeTag = await showLanguagePickerSheet(
+      context: context,
+      selectedLocaleTag: _selectedLocaleTag,
+      title: UserStorage.l10n.chooseLanguage,
+    );
+    if (!mounted || localeTag == null || localeTag == _selectedLocaleTag) {
+      return;
+    }
+
+    setState(() => _selectedLocaleTag = localeTag);
+    await _applyLanguage(localeTag);
+  }
+
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final userId = _userIdController.text.trim();
+    setState(() => _isSubmitting = true);
+
+    try {
+      await UserStorage.saveUser(userId);
+
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+
+        // Step 2 for first-time flow: configure storage before model config/home.
+        // On Android, skip storage setup — only app storage is available.
+        if (Platform.isIOS) {
+          final completedStorageSetup = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DataStoragePage(onboardingMode: true),
+            ),
+          );
+          if (!mounted || completedStorageSetup != true) {
+            return;
+          }
+        }
+
+        final avatarToSave = await _resolveAvatarForSave(userId);
+        await _memexRouter.updateUserAvatar(avatarToSave);
+        if (!mounted) return;
+
+        if (AppConfig.enableMemexModelService) {
+          final completedAiSetup = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AiServiceSetupPage(
+                onboardingMode: true,
+                onComplete: () => Navigator.of(context).pop(true),
+              ),
+            ),
+          );
+          if (!mounted || completedAiSetup != true) {
+            return;
+          }
+        }
+
+        widget.onUserCreated();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ToastHelper.showError(context, e);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 16),
+
+                  // ── Avatar ──
+                  GestureDetector(
+                    onTap: _showAvatarPicker,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 3,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                blurRadius: 24,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: CharacterAvatar(
+                            avatar: _selectedAvatar,
+                            name: _userIdController.text.trim(),
+                            size: 94,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.edit,
+                                size: 13, color: AppColors.textTertiary),
+                            const SizedBox(width: 4),
+                            Text(
+                              UserStorage.l10n.chooseAvatar,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Title ──
+                  Text(
+                    UserStorage.l10n.welcomeToMemex,
+                    style: GoogleFonts.inter(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    UserStorage.l10n.createUserIdToStart,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: AppColors.textTertiary,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 36),
+
+                  // ── Settings Card ──
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowLight,
+                          blurRadius: 16,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Language
+                        _buildLanguageSelector(),
+
+                        const SizedBox(height: 24),
+
+                        // User ID
+                        Text(
+                          UserStorage.l10n.userIdLabel,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _userIdController,
+                          decoration: InputDecoration(
+                            hintText: UserStorage.l10n.userIdHint,
+                            prefixIcon:
+                                const Icon(Icons.person_outline, size: 20),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[200]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: AppColors.background,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return UserStorage.l10n.pleaseEnterUserId;
+                            }
+                            if (value.trim().length > 50) {
+                              return UserStorage.l10n.userIdMaxLength;
+                            }
+                            return null;
+                          },
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleSubmit(),
+                          enabled: !_isSubmitting,
+                        ),
+
+                        const SizedBox(height: 8),
+                        Text(
+                          UserStorage.l10n.userIdTip,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ── Submit Button ──
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(
+                              UserStorage.l10n.startUsing,
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAvatarPicker() async {
+    final picked = await showAvatarPicker(
+      context,
+      _selectedAvatar,
+      onPickGallery: _pickUserAvatarFromGallery,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _selectedAvatar = picked;
+        _hasPickedAvatar = true;
+      });
+    }
+  }
+
+  Future<String?> _pickUserAvatarFromGallery() async {
+    final pickedPath = await pickAvatarImageFromGallery();
+    if (pickedPath == null) return null;
+
+    _pendingAvatarImagePath = pickedPath;
+    return pickedPath;
+  }
+
+  Future<String> _resolveAvatarForSave(String userId) async {
+    final pendingAvatarImagePath = _pendingAvatarImagePath;
+    if (pendingAvatarImagePath == null || pendingAvatarImagePath.isEmpty) {
+      return _selectedAvatar;
+    }
+
+    final dataRoot = await UserStorage.resolveDataRoot(userId);
+    await FileSystemService.init(dataRoot);
+
+    final imported = await MediaService.instance.importImage(
+      userId: userId,
+      sourcePath: pendingAvatarImagePath,
+    );
+
+    if (mounted) {
+      setState(() {
+        _selectedAvatar = imported.relativePath;
+      });
+    }
+    _pendingAvatarImagePath = null;
+    return imported.relativePath;
+  }
+
+  Widget _buildLanguageSelector() {
+    return Row(
+      children: [
+        const Icon(
+          Icons.language,
+          size: 18,
+          color: AppColors.textTertiary,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            UserStorage.l10n.chooseLanguage,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        LanguageValueButton(
+          localeTag: _selectedLocaleTag,
+          onTap: _showLanguagePicker,
+          compact: true,
+        ),
+      ],
+    );
+  }
+}

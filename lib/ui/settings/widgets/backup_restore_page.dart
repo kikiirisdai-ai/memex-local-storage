@@ -1,0 +1,1741 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:memex/data/services/backup_service.dart';
+import 'package:memex/data/services/event_bus_service.dart';
+import 'package:memex/data/services/external_backup_channel.dart';
+import 'package:memex/data/services/icloud_daily_backup_service.dart';
+import 'package:memex/ui/core/themes/app_colors.dart';
+import 'package:memex/ui/settings/widgets/backup_restore_confirm_dialog.dart';
+import 'package:memex/utils/logger.dart';
+import 'package:memex/utils/toast_helper.dart';
+import 'package:memex/utils/user_storage.dart';
+
+typedef AutoBackupCreator = Future<BackupSnapshot?> Function({
+  String trigger,
+  bool force,
+  void Function(String status)? onProgress,
+});
+
+typedef StoredBackupDeleter = Future<void> Function(BackupSnapshot snapshot);
+
+class BackupRestorePage extends StatefulWidget {
+  final bool? isAndroidOverride;
+  final bool? isIOSOverride;
+  final Future<int> Function()? estimateBackupSize;
+  final Future<BackupLocationInfo> Function()? currentBackupLocationInfo;
+  final Future<String> Function()? currentBackupLocationLabel;
+  final Future<List<BackupSnapshot>> Function()? listStoredBackups;
+  final AutoBackupCreator? createAutoBackup;
+  final StoredBackupDeleter? deleteStoredBackup;
+  final Future<void> Function()? pruneAutoBackups;
+  final Future<void> Function()? useDefaultBackupDirectory;
+  final Future<AndroidBackupDirectory?> Function()? pickAndroidBackupDirectory;
+  final Future<ICloudFolderStatus> Function()? icloudStatus;
+  final Future<ExternalFolder?> Function(String userId)? configureICloudFolder;
+  final Future<bool> Function({required String userId, bool force})?
+      maybeCreateICloudDailyBackup;
+  final Future<List<ICloudUploadStatus>> Function()? uploadStatus;
+
+  const BackupRestorePage({
+    super.key,
+    this.isAndroidOverride,
+    this.isIOSOverride,
+    this.estimateBackupSize,
+    this.currentBackupLocationInfo,
+    this.currentBackupLocationLabel,
+    this.listStoredBackups,
+    this.createAutoBackup,
+    this.deleteStoredBackup,
+    this.pruneAutoBackups,
+    this.useDefaultBackupDirectory,
+    this.pickAndroidBackupDirectory,
+    this.icloudStatus,
+    this.configureICloudFolder,
+    this.maybeCreateICloudDailyBackup,
+    this.uploadStatus,
+  });
+
+  bool get isAndroid => isAndroidOverride ?? Platform.isAndroid;
+  bool get isIOS => isIOSOverride ?? Platform.isIOS;
+
+  @override
+  State<BackupRestorePage> createState() => _BackupRestorePageState();
+}
+
+class _BackupRestorePageState extends State<BackupRestorePage> {
+  final Logger _logger = getLogger('BackupRestorePage');
+  bool _isBackingUp = false;
+  bool _isRestoring = false;
+  bool _isCreatingSnapshot = false;
+  bool _isPickingLocation = false;
+  bool _isUpdatingRetention = false;
+  bool _isConfiguringICloud = false;
+  String? _deletingBackupId;
+  bool _autoBackupEnabled = false;
+  String _statusText = '';
+  String _estimatedSize = '';
+  BackupLocationInfo? _backupLocationInfo;
+  DateTime? _lastAutoBackupAt;
+  int? _autoBackupRetentionDays = UserStorage.defaultAutoBackupRetentionDays;
+  int _autoBackupMaxBytes = UserStorage.defaultAutoBackupMaxBytes;
+  List<BackupSnapshot> _storedBackups = const [];
+  ICloudFolderStatus? _icloudStatus;
+  String? _icloudFolderLabel;
+  String? _icloudLastBackupYmd;
+  bool _icloudNeedsRepick = false;
+  List<ICloudUploadStatus> _uploadStatuses = const [];
+  Timer? _uploadStatusPollTimer;
+  int _uploadStatusPollTicks = 0;
+  static const int _uploadStatusPollMaxTicks = 10; // ~30s at 3s interval
+
+  @override
+  void initState() {
+    super.initState();
+    EventBusService.instance.addHandler(
+      EventBusMessageType.backupSnapshotsChanged,
+      _handleBackupDataChanged,
+    );
+    EventBusService.instance.addHandler(
+      EventBusMessageType.backupRestored,
+      _handleBackupDataChanged,
+    );
+    _loadPageData();
+  }
+
+  @override
+  void dispose() {
+    _uploadStatusPollTimer?.cancel();
+    EventBusService.instance.removeHandler(
+      EventBusMessageType.backupSnapshotsChanged,
+      _handleBackupDataChanged,
+    );
+    EventBusService.instance.removeHandler(
+      EventBusMessageType.backupRestored,
+      _handleBackupDataChanged,
+    );
+    super.dispose();
+  }
+
+  bool get _isBusy =>
+      _isBackingUp ||
+      _isRestoring ||
+      _isCreatingSnapshot ||
+      _isPickingLocation ||
+      _isUpdatingRetention ||
+      _isConfiguringICloud ||
+      _deletingBackupId != null;
+
+  void _handleBackupDataChanged(EventBusMessage message) {
+    if (!mounted || _isBusy) return;
+    unawaited(_loadPageData(includeEstimatedSize: false));
+  }
+
+  Future<void> _loadPageData({bool includeEstimatedSize = true}) async {
+    final userId = await UserStorage.getUserId();
+    final size = includeEstimatedSize
+        ? await (widget.estimateBackupSize ??
+            BackupService.estimateBackupSize)()
+        : null;
+    final location = await _resolveBackupLocationInfo();
+    final snapshots =
+        await (widget.listStoredBackups ?? BackupService.listStoredBackups)();
+    final autoEnabled = userId != null && userId.isNotEmpty
+        ? await UserStorage.isAutoBackupEnabled(userId)
+        : false;
+    final lastAutoBackupAt = userId != null && userId.isNotEmpty
+        ? await UserStorage.getLastAutoBackupAt(userId)
+        : null;
+    final retentionDays = userId != null && userId.isNotEmpty
+        ? await UserStorage.getAutoBackupRetentionDays(userId)
+        : UserStorage.defaultAutoBackupRetentionDays;
+    final maxBytes = userId != null && userId.isNotEmpty
+        ? await UserStorage.getAutoBackupMaxBytes(userId)
+        : UserStorage.defaultAutoBackupMaxBytes;
+    final icloudStatus = widget.isIOS
+        ? await (widget.icloudStatus ?? () => ExternalBackupChannel().icloudStatus())()
+        : null;
+    final icloudFolderLabel = userId != null && userId.isNotEmpty && widget.isIOS
+        ? await UserStorage.getICloudBackupFolderLabel(userId)
+        : null;
+    final icloudLastBackupYmd = userId != null && userId.isNotEmpty && widget.isIOS
+        ? await UserStorage.getLastICloudDailyBackupYmd(userId)
+        : null;
+    final icloudNeedsRepick = userId != null && userId.isNotEmpty && widget.isIOS
+        ? await UserStorage.getICloudBackupNeedsRepick(userId)
+        : false;
+    List<ICloudUploadStatus> uploadStatuses = _uploadStatuses;
+    if (widget.isIOS && (icloudStatus?.configured ?? false)) {
+      try {
+        uploadStatuses =
+            await (widget.uploadStatus ?? () => ExternalBackupChannel().uploadStatus())();
+      } catch (e, stack) {
+        _logger.warning('Failed to load iCloud upload status: $e', e, stack);
+        uploadStatuses = const [];
+      }
+    } else {
+      uploadStatuses = const [];
+    }
+
+    if (mounted) {
+      setState(() {
+        if (size != null) {
+          _estimatedSize = _formatBytes(size);
+        }
+        _backupLocationInfo = location;
+        _storedBackups = snapshots;
+        _autoBackupEnabled = autoEnabled;
+        _lastAutoBackupAt = lastAutoBackupAt;
+        _autoBackupRetentionDays = retentionDays;
+        _autoBackupMaxBytes = maxBytes;
+        _icloudStatus = icloudStatus;
+        _icloudFolderLabel = icloudFolderLabel;
+        _icloudLastBackupYmd = icloudLastBackupYmd;
+        _icloudNeedsRepick = icloudNeedsRepick;
+        _uploadStatuses = uploadStatuses;
+      });
+      _syncUploadStatusPolling();
+    }
+  }
+
+  bool get _hasUploadingFile =>
+      _uploadStatuses.any((status) => status.uploading);
+
+  void _syncUploadStatusPolling() {
+    if (_hasUploadingFile) {
+      _startUploadStatusPolling();
+    } else {
+      _stopUploadStatusPolling();
+    }
+  }
+
+  void _startUploadStatusPolling() {
+    // Never allow more than one timer running at a time.
+    if (_uploadStatusPollTimer != null) return;
+    _uploadStatusPollTicks = 0;
+    _uploadStatusPollTimer = Timer.periodic(
+      const Duration(seconds: 3),
+      (timer) => unawaited(_pollUploadStatus()),
+    );
+  }
+
+  void _stopUploadStatusPolling() {
+    _uploadStatusPollTimer?.cancel();
+    _uploadStatusPollTimer = null;
+    _uploadStatusPollTicks = 0;
+  }
+
+  Future<void> _pollUploadStatus() async {
+    if (!mounted) {
+      _stopUploadStatusPolling();
+      return;
+    }
+    _uploadStatusPollTicks += 1;
+    if (_uploadStatusPollTicks >= _uploadStatusPollMaxTicks) {
+      _stopUploadStatusPolling();
+      return;
+    }
+
+    List<ICloudUploadStatus> uploadStatuses;
+    try {
+      uploadStatuses =
+          await (widget.uploadStatus ?? () => ExternalBackupChannel().uploadStatus())();
+    } catch (e, stack) {
+      _logger.warning('Failed to poll iCloud upload status: $e', e, stack);
+      return;
+    }
+
+    if (!mounted) {
+      _stopUploadStatusPolling();
+      return;
+    }
+    setState(() {
+      _uploadStatuses = uploadStatuses;
+    });
+
+    if (!uploadStatuses.any((status) => status.uploading)) {
+      _stopUploadStatusPolling();
+    }
+  }
+
+  Future<void> _refreshUploadStatus() async {
+    if (!widget.isIOS) return;
+    List<ICloudUploadStatus> uploadStatuses;
+    try {
+      uploadStatuses =
+          await (widget.uploadStatus ?? () => ExternalBackupChannel().uploadStatus())();
+    } catch (e, stack) {
+      _logger.warning('Failed to refresh iCloud upload status: $e', e, stack);
+      uploadStatuses = const [];
+    }
+    if (mounted) {
+      setState(() {
+        _uploadStatuses = uploadStatuses;
+      });
+      _syncUploadStatusPolling();
+    }
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return DateFormat.yMd(
+      UserStorage.l10n.localeName,
+    ).add_Hm().format(dateTime);
+  }
+
+  int get _autoBackupRetentionMenuValue =>
+      _autoBackupRetentionDays ?? UserStorage.autoBackupRetentionForever;
+
+  String _formatAutoBackupRetention(int? days) {
+    return days == null
+        ? UserStorage.l10n.autoBackupRetentionForever
+        : UserStorage.l10n.autoBackupRetentionDays(days);
+  }
+
+  String _backupTypeText(BackupSnapshot snapshot) {
+    if (snapshot.isSafetySnapshot) {
+      return UserStorage.l10n.backupTypeSafetySnapshot;
+    }
+    if (snapshot.isAutoSnapshot) {
+      return UserStorage.l10n.backupTypeAutoSnapshot;
+    }
+    return UserStorage.l10n.backupTypeManualBackup;
+  }
+
+  Future<BackupLocationInfo> _resolveBackupLocationInfo() async {
+    if (widget.currentBackupLocationInfo != null) {
+      return widget.currentBackupLocationInfo!();
+    }
+
+    if (widget.currentBackupLocationLabel != null) {
+      final label = await widget.currentBackupLocationLabel!();
+      return BackupLocationInfo(
+        kind: BackupLocationKind.fileSystem,
+        label: label,
+        detail: label,
+      );
+    }
+
+    return BackupService.currentBackupLocationInfo();
+  }
+
+  Future<void> _createBackup() async {
+    if (_isBackingUp) return;
+    setState(() {
+      _isBackingUp = true;
+      _statusText = '';
+    });
+
+    try {
+      final backupPath = await BackupService.createBackup(
+        onProgress: (status) {
+          if (mounted) setState(() => _statusText = status);
+        },
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _isBackingUp = false;
+        _statusText = UserStorage.l10n.backupComplete;
+      });
+
+      // Share the file so user can save it anywhere
+      final xFile = XFile(backupPath, mimeType: BackupService.backupMimeType);
+      final box = context.findRenderObject() as RenderBox?;
+      await Share.shareXFiles(
+        [xFile],
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : const Rect.fromLTWH(0, 0, 100, 100),
+      );
+
+      // Record the export so the data-safety-net nudge knows a fresh
+      // external backup was made from this path too.
+      final uid = await UserStorage.getUserId();
+      if (uid != null) {
+        await UserStorage.setLastManualExportAt(uid, DateTime.now());
+      }
+    } catch (e, stack) {
+      _logger.severe('Backup failed: $e', e, stack);
+      if (mounted) {
+        setState(() {
+          _isBackingUp = false;
+          _statusText = '';
+        });
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupFailed(e.toString()),
+        );
+      }
+    }
+  }
+
+  Future<void> _createSnapshotNow() async {
+    if (_isCreatingSnapshot) return;
+    setState(() {
+      _isCreatingSnapshot = true;
+      _statusText = '';
+    });
+
+    try {
+      final createAutoBackup =
+          widget.createAutoBackup ?? BackupService.maybeCreateAutoBackup;
+      final snapshot = await createAutoBackup(
+        trigger: 'manual',
+        force: true,
+        onProgress: (status) {
+          if (mounted) setState(() => _statusText = status);
+        },
+      );
+      await _loadPageData(includeEstimatedSize: false);
+
+      if (!mounted) return;
+      setState(() {
+        _isCreatingSnapshot = false;
+        _statusText = snapshot == null
+            ? ''
+            : UserStorage.l10n.autoBackupCreated(snapshot.name);
+      });
+    } catch (e, stack) {
+      _logger.severe('Auto backup failed: $e', e, stack);
+      if (mounted) {
+        setState(() {
+          _isCreatingSnapshot = false;
+          _statusText = '';
+        });
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupFailed(e.toString()),
+        );
+      }
+    }
+  }
+
+  Future<void> _toggleAutoBackup(bool enabled) async {
+    final userId = await UserStorage.getUserId();
+    if (userId == null || userId.isEmpty) return;
+    await UserStorage.setAutoBackupEnabled(userId, enabled);
+    if (mounted) {
+      setState(() => _autoBackupEnabled = enabled);
+    }
+  }
+
+  Future<void> _setAutoBackupRetentionValue(int value) async {
+    if (_isUpdatingRetention) return;
+    final userId = await UserStorage.getUserId();
+    if (userId == null || userId.isEmpty) return;
+
+    final days = value == UserStorage.autoBackupRetentionForever ? null : value;
+    setState(() => _isUpdatingRetention = true);
+
+    try {
+      await UserStorage.setAutoBackupRetentionDays(userId, days);
+      await (widget.pruneAutoBackups ?? BackupService.pruneAutoBackups)();
+      await _loadPageData(includeEstimatedSize: false);
+    } catch (e, stack) {
+      _logger.warning('Failed to update auto backup retention: $e', e, stack);
+      if (mounted) {
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupFailed(e.toString()),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingRetention = false);
+      }
+    }
+  }
+
+  Future<void> _setAutoBackupMaxBytesValue(int bytes) async {
+    if (_isUpdatingRetention) return;
+    final userId = await UserStorage.getUserId();
+    if (userId == null || userId.isEmpty) return;
+
+    setState(() => _isUpdatingRetention = true);
+
+    try {
+      await UserStorage.setAutoBackupMaxBytes(userId, bytes);
+      await (widget.pruneAutoBackups ?? BackupService.pruneAutoBackups)();
+      await _loadPageData(includeEstimatedSize: false);
+    } catch (e, stack) {
+      _logger.warning('Failed to update auto backup max size: $e', e, stack);
+      if (mounted) {
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupFailed(e.toString()),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingRetention = false);
+      }
+    }
+  }
+
+  Future<void> _showBackupLocationMenu() async {
+    if (!widget.isAndroid) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.folder_special_outlined),
+              title: Text(UserStorage.l10n.defaultBackupLocation),
+              subtitle: Text(UserStorage.l10n.defaultBackupLocationAndroidDesc),
+              onTap: () async {
+                Navigator.pop(context);
+                await (widget.useDefaultBackupDirectory ??
+                    BackupService.useDefaultBackupDirectory)();
+                await _loadPageData();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.create_new_folder_outlined),
+              title: Text(UserStorage.l10n.chooseBackupLocation),
+              subtitle: Text(UserStorage.l10n.chooseBackupLocationAndroidDesc),
+              onTap: () async {
+                Navigator.pop(context);
+                await _pickAndroidBackupLocation();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showBackupLocationDetails() async {
+    final info = _backupLocationInfo;
+    if (info == null) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final bottomPadding = MediaQuery.viewInsetsOf(sheetContext).bottom;
+        final detailLabel = info.kind == BackupLocationKind.androidTree
+            ? UserStorage.l10n.backupLocationUri
+            : UserStorage.l10n.backupLocationFullPath;
+
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 24 + bottomPadding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        UserStorage.l10n.backupLocationDetails,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: UserStorage.l10n.close,
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _detailLabel(UserStorage.l10n.backupLocationSummary),
+                const SizedBox(height: 6),
+                Text(
+                  _formatBackupLocationSummary(info),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                _detailLabel(detailLabel),
+                const SizedBox(height: 6),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.textSecondary.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: SelectableText(
+                    info.detail,
+                    key: const ValueKey('backup-location-detail-value'),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textPrimary,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _copyBackupLocation(info.detail),
+                        icon: const Icon(Icons.copy_outlined, size: 18),
+                        label: Text(UserStorage.l10n.copyBackupLocationPath),
+                      ),
+                    ),
+                    if (widget.isAndroid) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                            _showBackupLocationMenu();
+                          },
+                          icon: const Icon(
+                            Icons.folder_open_outlined,
+                            size: 18,
+                          ),
+                          label: Text(UserStorage.l10n.backupLocationMenu),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
+      ),
+    );
+  }
+
+  Future<void> _copyBackupLocation(String value) async {
+    await Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) return;
+    ToastHelper.showSuccess(context, UserStorage.l10n.backupLocationCopied);
+  }
+
+  Future<void> _pickAndroidBackupLocation() async {
+    if (_isPickingLocation) return;
+    setState(() => _isPickingLocation = true);
+
+    try {
+      await (widget.pickAndroidBackupDirectory ??
+          BackupService.pickAndroidBackupDirectory)();
+      await _loadPageData();
+    } catch (e, stack) {
+      _logger.warning('Failed to pick backup location: $e', e, stack);
+      if (mounted) {
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupLocationFailed(e.toString()),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPickingLocation = false);
+      }
+    }
+  }
+
+  Future<void> _pickICloudFolder() async {
+    if (_isConfiguringICloud) return;
+    final userId = await UserStorage.getUserId();
+    if (userId == null || userId.isEmpty) return;
+
+    setState(() => _isConfiguringICloud = true);
+
+    try {
+      final configureFolder = widget.configureICloudFolder ??
+          (uid) => ICloudDailyBackupService().configureFolder(uid);
+      final folder = await configureFolder(userId);
+      if (folder != null) {
+        final maybeCreateDailyBackup = widget.maybeCreateICloudDailyBackup ??
+            ({required String userId, bool force = false}) =>
+                ICloudDailyBackupService()
+                    .maybeCreateDailyBackup(userId: userId, force: force);
+        await maybeCreateDailyBackup(userId: userId, force: true);
+      }
+      await _loadPageData(includeEstimatedSize: false);
+    } catch (e, stack) {
+      _logger.warning('iCloud folder configuration failed: $e', e, stack);
+      if (mounted) {
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupFailed(e.toString()),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isConfiguringICloud = false);
+      }
+    }
+  }
+
+  Future<void> _restoreBackup() async {
+    if (_isRestoring) return;
+
+    // Pick file
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result == null || result.files.isEmpty) return;
+
+    final filePath = result.files.single.path;
+    if (filePath == null) return;
+
+    // Validate extension
+    if (!BackupService.isSelectableBackupFile(filePath)) {
+      if (mounted) {
+        ToastHelper.showError(context, UserStorage.l10n.invalidBackupFile);
+      }
+      return;
+    }
+
+    BackupFileInfo backupInfo;
+    try {
+      backupInfo = await BackupService.inspectBackup(filePath);
+    } catch (e) {
+      if (mounted) {
+        ToastHelper.showError(context, UserStorage.l10n.restoreFailed(e));
+      }
+      return;
+    }
+    if (!mounted) return;
+
+    final confirmed = await _confirmRestore(backupInfo: backupInfo);
+    if (confirmed != true) return;
+
+    await _performRestore(
+      (onProgress) =>
+          BackupService.restoreBackup(filePath, onProgress: onProgress),
+    );
+  }
+
+  Future<void> _restoreStoredBackup(BackupSnapshot snapshot) async {
+    if (_isRestoring) return;
+
+    final confirmed = await _confirmRestore();
+    if (confirmed != true) return;
+
+    await _performRestore(
+      (onProgress) =>
+          BackupService.restoreStoredBackup(snapshot, onProgress: onProgress),
+    );
+  }
+
+  Future<void> _deleteStoredBackup(BackupSnapshot snapshot) async {
+    if (_deletingBackupId != null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(UserStorage.l10n.confirmDeleteBackup),
+        content: Text(
+          UserStorage.l10n.confirmDeleteBackupMessage(snapshot.name),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(UserStorage.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(UserStorage.l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() {
+      _deletingBackupId = snapshot.id;
+      _statusText = '';
+    });
+
+    try {
+      await (widget.deleteStoredBackup ?? BackupService.deleteStoredBackup)(
+        snapshot,
+      );
+      await _loadPageData(includeEstimatedSize: false);
+      if (!mounted) return;
+      setState(() {
+        _deletingBackupId = null;
+        _statusText = UserStorage.l10n.backupDeleted(snapshot.name);
+      });
+    } catch (e, stack) {
+      _logger.warning('Failed to delete backup ${snapshot.name}: $e', e, stack);
+      if (mounted) {
+        setState(() {
+          _deletingBackupId = null;
+          _statusText = '';
+        });
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.backupDeleteFailed(e.toString()),
+        );
+      }
+    }
+  }
+
+  Future<bool?> _confirmRestore({BackupFileInfo? backupInfo}) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => backupInfo == null
+          ? AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text(UserStorage.l10n.confirmRestore),
+              content: Text(UserStorage.l10n.confirmRestoreMessage),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(UserStorage.l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: Text(UserStorage.l10n.confirm),
+                ),
+              ],
+            )
+          : BackupRestoreConfirmDialog(backupInfo: backupInfo),
+    );
+  }
+
+  Future<void> _performRestore(
+    Future<bool> Function(void Function(String status) onProgress) restore,
+  ) async {
+    setState(() {
+      _isRestoring = true;
+      _statusText = UserStorage.l10n.creatingSafetySnapshot;
+    });
+
+    try {
+      await BackupService.createSafetySnapshot(
+        reason: 'before_restore',
+        onProgress: (status) {
+          if (mounted) setState(() => _statusText = status);
+        },
+      );
+      await restore((status) {
+        if (mounted) setState(() => _statusText = status);
+      });
+      await _loadPageData(includeEstimatedSize: false);
+
+      if (!mounted) return;
+      setState(() {
+        _isRestoring = false;
+        _statusText = UserStorage.l10n.restoreComplete;
+      });
+
+      // Show restart hint
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text(UserStorage.l10n.restoreComplete),
+            content: Text(UserStorage.l10n.restoreRestartHint),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Pop back to root
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                child: Text(UserStorage.l10n.ok),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e, stack) {
+      _logger.severe('Restore failed: $e', e, stack);
+      if (mounted) {
+        setState(() {
+          _isRestoring = false;
+          _statusText = '';
+        });
+        ToastHelper.showError(
+          context,
+          UserStorage.l10n.restoreFailed(e.toString()),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isBusy = _isBusy;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(UserStorage.l10n.backupAndRestore),
+        backgroundColor: AppColors.background,
+        surfaceTintColor: AppColors.background,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          _buildAutoBackupCard(isBusy),
+
+          const SizedBox(height: 16),
+
+          if (widget.isIOS) ...[
+            _buildICloudBackupCard(isBusy),
+            const SizedBox(height: 16),
+          ],
+
+          // Backup section
+          _buildCard(
+            icon: Icons.backup_outlined,
+            title: UserStorage.l10n.createBackup,
+            subtitle: _estimatedSize.isNotEmpty
+                ? '${UserStorage.l10n.estimatedSize}: $_estimatedSize'
+                : null,
+            description: UserStorage.l10n.backupDescription,
+            buttonText: UserStorage.l10n.createBackup,
+            isLoading: _isBackingUp,
+            onPressed: isBusy ? null : _createBackup,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Restore section
+          _buildCard(
+            icon: Icons.restore_outlined,
+            title: UserStorage.l10n.restoreBackup,
+            description: UserStorage.l10n.restoreDescription,
+            buttonText: UserStorage.l10n.selectBackupFile,
+            isLoading: _isRestoring,
+            onPressed: isBusy ? null : _restoreBackup,
+          ),
+
+          const SizedBox(height: 16),
+          _buildStoredBackupsCard(isBusy),
+
+          // Status
+          if (_statusText.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isBusy)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  Flexible(
+                    child: Text(
+                      _statusText,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isBusy
+                            ? AppColors.textSecondary
+                            : const Color(0xFF16A34A),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAutoBackupCard(bool isBusy) {
+    final lastBackupText = _lastAutoBackupAt == null
+        ? UserStorage.l10n.noAutoBackupYet
+        : UserStorage.l10n.lastBackupAt(_formatDateTime(_lastAutoBackupAt!));
+
+    return _settingsCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.auto_awesome_outlined,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  UserStorage.l10n.automaticBackup,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Switch(
+                value: _autoBackupEnabled,
+                activeThumbColor: AppColors.primary,
+                onChanged: isBusy ? null : _toggleAutoBackup,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            UserStorage.l10n.autoBackupDescription,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textTertiary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            UserStorage.l10n.backupSensitiveSettingsHint,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _backupLocationRow(),
+          const SizedBox(height: 8),
+          _infoRow(UserStorage.l10n.autoBackupStatus, lastBackupText),
+          const SizedBox(height: 8),
+          if (_estimatedSize.isNotEmpty)
+            _infoRow(UserStorage.l10n.estimatedSize, _estimatedSize),
+          if (_estimatedSize.isNotEmpty) const SizedBox(height: 8),
+          if (!widget.isIOS) ...[
+            _retentionRow(isBusy),
+            const SizedBox(height: 8),
+            _maxSizeRow(isBusy),
+            const SizedBox(height: 8),
+            Text(
+              UserStorage.l10n.autoBackupRetentionLimitHint(
+                _formatBytes(_autoBackupMaxBytes),
+              ),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ] else
+            Text(
+              UserStorage.l10n.iCloudRollingNote,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: isBusy ? null : _createSnapshotNow,
+                  icon: _isCreatingSnapshot
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.camera_outlined, size: 18),
+                  label: Text(UserStorage.l10n.createSnapshotNow),
+                ),
+              ),
+              if (widget.isAndroid) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: isBusy ? null : _showBackupLocationMenu,
+                    icon: _isPickingLocation
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.folder_open_outlined, size: 18),
+                    label: Text(UserStorage.l10n.backupLocationMenu),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildICloudBackupCard(bool isBusy) {
+    final configured = _icloudStatus?.configured ?? false;
+    final needsRepick = _icloudNeedsRepick || (_icloudStatus?.isStale ?? false);
+    final folderLabel = _icloudFolderLabel ?? _icloudStatus?.displayName ?? '';
+
+    return _settingsCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.cloud_outlined,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  UserStorage.l10n.iCloudDailyBackupTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              if (configured)
+                IconButton(
+                  key: const ValueKey('icloud-upload-status-refresh'),
+                  tooltip: UserStorage.l10n.refresh,
+                  onPressed: isBusy ? null : _refreshUploadStatus,
+                  icon: const Icon(Icons.refresh),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            UserStorage.l10n.iCloudDailyBackupDesc,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textTertiary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (!configured) ...[
+            Text(
+              UserStorage.l10n.iCloudNotConfigured,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ] else ...[
+            Text(
+              UserStorage.l10n.iCloudFolderLabel(folderLabel),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
+            ),
+            if (_icloudLastBackupYmd != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                UserStorage.l10n.iCloudLastBackup(_icloudLastBackupYmd!),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+            if (needsRepick) ...[
+              const SizedBox(height: 8),
+              Text(
+                UserStorage.l10n.iCloudNeedsRepick,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFFDC2626),
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            if (_uploadStatuses.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              ..._uploadStatuses.map(_buildUploadStatusRow),
+            ],
+          ],
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey('icloud-pick-folder-button'),
+              onPressed: isBusy || _isConfiguringICloud
+                  ? null
+                  : _pickICloudFolder,
+              child: _isConfiguringICloud
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      configured
+                          ? UserStorage.l10n.iCloudChangeFolder
+                          : UserStorage.l10n.iCloudPickFolder,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadStatusRow(ICloudUploadStatus status) {
+    IconData icon;
+    Color color;
+    String label;
+    if (status.hasError) {
+      icon = Icons.warning_amber_rounded;
+      color = const Color(0xFFDC2626);
+      label = UserStorage.l10n.iCloudNotUploaded;
+    } else if (status.uploading) {
+      icon = Icons.upload_outlined;
+      color = AppColors.textSecondary;
+      label = UserStorage.l10n.iCloudUploading;
+    } else if (status.uploaded) {
+      icon = Icons.check_circle_outline;
+      color = const Color(0xFF16A34A);
+      label = UserStorage.l10n.iCloudSynced;
+    } else {
+      icon = Icons.warning_amber_rounded;
+      color = const Color(0xFFD97706);
+      label = UserStorage.l10n.iCloudNotUploaded;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              status.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _retentionRow(bool isBusy) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            UserStorage.l10n.autoBackupRetention,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: PopupMenuButton<int>(
+              key: const ValueKey('auto-backup-retention-menu'),
+              enabled: !isBusy,
+              tooltip: UserStorage.l10n.autoBackupRetention,
+              initialValue: _autoBackupRetentionMenuValue,
+              onSelected: _setAutoBackupRetentionValue,
+              itemBuilder: (context) => [
+                for (final days in UserStorage.autoBackupRetentionDayOptions)
+                  PopupMenuItem<int>(
+                    value: days,
+                    child: Text(UserStorage.l10n.autoBackupRetentionDays(days)),
+                  ),
+                PopupMenuItem<int>(
+                  value: UserStorage.autoBackupRetentionForever,
+                  child: Text(UserStorage.l10n.autoBackupRetentionForever),
+                ),
+              ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _formatAutoBackupRetention(_autoBackupRetentionDays),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  _isUpdatingRetention
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.expand_more, size: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _maxSizeRow(bool isBusy) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            UserStorage.l10n.autoBackupMaxSize,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: PopupMenuButton<int>(
+              key: const ValueKey('auto-backup-max-size-menu'),
+              enabled: !isBusy,
+              tooltip: UserStorage.l10n.autoBackupMaxSize,
+              initialValue: _autoBackupMaxBytes,
+              onSelected: _setAutoBackupMaxBytesValue,
+              itemBuilder: (context) => [
+                for (final bytes in UserStorage.autoBackupMaxBytesOptions)
+                  PopupMenuItem<int>(
+                    value: bytes,
+                    child: Text(_formatBytes(bytes)),
+                  ),
+              ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _formatBytes(_autoBackupMaxBytes),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  _isUpdatingRetention
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.expand_more, size: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStoredBackupsCard(bool isBusy) {
+    return _settingsCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.history_outlined,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  UserStorage.l10n.storedBackups,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: UserStorage.l10n.refresh,
+                onPressed: isBusy ? null : _loadPageData,
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_storedBackups.isEmpty)
+            Text(
+              UserStorage.l10n.noStoredBackups,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textTertiary,
+                height: 1.5,
+              ),
+            )
+          else
+            ..._storedBackups.map(
+              (snapshot) => _StoredBackupTile(
+                snapshot: snapshot,
+                typeText: _backupTypeText(snapshot),
+                dateText: _formatDateTime(snapshot.createdAt),
+                sizeText: _formatBytes(snapshot.sizeBytes),
+                isDeleting: _deletingBackupId == snapshot.id,
+                onRestore: isBusy ? null : () => _restoreStoredBackup(snapshot),
+                onDelete: isBusy ? null : () => _deleteStoredBackup(snapshot),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required String description,
+    required String buttonText,
+    required bool isLoading,
+    VoidCallback? onPressed,
+  }) {
+    return _settingsCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: AppColors.primary, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            description,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textTertiary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(buttonText),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _settingsCard({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textSecondary.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _backupLocationRow() {
+    final info = _backupLocationInfo;
+    final summary = info == null ? '' : _formatBackupLocationSummary(info);
+
+    return Semantics(
+      button: info != null,
+      child: InkWell(
+        key: const ValueKey('backup-location-row'),
+        onTap: info == null ? null : _showBackupLocationDetails,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 96,
+                child: Text(
+                  UserStorage.l10n.backupLocation,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  summary,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textPrimary,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              if (info != null) ...[
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatBackupLocationSummary(BackupLocationInfo info) {
+    switch (info.kind) {
+      case BackupLocationKind.androidTree:
+        return UserStorage.l10n.androidBackupLocationSelected(info.label);
+      case BackupLocationKind.iosICloud:
+        return UserStorage.l10n.iosICloudBackupLocation;
+      case BackupLocationKind.iosAppDocuments:
+        return UserStorage.l10n.iosAppDocumentsBackupLocation;
+      case BackupLocationKind.fileSystem:
+        return info.label;
+    }
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StoredBackupTile extends StatelessWidget {
+  final BackupSnapshot snapshot;
+  final String typeText;
+  final String dateText;
+  final String sizeText;
+  final bool isDeleting;
+  final VoidCallback? onRestore;
+  final VoidCallback? onDelete;
+
+  const _StoredBackupTile({
+    required this.snapshot,
+    required this.typeText,
+    required this.dateText,
+    required this.sizeText,
+    required this.isDeleting,
+    required this.onRestore,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = UserStorage.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
+          ),
+          leading: Icon(
+            snapshot.isSafetySnapshot
+                ? Icons.health_and_safety_outlined
+                : Icons.inventory_2_outlined,
+            color: AppColors.primary,
+          ),
+          title: Text(
+            snapshot.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            '$typeText - $dateText - $sizeText',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                key: ValueKey('backup-restore-${snapshot.id}'),
+                tooltip: l10n.restoreThisBackup,
+                onPressed: onRestore,
+                icon: const Icon(Icons.restore_outlined),
+              ),
+              IconButton(
+                key: ValueKey('backup-delete-${snapshot.id}'),
+                tooltip: l10n.deleteThisBackup,
+                onPressed: onDelete,
+                color: const Color(0xFFDC2626),
+                icon: isDeleting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.delete_outline),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

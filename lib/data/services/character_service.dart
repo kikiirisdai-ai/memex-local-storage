@@ -1,0 +1,608 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
+import 'package:memex/domain/models/character_model.dart';
+import 'package:memex/data/services/avatar_media_service.dart';
+import 'package:memex/data/services/event_bus_service.dart';
+import 'package:memex/data/services/file_system_service.dart';
+import 'package:memex/utils/user_storage.dart';
+
+import 'package:memex/utils/logger.dart';
+
+class CharacterService {
+  static final CharacterService _instance = CharacterService._();
+  static CharacterService get instance => _instance;
+
+  /// Bump this whenever new default characters need to be seeded to existing users.
+  /// New users get all characters from l10n.defaultCharacters at once.
+  static const int _currentSeedVersion = 3;
+  static const String _seedVersionFile = '.characters_seed_version';
+
+  /// Migrations: version -> list of character IDs to seed for existing users.
+  /// Existing default characters are refreshed only when they still match
+  /// known legacy seed text, so user-created characters are left alone.
+  static const Map<int, List<String>> _migrations = {
+    1: ['counselor'],
+  };
+
+  static const Map<String, List<String>> _legacyDefaultPersonaMarkers = {
+    '2': ['智慧认可者', 'Wise Validator'],
+    '3': ["喜欢用'哎呀'", 'unconditionally caring elder'],
+    '4': ['求而不得', 'distant moonlight'],
+    '5': ['帮亲不帮理', 'ride-or-die bestie'],
+    'counselor': ['心理咨询师型陪伴者', 'psychological counselor-style companion'],
+  };
+
+  final Logger _logger = getLogger('CharacterService');
+  FileSystemService get _fileSystem => FileSystemService.instance;
+
+  CharacterService._();
+
+  /// Resolve relative media paths (avatar, chatBackground) to absolute.
+  /// Absolute paths (legacy) and DiceBear seeds are returned as-is.
+  CharacterModel _resolveMediaPaths(CharacterModel character) {
+    final avatar = character.avatar;
+    final bg = character.chatBackground;
+    var resolved = character;
+    if (avatar != null && avatar.isNotEmpty && isRelativeAvatarPath(avatar)) {
+      final absolute = AvatarMediaService.resolveAvatarPath(
+        avatar,
+        fileSystemService: _fileSystem,
+      );
+      resolved = resolved.copyWith(avatar: absolute);
+    }
+    if (bg != null && bg.isNotEmpty && _isRelativeMediaPath(bg)) {
+      final absolute = AvatarMediaService.resolveAvatarPath(
+        bg,
+        fileSystemService: _fileSystem,
+      );
+      resolved = resolved.copyWith(chatBackground: absolute);
+    }
+    return resolved;
+  }
+
+  /// Returns true if the path looks like a relative file path (image/media).
+  static bool _isRelativeMediaPath(String path) {
+    return AvatarMediaService.isRelativeImagePath(path);
+  }
+
+  /// Returns true if the avatar value looks like a relative file path
+  /// (not a DiceBear seed, not already absolute).
+  static bool isRelativeAvatarPath(String avatar) {
+    return AvatarMediaService.isRelativeImagePath(avatar);
+  }
+
+  /// Get the Characters directory path for a user
+  String getCharactersPath(String userId) {
+    return p.join(_fileSystem.getWorkspacePath(userId), 'Characters');
+  }
+
+  /// Ensure Characters directory exists and create default characters if empty
+  Future<String> _ensureCharactersDirectory(String userId) async {
+    final charsPath = getCharactersPath(userId);
+    final dir = Directory(charsPath);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    // Check if empty (ignore hidden files)
+    final entities = await dir.list().toList();
+    final visibleFiles = entities.where((e) {
+      final name = p.basename(e.path);
+      return !name.startsWith('.') && name.endsWith('.yaml');
+    }).toList();
+
+    if (visibleFiles.isEmpty) {
+      await _createDefaultCharacters(userId, charsPath);
+      await _writeSeedVersion(charsPath, _currentSeedVersion);
+    } else {
+      await _runMigrations(userId, charsPath);
+    }
+
+    return charsPath;
+  }
+
+  /// Create default characters
+  Future<void> _createDefaultCharacters(String userId, String charsPath) async {
+    final defaultCharacters = UserStorage.l10n.defaultCharacters;
+
+    for (var charData in defaultCharacters) {
+      final charId = charData['id'] as String;
+      await _seedCharacterFromData(userId, charsPath, charId, charData);
+    }
+  }
+
+  /// Build merged persona string from character data map.
+  String _buildPersona(Map<String, dynamic> charData) {
+    var persona = charData['persona'] as String;
+    if (charData.containsKey('style_guide')) {
+      persona += "\n\n## Voice\n${charData['style_guide']}";
+    }
+    return persona;
+  }
+
+  Map<String, dynamic> _buildDefaultCharacterYaml(
+    Map<String, dynamic> charData,
+  ) {
+    return {
+      "name": charData['name'],
+      "tags": charData['tags'],
+      "persona": _buildPersona(charData),
+      "avatar": charData['avatar'],
+      "enabled": true,
+      if (charData['pkm_interest_filter'] != null)
+        "interest_filter": charData['pkm_interest_filter'],
+      if (charData['first_message'] != null)
+        "first_message": charData['first_message'],
+      if (charData['post_history_instructions'] != null)
+        "post_history_instructions": charData['post_history_instructions'],
+      if (charData['example_dialogue'] != null)
+        "mes_example": charData['example_dialogue'],
+    };
+  }
+
+  /// Seed a single character from its data map. Skips if file already exists.
+  Future<void> _seedCharacterFromData(
+    String userId,
+    String charsPath,
+    String charId,
+    Map<String, dynamic> charData,
+  ) async {
+    final charFile = p.join(charsPath, '$charId.yaml');
+    if (await File(charFile).exists()) return;
+
+    final charDict = _buildDefaultCharacterYaml(charData);
+
+    try {
+      await _fileSystem.writeYamlFile(charFile, charDict);
+      _logger.info("Created default character $charId for user $userId");
+    } catch (e) {
+      _logger.severe("Failed to create character $charId for user $userId: $e");
+    }
+  }
+
+  /// Seed a single character by ID if it doesn't exist. Looks up data from l10n defaults.
+  Future<void> _seedCharacterById(
+    String userId,
+    String charsPath,
+    String charId,
+  ) async {
+    final allDefaults = UserStorage.l10n.defaultCharacters;
+    final charData = allDefaults.cast<Map<String, dynamic>?>().firstWhere(
+          (c) => c!['id'] == charId,
+          orElse: () => null,
+        );
+    if (charData == null) return;
+    await _seedCharacterFromData(userId, charsPath, charId, charData);
+  }
+
+  /// Read the current seed version (0 if file doesn't exist).
+  Future<int> _readSeedVersion(String charsPath) async {
+    final file = File(p.join(charsPath, _seedVersionFile));
+    if (!await file.exists()) return 0;
+    try {
+      return int.parse((await file.readAsString()).trim());
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Write the seed version marker.
+  Future<void> _writeSeedVersion(String charsPath, int version) async {
+    try {
+      final file = File(p.join(charsPath, _seedVersionFile));
+      await file.writeAsString(version.toString());
+    } catch (e) {
+      _logger.warning('Failed to write seed version: $e');
+    }
+  }
+
+  /// Run all pending migrations from current version to [_currentSeedVersion].
+  Future<void> _runMigrations(String userId, String charsPath) async {
+    final currentVersion = await _readSeedVersion(charsPath);
+    if (currentVersion >= _currentSeedVersion) return;
+
+    for (int v = currentVersion + 1; v <= _currentSeedVersion; v++) {
+      final charIds = _migrations[v];
+      if (charIds != null) {
+        for (final charId in charIds) {
+          await _seedCharacterById(userId, charsPath, charId);
+        }
+      }
+      if (v == 2 || v == 3) {
+        await _refreshLegacyDefaultCharacters(userId, charsPath);
+      }
+    }
+
+    await _writeSeedVersion(charsPath, _currentSeedVersion);
+  }
+
+  Future<void> _refreshLegacyDefaultCharacters(
+    String userId,
+    String charsPath,
+  ) async {
+    final defaultsById = {
+      for (final data in UserStorage.l10n.defaultCharacters)
+        data['id'] as String: data,
+    };
+
+    for (final entry in _legacyDefaultPersonaMarkers.entries) {
+      final defaultData = defaultsById[entry.key];
+      if (defaultData == null) continue;
+
+      final charFile = File(p.join(charsPath, '${entry.key}.yaml'));
+      if (!await charFile.exists()) continue;
+
+      try {
+        final content = await charFile.readAsString();
+        final doc = loadYaml(content);
+        final charData = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+        final persona = charData['persona']?.toString() ?? '';
+        final looksLikeOldDefault = entry.value.any(
+          (marker) => persona.contains(marker),
+        );
+        if (!looksLikeOldDefault) continue;
+
+        final refreshed = _buildDefaultCharacterYaml(defaultData);
+        refreshed['enabled'] = charData['enabled'] ?? true;
+        if (charData.containsKey('is_primary_companion')) {
+          refreshed['is_primary_companion'] = charData['is_primary_companion'];
+        }
+        if (charData['chat_background'] != null) {
+          refreshed['chat_background'] = charData['chat_background'];
+        }
+
+        await _fileSystem.writeYamlFile(charFile.path, refreshed);
+        _logger.info(
+          'Refreshed legacy default character ${entry.key} for user $userId',
+        );
+      } catch (e) {
+        _logger.warning(
+          'Failed to refresh default character ${entry.key} for user $userId: $e',
+        );
+      }
+    }
+  }
+
+  /// Get all characters for a user
+  Future<List<CharacterModel>> getAllCharacters(String userId) async {
+    final charsPath = await _ensureCharactersDirectory(userId);
+    final dir = Directory(charsPath);
+    final characters = <CharacterModel>[];
+
+    await for (final entity in dir.list()) {
+      if (entity is File &&
+          !p.basename(entity.path).startsWith('.') &&
+          entity.path.endsWith('.yaml')) {
+        try {
+          final content = await entity.readAsString();
+          final doc = loadYaml(content);
+          final data = jsonDecode(jsonEncode(doc)); // Convert YamlMap to Map
+          final charId = p.basenameWithoutExtension(entity.path);
+
+          // Use CharacterModel.fromJson but handle id separately as it's not in the file sometimes or is filename
+          // CharacterModel expects 'id' in json.
+          data['id'] = charId;
+
+          final character = CharacterModel.fromJson(data);
+          characters.add(_resolveMediaPaths(character));
+        } catch (e) {
+          _logger.warning("Failed to load character from ${entity.path}: $e");
+        }
+      }
+    }
+
+    // Sort by ID to be consistent
+    characters.sort((a, b) => a.id.compareTo(b.id));
+    return characters;
+  }
+
+  /// Get specific character
+  Future<CharacterModel?> getCharacter(
+    String userId,
+    String characterId, {
+    bool returnPlaceholder = true,
+  }) async {
+    if (characterId == "0") {
+      return CharacterModel(
+        id: "0",
+        name: "memex",
+        tags: [],
+        persona: "",
+        enabled: true,
+      );
+    }
+
+    final charsPath = await _ensureCharactersDirectory(userId);
+    var charFile = File(p.join(charsPath, '$characterId.yaml'));
+    if (!await charFile.exists()) {
+      _logger.warning("Character $characterId not found for user $userId");
+      if (returnPlaceholder) {
+        return CharacterModel(
+          id: characterId,
+          name: "[Deleted character]",
+          tags: [],
+          persona: "This character has been deleted",
+          enabled: false,
+          avatar: null,
+        );
+      }
+      return null;
+    }
+
+    try {
+      final content = await charFile.readAsString();
+      final doc = loadYaml(content);
+      final data = jsonDecode(jsonEncode(doc));
+      data['id'] = characterId;
+
+      final character = CharacterModel.fromJson(data);
+      return _resolveMediaPaths(character);
+    } catch (e) {
+      _logger.severe("Failed to load character $characterId: $e");
+      return null;
+    }
+  }
+
+  /// Path to the file that tracks the next available numeric character ID.
+  /// This prevents ID reuse after character deletion.
+  static const String _nextIdFile = '.next_id';
+
+  /// Read the next available ID from the tracker file.
+  /// If the file doesn't exist, scans existing files to bootstrap.
+  Future<int> _readNextId(String charsPath) async {
+    final file = File(p.join(charsPath, _nextIdFile));
+    if (await file.exists()) {
+      try {
+        return int.parse((await file.readAsString()).trim());
+      } catch (_) {
+        // Corrupted file — fall through to bootstrap
+      }
+    }
+
+    // Bootstrap: scan existing numeric IDs and pick max + 1
+    final dir = Directory(charsPath);
+    int maxId = 0;
+    await for (final entity in dir.list()) {
+      if (entity is File && !p.basename(entity.path).startsWith('.')) {
+        final name = p.basenameWithoutExtension(entity.path);
+        final parsed = int.tryParse(name);
+        if (parsed != null && parsed > maxId) {
+          maxId = parsed;
+        }
+      }
+    }
+    final nextId = maxId + 1;
+    await _writeNextId(charsPath, nextId);
+    return nextId;
+  }
+
+  /// Persist the next available ID.
+  Future<void> _writeNextId(String charsPath, int nextId) async {
+    final file = File(p.join(charsPath, _nextIdFile));
+    await file.writeAsString(nextId.toString());
+  }
+
+  /// Create new character
+  Future<CharacterModel> createCharacter({
+    required String userId,
+    required Map<String, dynamic> characterData,
+  }) async {
+    final charsPath = await _ensureCharactersDirectory(userId);
+
+    // Generate new ID using monotonically increasing counter (never reuses deleted IDs)
+    final nextId = await _readNextId(charsPath);
+    final newId = nextId.toString();
+    await _writeNextId(charsPath, nextId + 1);
+
+    final charFile = p.join(charsPath, '$newId.yaml');
+    final charDict = {
+      "name": characterData['name'] ?? "",
+      "tags": characterData['tags'] ?? [],
+      "persona": characterData['persona'] ?? "",
+      "avatar": characterData['avatar'],
+      "enabled": characterData['enabled'] ?? true,
+      "memory": characterData['memory'] ?? [],
+      if (characterData['interest_filter'] != null)
+        "interest_filter": characterData['interest_filter'],
+      if (characterData['first_message'] != null)
+        "first_message": characterData['first_message'],
+      if (characterData['system_prompt_override'] != null)
+        "system_prompt_override": characterData['system_prompt_override'],
+      if (characterData['post_history_instructions'] != null)
+        "post_history_instructions": characterData['post_history_instructions'],
+      if (characterData['mes_example'] != null)
+        "mes_example": characterData['mes_example'],
+      if (characterData['chat_background'] != null)
+        "chat_background": characterData['chat_background'],
+    };
+
+    try {
+      await _fileSystem.writeYamlFile(charFile, charDict);
+      _logger.info("Created character $newId for user $userId");
+
+      charDict['id'] = newId;
+      AvatarMediaService.precacheDiceBearAvatar(charDict['avatar'] as String?);
+      EventBusService.instance.emitEvent(
+        CharacterUpdatedMessage(userId: userId, characterId: newId),
+      );
+      return _resolveMediaPaths(CharacterModel.fromJson(charDict));
+    } catch (e) {
+      _logger.severe("Failed to create character for user $userId: $e");
+      rethrow;
+    }
+  }
+
+  /// Update existing character
+  Future<CharacterModel?> updateCharacter({
+    required String userId,
+    required String characterId,
+    required Map<String, dynamic> updates,
+  }) async {
+    final charsPath = await _ensureCharactersDirectory(userId);
+    var charFile = File(p.join(charsPath, '$characterId.yaml'));
+    if (!await charFile.exists()) {
+      _logger.warning("Character $characterId not found for user $userId");
+      return null;
+    }
+
+    try {
+      final content = await charFile.readAsString();
+      final doc = loadYaml(content);
+      final charData = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+
+      // Update fields
+      if (updates.containsKey('name')) {
+        charData['name'] = updates['name'];
+      }
+      if (updates.containsKey('tags')) {
+        charData['tags'] = updates['tags'];
+      }
+      if (updates.containsKey('persona')) {
+        charData['persona'] = updates['persona'];
+      }
+      if (updates.containsKey('avatar')) {
+        charData['avatar'] = updates['avatar'];
+      }
+      if (updates.containsKey('enabled')) {
+        charData['enabled'] = updates['enabled'];
+      }
+      if (updates.containsKey('memory')) {
+        charData['memory'] = updates['memory'];
+      }
+      if (updates.containsKey('is_primary_companion')) {
+        charData['is_primary_companion'] = updates['is_primary_companion'];
+      }
+      if (updates.containsKey('interest_filter')) {
+        charData['interest_filter'] = updates['interest_filter'];
+      }
+      if (updates.containsKey('first_message')) {
+        if (updates['first_message'] == null) {
+          charData.remove('first_message');
+        } else {
+          charData['first_message'] = updates['first_message'];
+        }
+      }
+      if (updates.containsKey('system_prompt_override')) {
+        if (updates['system_prompt_override'] == null) {
+          charData.remove('system_prompt_override');
+        } else {
+          charData['system_prompt_override'] =
+              updates['system_prompt_override'];
+        }
+      }
+      if (updates.containsKey('post_history_instructions')) {
+        if (updates['post_history_instructions'] == null) {
+          charData.remove('post_history_instructions');
+        } else {
+          charData['post_history_instructions'] =
+              updates['post_history_instructions'];
+        }
+      }
+      if (updates.containsKey('mes_example')) {
+        if (updates['mes_example'] == null) {
+          charData.remove('mes_example');
+        } else {
+          charData['mes_example'] = updates['mes_example'];
+        }
+      }
+      if (updates.containsKey('chat_background')) {
+        if (updates['chat_background'] == null) {
+          charData.remove('chat_background');
+        } else {
+          charData['chat_background'] = updates['chat_background'];
+        }
+      }
+
+      // Remove legacy fields if they exist (merged into persona already by backend logic usually, but cleanup is good)
+      charData.remove('style_guide');
+      charData.remove('example_dialogue');
+      charData.remove('pkm_interest_filter');
+
+      await _fileSystem.writeYamlFile(charFile.path, charData);
+
+      _logger.info("Updated character $characterId for user $userId");
+      charData['id'] = characterId;
+      AvatarMediaService.precacheDiceBearAvatar(charData['avatar'] as String?);
+      EventBusService.instance.emitEvent(
+        CharacterUpdatedMessage(userId: userId, characterId: characterId),
+      );
+      return _resolveMediaPaths(CharacterModel.fromJson(charData));
+    } catch (e) {
+      _logger.severe(
+        "Failed to update character $characterId for user $userId: $e",
+      );
+      rethrow;
+    }
+  }
+
+  /// Physically delete character
+  Future<bool> deleteCharacter(String userId, String characterId) async {
+    final charsPath = await _ensureCharactersDirectory(userId);
+    var charFile = File(p.join(charsPath, '$characterId.yaml'));
+    if (!await charFile.exists()) {
+      _logger.warning("Character $characterId not found for deletion");
+      return false;
+    }
+
+    try {
+      await charFile.delete();
+      _logger.info(
+        "Physically deleted character $characterId for user $userId",
+      );
+      return true;
+    } catch (e) {
+      _logger.severe("Failed to delete character $characterId: $e");
+      return false;
+    }
+  }
+
+  /// Set character enabled status
+  Future<bool> setCharacterEnabled(
+    String userId,
+    String characterId,
+    bool enabled,
+  ) async {
+    final result = await updateCharacter(
+      userId: userId,
+      characterId: characterId,
+      updates: {"enabled": enabled},
+    );
+    return result != null;
+  }
+
+  /// Set a character as the primary companion.
+  /// Clears the flag on all other characters first.
+  Future<bool> setPrimaryCompanion(String userId, String characterId) async {
+    final characters = await getAllCharacters(userId);
+    // Clear existing primary
+    for (final char in characters) {
+      if (char.isPrimaryCompanion && char.id != characterId) {
+        await updateCharacter(
+          userId: userId,
+          characterId: char.id,
+          updates: {'is_primary_companion': false},
+        );
+      }
+    }
+    // Set new primary
+    final result = await updateCharacter(
+      userId: userId,
+      characterId: characterId,
+      updates: {'is_primary_companion': true, 'enabled': true},
+    );
+    return result != null;
+  }
+
+  /// Get the user's primary companion character.
+  /// Returns the first enabled character if none is explicitly set.
+  Future<CharacterModel?> getPrimaryCompanion(String userId) async {
+    final characters = await getAllCharacters(userId);
+    final primary = characters.where((c) => c.isPrimaryCompanion).firstOrNull;
+    if (primary != null) return primary;
+    // Fallback: first enabled character
+    return characters.where((c) => c.enabled).firstOrNull;
+  }
+}

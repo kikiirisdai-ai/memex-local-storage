@@ -1,0 +1,444 @@
+/// Typed model for timeline card YAML file (Cards/.../*.yaml).
+/// Used by FileSystemService.readCardFile / updateCardFile / safeWriteCardFile.
+/// UiConfig is shared with TimelineCardModel and event bus messages.
+
+/// Render configuration for a single card template (shared with timeline/event bus).
+class UiConfig {
+  final String templateId;
+  final Map<String, dynamic> data;
+
+  const UiConfig({required this.templateId, required this.data});
+
+  factory UiConfig.fromJson(Map<String, dynamic> json) {
+    return UiConfig(
+      templateId: json['template_id'] as String? ?? 'classic_card',
+      data: (json['data'] as Map<String, dynamic>?) ?? {},
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'template_id': templateId, 'data': data};
+  }
+}
+
+/// Insight section stored in card YAML (text, summary, related_facts, character_id).
+class CardInsight {
+  final String? text;
+  final String? summary;
+  final List<RelatedFact> relatedFacts;
+  final String? characterId;
+
+  const CardInsight({
+    this.text,
+    this.summary,
+    List<RelatedFact>? relatedFacts,
+    this.characterId,
+  }) : relatedFacts = relatedFacts ?? const [];
+
+  factory CardInsight.fromJson(Map<String, dynamic> json) {
+    final raw = json['related_facts'];
+    List<RelatedFact> list = [];
+    if (raw is List) {
+      for (final e in raw) {
+        if (e is Map && e['id'] != null) {
+          list.add(RelatedFact(id: e['id'].toString()));
+        }
+      }
+    }
+    return CardInsight(
+      text: json['text'] as String?,
+      summary: json['summary'] as String?,
+      relatedFacts: list,
+      characterId: json['character_id']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final m = <String, dynamic>{};
+    if (text != null) m['text'] = text;
+    if (summary != null) m['summary'] = summary;
+    if (relatedFacts.isNotEmpty) {
+      m['related_facts'] = relatedFacts.map((e) => {'id': e.id}).toList();
+    }
+    if (characterId != null) m['character_id'] = characterId;
+    return m;
+  }
+}
+
+class RelatedFact {
+  final String id;
+
+  const RelatedFact({required this.id});
+}
+
+/// Timeline card data (YAML file content).
+class CardData {
+  final String factId;
+
+  /// System-controlled record creation time, in Unix seconds. This is when the
+  /// record entered Memex, distinct from [timestamp], which is the content/event
+  /// time and may be model-inferred or user-edited.
+  final int? createdAt;
+  final int timestamp;
+  final String status;
+  final List<String> tags;
+  final List<UiConfig> uiConfigs;
+  final String? title;
+  final String? address;
+
+  /// The user's original raw information this card represents (AI-recognized
+  /// capture intent). Replaces the legacy pipeline's fact-file content and
+  /// image-analysis text that used to live outside the card.
+  final String? fact;
+
+  /// Image/audio attachments associated with this card, each stored as a
+  /// markdown-style reference identical to the in-text form: `![image](fs://…)`
+  /// for images and `[audio](fs://…)` for audio. Replaces the legacy pipeline's
+  /// fs:// references that used to live inline in the fact-file content.
+  final List<String> assets;
+  final int? userFixedTimestamp;
+  final String? userFixedAddress;
+  final UserFixedLocation? userFixedLocation;
+  final List<CardComment> comments;
+  final CardInsight? insight;
+  final bool? deleted;
+  final String? failureReason;
+
+  /// Machine-readable structured fields (see [CardMetadataKeys]) that power
+  /// aggregation features (mood trends, rollup summaries) without polluting
+  /// the user-visible tags. Absent on cards written before this field existed.
+  final Map<String, dynamic>? metadata;
+
+  const CardData({
+    required this.factId,
+    this.createdAt,
+    required this.timestamp,
+    required this.status,
+    required this.tags,
+    required this.uiConfigs,
+    this.title,
+    this.address,
+    this.fact,
+    List<String>? assets,
+    this.userFixedTimestamp,
+    this.userFixedAddress,
+    this.userFixedLocation,
+    List<CardComment>? comments,
+    this.insight,
+    this.deleted,
+    this.failureReason,
+    this.metadata,
+  })  : assets = assets ?? const [],
+        comments = comments ?? const [];
+
+  factory CardData.fromJson(Map<String, dynamic> json) {
+    final tagsRaw = json['tags'];
+    List<String> tagsList = [];
+    if (tagsRaw is List) {
+      tagsList = tagsRaw.map((e) => e.toString()).toList();
+    }
+
+    final assetsRaw = json['assets'];
+    List<String> assetsList = [];
+    if (assetsRaw is List) {
+      assetsList = assetsRaw.map((e) => e.toString()).toList();
+    }
+
+    final uiConfigsRaw = json['ui_configs'];
+    List<UiConfig> uiConfigsList = [];
+    if (uiConfigsRaw is List) {
+      for (final e in uiConfigsRaw) {
+        if (e is Map<String, dynamic>) {
+          uiConfigsList.add(UiConfig.fromJson(e));
+        }
+      }
+    }
+    if (uiConfigsList.isEmpty && json['ui_config'] is Map) {
+      uiConfigsList.add(
+        UiConfig.fromJson(Map<String, dynamic>.from(json['ui_config'] as Map)),
+      );
+    }
+
+    final commentsRaw = json['comments'];
+    List<CardComment> commentsList = [];
+    if (commentsRaw is List) {
+      for (final e in commentsRaw) {
+        if (e is Map<String, dynamic>) {
+          commentsList.add(CardComment.fromJson(e));
+        }
+      }
+    }
+
+    final userLoc = json['user_fixed_location'];
+    UserFixedLocation? userFixedLocation;
+    if (userLoc is Map) {
+      userFixedLocation = UserFixedLocation.fromJson(
+        Map<String, dynamic>.from(userLoc),
+      );
+    }
+
+    CardInsight? insightData;
+    if (json['insight'] is Map) {
+      insightData = CardInsight.fromJson(
+        Map<String, dynamic>.from(json['insight'] as Map),
+      );
+    }
+
+    Map<String, dynamic>? metadata;
+    if (json['metadata'] is Map) {
+      metadata = Map<String, dynamic>.from(json['metadata'] as Map);
+    }
+
+    return CardData(
+      factId: json['fact_id'] as String? ?? '',
+      createdAt: json['created_at'] as int?,
+      timestamp: json['timestamp'] as int? ?? 0,
+      status: json['status'] as String? ?? 'processing',
+      tags: tagsList,
+      uiConfigs: uiConfigsList,
+      title: json['title'] as String?,
+      address: json['address'] as String?,
+      fact: json['fact'] as String?,
+      assets: assetsList,
+      userFixedTimestamp: json['user_fixed_timestamp'] as int?,
+      userFixedAddress: json['user_fixed_address'] as String?,
+      userFixedLocation: userFixedLocation,
+      comments: commentsList,
+      insight: insightData,
+      deleted: json['deleted'] as bool?,
+      failureReason: json['failure_reason'] as String?,
+      metadata: metadata,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final m = <String, dynamic>{
+      'fact_id': factId,
+      'timestamp': timestamp,
+      'status': status,
+      'tags': tags,
+      'ui_configs': uiConfigs.map((e) => e.toJson()).toList(),
+    };
+    if (createdAt != null) m['created_at'] = createdAt;
+    if (title != null) m['title'] = title;
+    if (address != null) m['address'] = address;
+    if (fact != null) m['fact'] = fact;
+    if (assets.isNotEmpty) m['assets'] = assets;
+    if (userFixedTimestamp != null)
+      m['user_fixed_timestamp'] = userFixedTimestamp;
+    if (userFixedAddress != null) m['user_fixed_address'] = userFixedAddress;
+    if (userFixedLocation != null)
+      m['user_fixed_location'] = userFixedLocation!.toJson();
+    if (comments.isNotEmpty)
+      m['comments'] = comments.map((e) => e.toJson()).toList();
+    if (insight != null) m['insight'] = insight!.toJson();
+    if (deleted == true) m['deleted'] = deleted;
+    if (failureReason != null) m['failure_reason'] = failureReason;
+    if (metadata != null && metadata!.isNotEmpty) m['metadata'] = metadata;
+    return m;
+  }
+
+  CardData copyWith({
+    String? factId,
+    int? createdAt,
+    int? timestamp,
+    String? status,
+    List<String>? tags,
+    List<UiConfig>? uiConfigs,
+    String? title,
+    String? address,
+    String? fact,
+    List<String>? assets,
+    int? userFixedTimestamp,
+    String? userFixedAddress,
+    UserFixedLocation? userFixedLocation,
+    List<CardComment>? comments,
+    CardInsight? insight,
+    bool? deleted,
+    String? failureReason,
+    bool clearFailureReason = false,
+    Map<String, dynamic>? metadata,
+  }) {
+    return CardData(
+      factId: factId ?? this.factId,
+      createdAt: createdAt ?? this.createdAt,
+      timestamp: timestamp ?? this.timestamp,
+      status: status ?? this.status,
+      tags: tags ?? this.tags,
+      uiConfigs: uiConfigs ?? this.uiConfigs,
+      title: title ?? this.title,
+      address: address ?? this.address,
+      fact: fact ?? this.fact,
+      assets: assets ?? this.assets,
+      userFixedTimestamp: userFixedTimestamp ?? this.userFixedTimestamp,
+      userFixedAddress: userFixedAddress ?? this.userFixedAddress,
+      userFixedLocation: userFixedLocation ?? this.userFixedLocation,
+      comments: comments ?? this.comments,
+      insight: insight ?? this.insight,
+      deleted: deleted ?? this.deleted,
+      failureReason:
+          clearFailureReason ? null : failureReason ?? this.failureReason,
+      metadata: metadata ?? this.metadata,
+    );
+  }
+}
+
+/// Keys for the structured [CardData.metadata] map. Every producer/consumer
+/// must go through these constants so rollup services can rely on them.
+abstract final class CardMetadataKeys {
+  /// int 1-10 — how positive the user's mood reads in this record.
+  static const String moodScore = 'mood_score';
+
+  /// Short mood word in the user's language, e.g. "开心" / "tired".
+  static const String moodLabel = 'mood_label';
+
+  /// int 1-10 — the user's own rating, set by tapping the mood badge.
+  /// Always wins over the model-inferred [moodScore] wherever moods are read.
+  static const String userMoodScore = 'user_mood_score';
+
+  /// Original text before polish. Trimmed; empty becomes null.
+  static const String originalText = 'original_text';
+
+  /// Polish style: 'plain', 'literary', etc. Null if not polished.
+  static const String polishedStyle = 'polished_style';
+
+  /// 'book' | 'movie' | 'tv' | 'music' | 'podcast' | 'other'. Presence marks
+  /// this card as a media record (书影音).
+  static const String mediaType = 'media_type';
+
+  /// 'want' | 'doing' | 'done'. Independently editable from the rating.
+  static const String mediaStatus = 'media_status';
+
+  /// int 1-10 — model-inferred rating, same scale as [moodScore].
+  static const String mediaRating = 'media_rating';
+
+  /// int 1-10 — the user's own rating. Always wins over [mediaRating].
+  static const String userMediaRating = 'user_media_rating';
+
+  /// Short review text. Overwritten in place by user edits (no ai/user
+  /// split — free text has no "which one is right" ambiguity).
+  static const String mediaComment = 'media_comment';
+
+  /// Display-only metadata, no edit UI.
+  static const String mediaAuthor = 'media_author';
+  static const String mediaYear = 'media_year';
+}
+
+/// Validates a model-produced mood score: returns it as an int within 1-10,
+/// or null when absent/out-of-range/mistyped.
+int? sanitizeMoodScore(Object? raw) {
+  final score = switch (raw) {
+    int v => v,
+    num v => v.round(),
+    String v => int.tryParse(v.trim()),
+    _ => null,
+  };
+  if (score == null || score < 1 || score > 10) return null;
+  return score;
+}
+
+const _mediaTypes = {'book', 'movie', 'tv', 'music', 'podcast', 'other'};
+const _mediaStatuses = {'want', 'doing', 'done'};
+
+/// Validates a model-produced media type: returns it when it's one of the
+/// whitelisted values, or null otherwise.
+String? sanitizeMediaType(Object? raw) {
+  if (raw is! String) return null;
+  return _mediaTypes.contains(raw) ? raw : null;
+}
+
+/// Validates a media status: 'want' | 'doing' | 'done', or null otherwise.
+String? sanitizeMediaStatus(Object? raw) {
+  if (raw is! String) return null;
+  return _mediaStatuses.contains(raw) ? raw : null;
+}
+
+/// Derives the [CardMetadataKeys] media fields from a `media_card`
+/// ui_config's `data` map (keys: `media_type`, `media_status`, `rating`,
+/// `comment`, per the template field spec), so the detail-page media badges
+/// — which read from card metadata, not ui_config data — stay in sync no
+/// matter which code path wrote the ui_config. Returns an empty map when
+/// `data` carries no valid `media_type`.
+Map<String, dynamic> mediaMetadataFromUiConfigData(Map<String, dynamic> data) {
+  final mediaType = sanitizeMediaType(data['media_type']);
+  if (mediaType == null) return const {};
+  final mediaStatus = sanitizeMediaStatus(data['media_status']);
+  final rating = sanitizeMoodScore(data['rating']);
+  final comment = data['comment'];
+  final trimmedComment =
+      comment is String && comment.trim().isNotEmpty ? comment.trim() : null;
+  return {
+    CardMetadataKeys.mediaType: mediaType,
+    if (mediaStatus != null) CardMetadataKeys.mediaStatus: mediaStatus,
+    if (rating != null) CardMetadataKeys.mediaRating: rating,
+    if (trimmedComment != null) CardMetadataKeys.mediaComment: trimmedComment,
+  };
+}
+
+class CardComment {
+  final String id;
+  final String content;
+  final bool isAi;
+  final int timestamp;
+  final String? characterId;
+  final String? replyToId;
+
+  const CardComment({
+    required this.id,
+    required this.content,
+    required this.isAi,
+    required this.timestamp,
+    this.characterId,
+    this.replyToId,
+  });
+
+  factory CardComment.fromJson(Map<String, dynamic> json) {
+    final charId = json['character_id'];
+    return CardComment(
+      id: json['id'] as String? ?? '',
+      content: json['content'] as String? ?? '',
+      isAi: json['is_ai'] as bool? ?? false,
+      timestamp: json['timestamp'] as int? ?? 0,
+      characterId: charId?.toString(),
+      replyToId: json['reply_to_id'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final m = <String, dynamic>{
+      'id': id,
+      'content': content,
+      'is_ai': isAi,
+      'timestamp': timestamp,
+    };
+    if (characterId != null) m['character_id'] = characterId;
+    if (replyToId != null) m['reply_to_id'] = replyToId;
+    return m;
+  }
+}
+
+class UserFixedLocation {
+  final double? lat;
+  final double? lng;
+  final String? name;
+
+  const UserFixedLocation({this.lat, this.lng, this.name});
+
+  factory UserFixedLocation.fromJson(Map<String, dynamic> json) {
+    final lat = json['lat'];
+    final lng = json['lng'];
+    return UserFixedLocation(
+      lat: lat is num ? lat.toDouble() : null,
+      lng: lng is num ? lng.toDouble() : null,
+      name: json['name'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final m = <String, dynamic>{};
+    if (lat != null) m['lat'] = lat;
+    if (lng != null) m['lng'] = lng;
+    if (name != null) m['name'] = name;
+    return m;
+  }
+}

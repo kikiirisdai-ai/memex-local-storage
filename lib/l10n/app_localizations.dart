@@ -1,0 +1,6613 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_ar.dart';
+import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_zh.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('de'),
+    Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('hi'),
+    Locale('id'),
+    Locale('ja'),
+    Locale('ko'),
+    Locale('pt'),
+    Locale('ru'),
+    Locale('zh'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')
+  ];
+
+  /// No description provided for @timesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Times'**
+  String get timesLabel;
+
+  /// No description provided for @modelSetAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set {modelId} as default model'**
+  String modelSetAsDefault(Object modelId);
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @unknownModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown model'**
+  String get unknownModel;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @confirmClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm clear'**
+  String get confirmClear;
+
+  /// No description provided for @confirmClearTokenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear current user? You will need to enter user ID again.'**
+  String get confirmClearTokenMessage;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @showOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get showOriginal;
+
+  /// No description provided for @showPolished.
+  ///
+  /// In en, this message translates to:
+  /// **'Show polished'**
+  String get showPolished;
+
+  /// No description provided for @tokenCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'User cleared'**
+  String get tokenCleared;
+
+  /// No description provided for @clearTokenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear user: {error}'**
+  String clearTokenFailed(Object error);
+
+  /// No description provided for @selectDateRangeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date range (optional):'**
+  String get selectDateRangeOptional;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get startDate;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get endDate;
+
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// No description provided for @processLimitOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Process limit (optional)'**
+  String get processLimitOptional;
+
+  /// No description provided for @leaveEmptyForAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to process all'**
+  String get leaveEmptyForAll;
+
+  /// No description provided for @startProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Start processing'**
+  String get startProcessing;
+
+  /// No description provided for @userIdNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID not found'**
+  String get userIdNotFound;
+
+  /// No description provided for @createTaskFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create task: {error}'**
+  String createTaskFailed(Object error);
+
+  /// No description provided for @reprocessCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprocess cards'**
+  String get reprocessCards;
+
+  /// No description provided for @reprocessCardsTaskCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprocess request queued in Super Agent'**
+  String get reprocessCardsTaskCreated;
+
+  /// No description provided for @memorySyncCompletedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent memory synced'**
+  String get memorySyncCompletedToast;
+
+  /// No description provided for @reprocessCardsDownstreamMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get reprocessCardsDownstreamMode;
+
+  /// No description provided for @reprocessCardsCardOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards only'**
+  String get reprocessCardsCardOnly;
+
+  /// No description provided for @reprocessCardsCardOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Super Agent to review and regenerate the selected timeline cards.'**
+  String get reprocessCardsCardOnlyDesc;
+
+  /// No description provided for @reprocessCardsRerunDownstream.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards and related follow-ups'**
+  String get reprocessCardsRerunDownstream;
+
+  /// No description provided for @reprocessCardsRerunDownstreamDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Super Agent to also consider related PKM, schedule, and insight updates when needed.'**
+  String get reprocessCardsRerunDownstreamDesc;
+
+  /// No description provided for @reanalyzeMediaAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-read media attachments'**
+  String get reanalyzeMediaAssets;
+
+  /// No description provided for @reanalyzeMediaAssetsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Super Agent to inspect attached media again when regenerating cards.'**
+  String get reanalyzeMediaAssetsDesc;
+
+  /// No description provided for @regenerateComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate comments'**
+  String get regenerateComments;
+
+  /// No description provided for @regenerateCommentsTaskCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate comments task created, running in background'**
+  String get regenerateCommentsTaskCreated;
+
+  /// No description provided for @rebuildSearchIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild search index'**
+  String get rebuildSearchIndex;
+
+  /// No description provided for @rebuildSearchIndexSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Search index rebuilt successfully'**
+  String get rebuildSearchIndexSuccess;
+
+  /// No description provided for @rebuildSearchIndexFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to rebuild search index'**
+  String get rebuildSearchIndexFailed;
+
+  /// No description provided for @clearData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear data'**
+  String get clearData;
+
+  /// No description provided for @confirmClearDataMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear data?'**
+  String get confirmClearDataMessage;
+
+  /// No description provided for @confirmClearDataDeletesWorkspaceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All local workspace data for the current user will be deleted, including cards, media, knowledge files, insights, memory, chat history, and system state.\n\nThis action cannot be undone!'**
+  String get confirmClearDataDeletesWorkspaceMessage;
+
+  /// No description provided for @clearFailedAgentContexts.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear failed conversation context'**
+  String get clearFailedAgentContexts;
+
+  /// No description provided for @confirmClearFailedAgentContextsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the saved conversation context for Insight and Schedule agents? This is useful after changing models when previous agent messages are no longer compatible. Facts, cards, knowledge, memories, and model settings will not be deleted.'**
+  String get confirmClearFailedAgentContextsMessage;
+
+  /// No description provided for @failedAgentContextsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared {count} saved conversation context(s)'**
+  String failedAgentContextsCleared(Object count);
+
+  /// No description provided for @clearFailedAgentContextsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear conversation context: {error}'**
+  String clearFailedAgentContextsFailed(Object error);
+
+  /// No description provided for @cloneToTestUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Clone to test user'**
+  String get cloneToTestUser;
+
+  /// No description provided for @confirmCloneToTestUserMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the current workspace into a new local test user and switch to it. Agent runtime state is not copied. Your current user data will not be modified.'**
+  String get confirmCloneToTestUserMessage;
+
+  /// No description provided for @testUserIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Test user ID'**
+  String get testUserIdLabel;
+
+  /// No description provided for @testUserIdHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Use letters, numbers, hyphen, or underscore.'**
+  String get testUserIdHelper;
+
+  /// No description provided for @testUserIdInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use only letters, numbers, hyphen, or underscore.'**
+  String get testUserIdInvalid;
+
+  /// No description provided for @overwriteExistingTestUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace existing test user with the same ID'**
+  String get overwriteExistingTestUser;
+
+  /// No description provided for @testUserCloneSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to test user {userId}'**
+  String testUserCloneSuccess(Object userId);
+
+  /// No description provided for @testUserCloneFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clone test user: {error}'**
+  String testUserCloneFailed(Object error);
+
+  /// No description provided for @dataClearedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data cleared successfully'**
+  String get dataClearedSuccess;
+
+  /// No description provided for @clearDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear data: {error}'**
+  String clearDataFailed(Object error);
+
+  /// No description provided for @personalCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal center'**
+  String get personalCenter;
+
+  /// No description provided for @viewLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'View logs'**
+  String get viewLogs;
+
+  /// No description provided for @systemAuthorization.
+  ///
+  /// In en, this message translates to:
+  /// **'System authorization'**
+  String get systemAuthorization;
+
+  /// No description provided for @aiCharacterConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'AI character config'**
+  String get aiCharacterConfig;
+
+  /// No description provided for @modelConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Model config'**
+  String get modelConfig;
+
+  /// No description provided for @agentConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent config'**
+  String get agentConfig;
+
+  /// No description provided for @experimentalLab.
+  ///
+  /// In en, this message translates to:
+  /// **'Labs'**
+  String get experimentalLab;
+
+  /// No description provided for @experimentalLabDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental features that may change or move later.'**
+  String get experimentalLabDescription;
+
+  /// No description provided for @modelUsageStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Model usage stats'**
+  String get modelUsageStats;
+
+  /// No description provided for @asyncTaskList.
+  ///
+  /// In en, this message translates to:
+  /// **'Async task list'**
+  String get asyncTaskList;
+
+  /// No description provided for @clearLocalToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear user'**
+  String get clearLocalToken;
+
+  /// No description provided for @insightCardTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Insight card templates'**
+  String get insightCardTemplates;
+
+  /// No description provided for @timelineCardTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline card templates'**
+  String get timelineCardTemplates;
+
+  /// No description provided for @logViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Log viewer'**
+  String get logViewer;
+
+  /// No description provided for @autoRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto refresh'**
+  String get autoRefresh;
+
+  /// No description provided for @lineCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Line count: '**
+  String get lineCount;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get schedule;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get statistics;
+
+  /// No description provided for @appLockConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock config'**
+  String get appLockConfig;
+
+  /// No description provided for @activityStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity stats'**
+  String get activityStats;
+
+  /// No description provided for @activityStatsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'In this period you recorded {inputs} time(s) and generated {cards} card(s).'**
+  String activityStatsSummary(Object inputs, Object cards);
+
+  /// No description provided for @last7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get last7Days;
+
+  /// No description provided for @last30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get last30Days;
+
+  /// No description provided for @last90Days.
+  ///
+  /// In en, this message translates to:
+  /// **'90 days'**
+  String get last90Days;
+
+  /// No description provided for @records.
+  ///
+  /// In en, this message translates to:
+  /// **'Records'**
+  String get records;
+
+  /// No description provided for @words.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get words;
+
+  /// No description provided for @cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get cards;
+
+  /// No description provided for @knowledgeUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge units'**
+  String get knowledgeUnits;
+
+  /// No description provided for @completedTodos.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed todos'**
+  String get completedTodos;
+
+  /// No description provided for @activeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Active days'**
+  String get activeDays;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get streakDays;
+
+  /// No description provided for @dailyRhythm.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily rhythm'**
+  String get dailyRhythm;
+
+  /// No description provided for @recordToOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Record to output'**
+  String get recordToOutput;
+
+  /// No description provided for @sourceBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Source breakdown'**
+  String get sourceBreakdown;
+
+  /// No description provided for @topThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Top themes'**
+  String get topThemes;
+
+  /// No description provided for @textInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get textInput;
+
+  /// No description provided for @imageInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get imageInput;
+
+  /// No description provided for @audioInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get audioInput;
+
+  /// No description provided for @noStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity stats yet'**
+  String get noStatsYet;
+
+  /// No description provided for @tapDayForDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to view details'**
+  String get tapDayForDetails;
+
+  /// No description provided for @dayDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Day details'**
+  String get dayDetails;
+
+  /// No description provided for @loadStatsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load stats: {error}'**
+  String loadStatsFailed(Object error);
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get daily;
+
+  /// No description provided for @modelStatsByAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'By agent'**
+  String get modelStatsByAgent;
+
+  /// No description provided for @detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get detail;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent'**
+  String get agent;
+
+  /// No description provided for @noData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get noData;
+
+  /// No description provided for @totalCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Total calls'**
+  String get totalCalls;
+
+  /// No description provided for @calls.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls'**
+  String get calls;
+
+  /// No description provided for @callsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} calls'**
+  String callsCount(Object count);
+
+  /// No description provided for @selectDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date range'**
+  String get selectDateRange;
+
+  /// No description provided for @totalTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Total tokens'**
+  String get totalTokens;
+
+  /// No description provided for @cacheRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache rate'**
+  String get cacheRate;
+
+  /// No description provided for @promptTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt tokens'**
+  String get promptTokens;
+
+  /// No description provided for @completionTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion tokens'**
+  String get completionTokens;
+
+  /// No description provided for @cachedTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached tokens'**
+  String get cachedTokens;
+
+  /// No description provided for @thoughtTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Thought tokens'**
+  String get thoughtTokens;
+
+  /// No description provided for @prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get prompt;
+
+  /// No description provided for @completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion'**
+  String get completion;
+
+  /// No description provided for @cached.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached'**
+  String get cached;
+
+  /// No description provided for @thought.
+  ///
+  /// In en, this message translates to:
+  /// **'Thought'**
+  String get thought;
+
+  /// No description provided for @model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get model;
+
+  /// No description provided for @scene.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene'**
+  String get scene;
+
+  /// No description provided for @sceneId.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene ID'**
+  String get sceneId;
+
+  /// No description provided for @tokenUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Token usage'**
+  String get tokenUsage;
+
+  /// No description provided for @handler.
+  ///
+  /// In en, this message translates to:
+  /// **'Handler'**
+  String get handler;
+
+  /// No description provided for @modelBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Model breakdown'**
+  String get modelBreakdown;
+
+  /// No description provided for @callDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Call details'**
+  String get callDetails;
+
+  /// No description provided for @recordDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record details: {scene}'**
+  String recordDetailsTitle(Object scene);
+
+  /// No description provided for @saveLlmConfigFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save LLM config: {error}'**
+  String saveLlmConfigFailed(Object error);
+
+  /// No description provided for @webHtmlPreviewUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'HTML preview is not available on web. Please view on mobile.'**
+  String get webHtmlPreviewUnavailable;
+
+  /// No description provided for @saveUserInfoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save user info: {error}'**
+  String saveUserInfoFailed(Object error);
+
+  /// No description provided for @totalEstimatedCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Total estimated cost'**
+  String get totalEstimatedCost;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @totalTokenConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Total token consumption'**
+  String get totalTokenConsumption;
+
+  /// No description provided for @dataLoadFailedRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Data load failed, please retry later.'**
+  String get dataLoadFailedRetry;
+
+  /// No description provided for @timelineLoadFailedRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline load failed, please retry later.'**
+  String get timelineLoadFailedRetry;
+
+  /// No description provided for @newPerspective.
+  ///
+  /// In en, this message translates to:
+  /// **'New perspective'**
+  String get newPerspective;
+
+  /// No description provided for @startPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get startPoint;
+
+  /// No description provided for @endPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get endPoint;
+
+  /// No description provided for @originalInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Original input'**
+  String get originalInput;
+
+  /// No description provided for @referenceContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference content'**
+  String get referenceContent;
+
+  /// No description provided for @referenceWithTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference: {title}'**
+  String referenceWithTitle(Object title);
+
+  /// No description provided for @actionCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending actions'**
+  String get actionCenterTitle;
+
+  /// No description provided for @noPendingActions.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending actions'**
+  String get noPendingActions;
+
+  /// No description provided for @clarificationNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex wants to confirm'**
+  String get clarificationNeeded;
+
+  /// No description provided for @clarificationTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a short answer'**
+  String get clarificationTextHint;
+
+  /// No description provided for @clarificationTextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a short answer first'**
+  String get clarificationTextRequired;
+
+  /// No description provided for @clarificationAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get clarificationAnswered;
+
+  /// No description provided for @clarificationAnswerPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer: {answer}'**
+  String clarificationAnswerPrefix(Object answer);
+
+  /// No description provided for @answerSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer saved'**
+  String get answerSaved;
+
+  /// No description provided for @clarificationOtherAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual input'**
+  String get clarificationOtherAnswer;
+
+  /// No description provided for @clarificationNotSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure / prefer not to say'**
+  String get clarificationNotSure;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @footprintMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Footprint map'**
+  String get footprintMap;
+
+  /// No description provided for @waypointPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Waypoint places'**
+  String get waypointPlaces;
+
+  /// No description provided for @unknownPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown place'**
+  String get unknownPlace;
+
+  /// No description provided for @releaseToSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Release to send'**
+  String get releaseToSend;
+
+  /// No description provided for @selectFromAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Select from album'**
+  String get selectFromAlbum;
+
+  /// No description provided for @clipboardPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New clipboard'**
+  String get clipboardPreviewTitle;
+
+  /// No description provided for @clipboardPreviewImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clipboard image'**
+  String get clipboardPreviewImageTitle;
+
+  /// No description provided for @clipboardPreviewImageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Image ready to add'**
+  String get clipboardPreviewImageDescription;
+
+  /// No description provided for @clipboardPreviewUnprocessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not pasted yet'**
+  String get clipboardPreviewUnprocessed;
+
+  /// No description provided for @clipboardPreviewPasteToInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste to input'**
+  String get clipboardPreviewPasteToInput;
+
+  /// No description provided for @clipboardPreviewAddImageToInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get clipboardPreviewAddImageToInput;
+
+  /// No description provided for @clipboardPreviewImageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read clipboard image'**
+  String get clipboardPreviewImageFailed;
+
+  /// No description provided for @tellAiWhatHappened.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell AI what happened...'**
+  String get tellAiWhatHappened;
+
+  /// No description provided for @recordingWithDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording: {duration}'**
+  String recordingWithDuration(Object duration);
+
+  /// No description provided for @playing.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing...'**
+  String get playing;
+
+  /// No description provided for @sendLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get sendLabel;
+
+  /// No description provided for @attachedImagesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent {count} image(s)'**
+  String attachedImagesMessage(Object count);
+
+  /// No description provided for @noTaskData.
+  ///
+  /// In en, this message translates to:
+  /// **'No task data'**
+  String get noTaskData;
+
+  /// No description provided for @createdAtDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {date}'**
+  String createdAtDate(Object date);
+
+  /// No description provided for @updatedAtDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated: {date}'**
+  String updatedAtDate(Object date);
+
+  /// No description provided for @durationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duration}'**
+  String durationLabel(Object duration);
+
+  /// No description provided for @retryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry: {count}'**
+  String retryCount(Object count);
+
+  /// No description provided for @loadDetailFailedRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Load detail failed, please retry later.'**
+  String get loadDetailFailedRetry;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Load failed'**
+  String get loadFailed;
+
+  /// No description provided for @reload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get reload;
+
+  /// No description provided for @aiInsightDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Insight Detail'**
+  String get aiInsightDetail;
+
+  /// No description provided for @relatedRecordsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Related records ({count})'**
+  String relatedRecordsCount(Object count);
+
+  /// No description provided for @noRelatedRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No related records'**
+  String get noRelatedRecords;
+
+  /// No description provided for @useFingerprintToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint to unlock'**
+  String get useFingerprintToUnlock;
+
+  /// No description provided for @locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get locked;
+
+  /// No description provided for @wrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password'**
+  String get wrongPassword;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get enterPassword;
+
+  /// No description provided for @memexLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex is locked'**
+  String get memexLocked;
+
+  /// No description provided for @calendarShortSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get calendarShortSun;
+
+  /// No description provided for @calendarShortMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get calendarShortMon;
+
+  /// No description provided for @calendarShortTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get calendarShortTue;
+
+  /// No description provided for @calendarShortWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get calendarShortWed;
+
+  /// No description provided for @calendarShortThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get calendarShortThu;
+
+  /// No description provided for @calendarShortFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get calendarShortFri;
+
+  /// No description provided for @calendarShortSat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get calendarShortSat;
+
+  /// No description provided for @noRecordsOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No records on {date}'**
+  String noRecordsOnDate(Object date);
+
+  /// No description provided for @footprintPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Footprint path'**
+  String get footprintPath;
+
+  /// No description provided for @lifeCompositionTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Life composition'**
+  String get lifeCompositionTable;
+
+  /// No description provided for @emotionReframe.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotion reframe'**
+  String get emotionReframe;
+
+  /// No description provided for @chronicleOfThings.
+  ///
+  /// In en, this message translates to:
+  /// **'Chronicle of things'**
+  String get chronicleOfThings;
+
+  /// No description provided for @goalProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal progress'**
+  String get goalProgress;
+
+  /// No description provided for @trendChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Trend chart'**
+  String get trendChart;
+
+  /// No description provided for @comparisonChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparison chart'**
+  String get comparisonChart;
+
+  /// No description provided for @todayTimeFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s time flow'**
+  String get todayTimeFlow;
+
+  /// No description provided for @aiInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether it\'s memories or the present, I\'m here...'**
+  String get aiInputHint;
+
+  /// No description provided for @actionCreateCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Create card'**
+  String get actionCreateCard;
+
+  /// No description provided for @actionAiInteract.
+  ///
+  /// In en, this message translates to:
+  /// **'AI chat'**
+  String get actionAiInteract;
+
+  /// No description provided for @actionPolish.
+  ///
+  /// In en, this message translates to:
+  /// **'Polish'**
+  String get actionPolish;
+
+  /// No description provided for @modelOfflineToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Model not connected'**
+  String get modelOfflineToast;
+
+  /// No description provided for @refreshSuperAgentStateTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Memex Agent context'**
+  String get refreshSuperAgentStateTooltip;
+
+  /// No description provided for @refreshSuperAgentStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Memex Agent history context?'**
+  String get refreshSuperAgentStateTitle;
+
+  /// No description provided for @refreshSuperAgentStateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The visible chat history will stay, but Memex Agent\'s historical runtime context will be cleared and future replies will start from a fresh context. Persistent memory, knowledge base files, cards, and other saved data are not affected. Use this when Memex Agent keeps behaving abnormally. Continue?'**
+  String get refreshSuperAgentStateMessage;
+
+  /// No description provided for @refreshSuperAgentStateActiveRunMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait until the current Memex Agent message finishes before clearing context.'**
+  String get refreshSuperAgentStateActiveRunMessage;
+
+  /// No description provided for @refreshSuperAgentStateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex Agent context cleared'**
+  String get refreshSuperAgentStateSuccess;
+
+  /// No description provided for @refreshSuperAgentStateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear Memex Agent context: {error}'**
+  String refreshSuperAgentStateFailed(Object error);
+
+  /// No description provided for @nothingHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get nothingHere;
+
+  /// No description provided for @nothingHereHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button below to create your first card'**
+  String get nothingHereHint;
+
+  /// No description provided for @agentProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is processing...'**
+  String get agentProcessing;
+
+  /// No description provided for @keepAppOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t close the app'**
+  String get keepAppOpen;
+
+  /// No description provided for @activityDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Detail'**
+  String get activityDetail;
+
+  /// No description provided for @noAgentActivityYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No agent activity yet'**
+  String get noAgentActivityYet;
+
+  /// No description provided for @processingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get processingEllipsis;
+
+  /// No description provided for @agentBackgroundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex Agent'**
+  String get agentBackgroundTitle;
+
+  /// No description provided for @agentBackgroundPausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex Agent paused'**
+  String get agentBackgroundPausedTitle;
+
+  /// No description provided for @agentBackgroundNeedsAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex Agent needs attention'**
+  String get agentBackgroundNeedsAttentionTitle;
+
+  /// No description provided for @agentBackgroundStageIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get agentBackgroundStageIdle;
+
+  /// No description provided for @agentBackgroundStageProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get agentBackgroundStageProcessing;
+
+  /// No description provided for @agentBackgroundStageQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get agentBackgroundStageQueued;
+
+  /// No description provided for @agentBackgroundStageRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to retry'**
+  String get agentBackgroundStageRetrying;
+
+  /// No description provided for @agentBackgroundStagePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get agentBackgroundStagePaused;
+
+  /// No description provided for @agentBackgroundStageCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get agentBackgroundStageCompleted;
+
+  /// No description provided for @agentBackgroundStageNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get agentBackgroundStageNeedsAttention;
+
+  /// No description provided for @agentBackgroundStageAnalyzingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing media'**
+  String get agentBackgroundStageAnalyzingMedia;
+
+  /// No description provided for @agentBackgroundStageGeneratingCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating card'**
+  String get agentBackgroundStageGeneratingCard;
+
+  /// No description provided for @agentBackgroundStageUpdatingKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating knowledge'**
+  String get agentBackgroundStageUpdatingKnowledge;
+
+  /// No description provided for @agentBackgroundStagePreparingComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing comment'**
+  String get agentBackgroundStagePreparingComment;
+
+  /// No description provided for @agentBackgroundStageRoutingFollowUps.
+  ///
+  /// In en, this message translates to:
+  /// **'Routing follow-ups'**
+  String get agentBackgroundStageRoutingFollowUps;
+
+  /// No description provided for @agentBackgroundTaskSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Running {running}, Pending {pending}, Retry {retrying}'**
+  String agentBackgroundTaskSummary(
+      Object running, Object pending, Object retrying);
+
+  /// No description provided for @agentBackgroundTaskDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing {count} queued task(s).'**
+  String agentBackgroundTaskDetail(Object count);
+
+  /// No description provided for @agentBackgroundNoTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No background tasks.'**
+  String get agentBackgroundNoTasks;
+
+  /// No description provided for @agentBackgroundStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing is starting.'**
+  String get agentBackgroundStarting;
+
+  /// No description provided for @agentBackgroundCompletedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'All background tasks finished.'**
+  String get agentBackgroundCompletedDetail;
+
+  /// No description provided for @agentBackgroundFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing stopped with an error.'**
+  String get agentBackgroundFailedDetail;
+
+  /// No description provided for @agentBackgroundPausedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing is paused and will continue later.'**
+  String get agentBackgroundPausedDetail;
+
+  /// No description provided for @agentBackgroundQueuedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the next processing step.'**
+  String get agentBackgroundQueuedDetail;
+
+  /// No description provided for @agentBackgroundRetryingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The current step will retry automatically.'**
+  String get agentBackgroundRetryingDetail;
+
+  /// No description provided for @agentBackgroundAnalyzeMediaDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading attachments and local context.'**
+  String get agentBackgroundAnalyzeMediaDetail;
+
+  /// No description provided for @agentBackgroundGeneratingCardDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Turning the record into a timeline card.'**
+  String get agentBackgroundGeneratingCardDetail;
+
+  /// No description provided for @agentBackgroundUpdatingKnowledgeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating local knowledge and memory.'**
+  String get agentBackgroundUpdatingKnowledgeDetail;
+
+  /// No description provided for @agentBackgroundPreparingCommentDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing an assistant follow-up.'**
+  String get agentBackgroundPreparingCommentDetail;
+
+  /// No description provided for @agentBackgroundRoutingFollowUpsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking follow-up actions for this card.'**
+  String get agentBackgroundRoutingFollowUpsDetail;
+
+  /// No description provided for @agentBackgroundPausedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused - {summary}'**
+  String agentBackgroundPausedStatus(Object summary);
+
+  /// No description provided for @agentBackgroundNeedsAttentionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention - {summary}'**
+  String agentBackgroundNeedsAttentionStatus(Object summary);
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @languageSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageSettings;
+
+  /// No description provided for @languageSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the app display language'**
+  String get languageSettingsDesc;
+
+  /// No description provided for @noPendingActionsToast.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending actions'**
+  String get noPendingActionsToast;
+
+  /// No description provided for @knowledgeNewDiscovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge new discovery'**
+  String get knowledgeNewDiscovery;
+
+  /// No description provided for @discoveredNewInsightsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovered {count} new insight(s)'**
+  String discoveredNewInsightsCount(Object count);
+
+  /// No description provided for @updatedExistingInsightsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} existing insight(s)'**
+  String updatedExistingInsightsCount(Object count);
+
+  /// No description provided for @sectionNewInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'New insights'**
+  String get sectionNewInsights;
+
+  /// No description provided for @sectionUpdatedInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated insights'**
+  String get sectionUpdatedInsights;
+
+  /// No description provided for @unnamedInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed insight'**
+  String get unnamedInsight;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @selectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected location'**
+  String get selectedLocation;
+
+  /// No description provided for @confirmLocationName.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm location name'**
+  String get confirmLocationName;
+
+  /// No description provided for @confirmLocationNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit the name (coordinates stay the same)'**
+  String get confirmLocationNameHint;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get nameLabel;
+
+  /// No description provided for @inputPlaceNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter place name...'**
+  String get inputPlaceNameHint;
+
+  /// No description provided for @currentCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates: {lat}, {lng}'**
+  String currentCoordinates(Object lat, Object lng);
+
+  /// No description provided for @confirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm location'**
+  String get confirmLocation;
+
+  /// No description provided for @welcomeToMemex.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Memex'**
+  String get welcomeToMemex;
+
+  /// No description provided for @createUserIdToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your profile'**
+  String get createUserIdToStart;
+
+  /// No description provided for @userIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Name / Nickname'**
+  String get userIdLabel;
+
+  /// No description provided for @userIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name or nickname'**
+  String get userIdHint;
+
+  /// No description provided for @pleaseEnterUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get pleaseEnterUserId;
+
+  /// No description provided for @userIdMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must not exceed 50 characters'**
+  String get userIdMaxLength;
+
+  /// No description provided for @startUsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get startUsing;
+
+  /// No description provided for @userIdTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This will be used to personalize your experience.'**
+  String get userIdTip;
+
+  /// No description provided for @setupModelConfigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up an AI model'**
+  String get setupModelConfigTitle;
+
+  /// No description provided for @setupModelConfigSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex needs a frontier AI model to organize records, analyze images, and generate insights. Choose one connection method.'**
+  String get setupModelConfigSubtitle;
+
+  /// No description provided for @setupModelConfigComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete & Go'**
+  String get setupModelConfigComplete;
+
+  /// No description provided for @aiService.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex Model Service'**
+  String get aiService;
+
+  /// No description provided for @aiModelHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI models and services'**
+  String get aiModelHubTitle;
+
+  /// No description provided for @aiModelHubSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Memex\'s official service or bring your own provider. Advanced model routing stays available when you need it.'**
+  String get aiModelHubSubtitle;
+
+  /// No description provided for @aiSetupCurrentStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current setup'**
+  String get aiSetupCurrentStatusTitle;
+
+  /// No description provided for @aiSetupStatusNotConfiguredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI service is not configured'**
+  String get aiSetupStatusNotConfiguredTitle;
+
+  /// No description provided for @aiSetupStatusNotConfiguredDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one connection method to enable AI organization for records, media, and insights.'**
+  String get aiSetupStatusNotConfiguredDescription;
+
+  /// No description provided for @aiSetupStatusMemexTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using MemeX official service'**
+  String get aiSetupStatusMemexTitle;
+
+  /// No description provided for @aiSetupStatusMemexDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will use the official connection and API credentials managed by your MemeX account.'**
+  String get aiSetupStatusMemexDescription;
+
+  /// No description provided for @aiSetupStatusCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using custom provider settings'**
+  String get aiSetupStatusCustomTitle;
+
+  /// No description provided for @aiSetupStatusCustomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will use your configured provider credentials and model role selections.'**
+  String get aiSetupStatusCustomDescription;
+
+  /// No description provided for @aiSetupChooseConnectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a connection method'**
+  String get aiSetupChooseConnectionTitle;
+
+  /// No description provided for @aiSetupChooseConnectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the path that matches how you want Memex to access AI models.'**
+  String get aiSetupChooseConnectionDescription;
+
+  /// No description provided for @aiSetupOfficialRouteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to MemeX and use the official service without choosing providers, keys, or agent-level models.'**
+  String get aiSetupOfficialRouteDescription;
+
+  /// No description provided for @aiSetupCustomRouteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your own provider credentials, choose the model Super Agent should use, and optionally override models per agent.'**
+  String get aiSetupCustomRouteDescription;
+
+  /// No description provided for @aiSetupCustomPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom AI service'**
+  String get aiSetupCustomPageTitle;
+
+  /// No description provided for @aiSetupCustomPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure provider credentials first, then choose the model Memex should use.'**
+  String get aiSetupCustomPageSubtitle;
+
+  /// No description provided for @aiSetupProviderCredentialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider and API keys'**
+  String get aiSetupProviderCredentialsTitle;
+
+  /// No description provided for @aiSetupProviderCredentialsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add or edit OpenAI, Anthropic, DeepSeek, Gemini, OpenRouter, Ollama, or another compatible provider.'**
+  String get aiSetupProviderCredentialsDescription;
+
+  /// No description provided for @modelRolesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose primary model'**
+  String get modelRolesTitle;
+
+  /// No description provided for @modelRolesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Agent uses one model for text and image inputs. Advanced agent overrides stay available below.'**
+  String get modelRolesDescription;
+
+  /// No description provided for @textModelRoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary model'**
+  String get textModelRoleTitle;
+
+  /// No description provided for @textModelRoleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by Super Agent for text, images, cards, knowledge, insights, chat, comments, schedule, and memory.'**
+  String get textModelRoleDescription;
+
+  /// No description provided for @modelConnectionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Model providers and API keys'**
+  String get modelConnectionsTitle;
+
+  /// No description provided for @modelConnectionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Memex\'s official service or add your own provider credentials.'**
+  String get modelConnectionsDescription;
+
+  /// No description provided for @relatedAiCapabilitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced and related capabilities'**
+  String get relatedAiCapabilitiesTitle;
+
+  /// No description provided for @relatedAiCapabilitiesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine-tune agent assignments, location provider, and speech transcription behavior.'**
+  String get relatedAiCapabilitiesDescription;
+
+  /// No description provided for @aiSetupServiceCapabilitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service capabilities'**
+  String get aiSetupServiceCapabilitiesTitle;
+
+  /// No description provided for @aiSetupServiceCapabilitiesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the providers Memex uses for adjacent AI-powered capabilities such as speech and reverse geocoding.'**
+  String get aiSetupServiceCapabilitiesDescription;
+
+  /// No description provided for @aiSetupAdvancedCustomizationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced model routing'**
+  String get aiSetupAdvancedCustomizationTitle;
+
+  /// No description provided for @aiSetupAdvancedCustomizationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'For power users who want individual agents to use different providers or model configs.'**
+  String get aiSetupAdvancedCustomizationDescription;
+
+  /// No description provided for @locationProviderSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Location provider'**
+  String get locationProviderSettings;
+
+  /// No description provided for @speechProviderSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech transcription'**
+  String get speechProviderSettings;
+
+  /// No description provided for @advancedAgentModelAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent model assignments'**
+  String get advancedAgentModelAssignments;
+
+  /// No description provided for @openAdvancedAgentModelAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Override individual agents'**
+  String get openAdvancedAgentModelAssignments;
+
+  /// No description provided for @noConfiguredModelOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a provider or API key before choosing model roles.'**
+  String get noConfiguredModelOptions;
+
+  /// No description provided for @modelSlotUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Model role updated'**
+  String get modelSlotUpdated;
+
+  /// No description provided for @aiServiceMemexRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect through Memex'**
+  String get aiServiceMemexRouteTitle;
+
+  /// No description provided for @aiServiceLongDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex uses a multi-agent system to organize life records, knowledge notes, and social context, discover deeper insights, and provide AI companionship with persistent memory. Your data is stored as plain-text Markdown, preserving data freedom and portability.'**
+  String get aiServiceLongDescription;
+
+  /// No description provided for @aiServiceCustomApiRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I have an API key'**
+  String get aiServiceCustomApiRouteTitle;
+
+  /// No description provided for @aiServiceCustomModelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose this first if you already have an API key from OpenAI, Anthropic, DeepSeek, Gemini, or another provider.'**
+  String get aiServiceCustomModelDescription;
+
+  /// No description provided for @enableAiService.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with Memex'**
+  String get enableAiService;
+
+  /// No description provided for @aiServiceReadyToast.
+  ///
+  /// In en, this message translates to:
+  /// **'AI organization is on'**
+  String get aiServiceReadyToast;
+
+  /// No description provided for @aiServiceSettingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'If you do not have an API key, use a Memex account to connect to mainstream model services.'**
+  String get aiServiceSettingsDescription;
+
+  /// No description provided for @advancedModelConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure API key'**
+  String get advancedModelConfiguration;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get skipForNow;
+
+  /// No description provided for @clearAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear auth'**
+  String get clearAuth;
+
+  /// No description provided for @authorizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorizing...'**
+  String get authorizing;
+
+  /// No description provided for @authFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Auth failed: {error}'**
+  String authFailed(Object error);
+
+  /// No description provided for @authorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized'**
+  String get authorized;
+
+  /// No description provided for @config.
+  ///
+  /// In en, this message translates to:
+  /// **'Config'**
+  String get config;
+
+  /// No description provided for @calendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar;
+
+  /// No description provided for @reminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders;
+
+  /// No description provided for @writeToSystemFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to write to system'**
+  String get writeToSystemFailed;
+
+  /// No description provided for @permissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} permission required'**
+  String permissionRequired(Object name);
+
+  /// No description provided for @permissionRationale.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow the app to access your {name} in Settings so we can create it for you.'**
+  String permissionRationale(Object name);
+
+  /// No description provided for @goToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings'**
+  String get goToSettings;
+
+  /// No description provided for @unknownAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown action'**
+  String get unknownAction;
+
+  /// No description provided for @discoveredCalendarEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar event found'**
+  String get discoveredCalendarEvent;
+
+  /// No description provided for @discoveredReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder found'**
+  String get discoveredReminder;
+
+  /// No description provided for @addToCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to calendar'**
+  String get addToCalendar;
+
+  /// No description provided for @addToReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to reminders'**
+  String get addToReminders;
+
+  /// No description provided for @addedToSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully added to {target}'**
+  String addedToSuccess(Object target);
+
+  /// No description provided for @ignore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get ignore;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delete'**
+  String get confirmDelete;
+
+  /// No description provided for @confirmDeleteSessionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this conversation? This cannot be undone.'**
+  String get confirmDeleteSessionMessage;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get deleteSuccess;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String deleteFailed(Object error);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String daysAgo(Object count);
+
+  /// No description provided for @chatHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat history'**
+  String get chatHistory;
+
+  /// No description provided for @enterFullScreenTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter full screen'**
+  String get enterFullScreenTooltip;
+
+  /// No description provided for @exitFullScreenTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get exitFullScreenTooltip;
+
+  /// No description provided for @noConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations'**
+  String get noConversations;
+
+  /// No description provided for @loadSessionListFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load session list: {error}'**
+  String loadSessionListFailed(Object error);
+
+  /// No description provided for @yesterdayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday {time}'**
+  String yesterdayAt(Object time);
+
+  /// No description provided for @newChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get newChat;
+
+  /// No description provided for @messageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} messages'**
+  String messageCount(Object count);
+
+  /// No description provided for @organize.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize'**
+  String get organize;
+
+  /// No description provided for @pkmCategoryProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get pkmCategoryProject;
+
+  /// No description provided for @pkmCategoryProjectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-term · Goals · Deadlines'**
+  String get pkmCategoryProjectSubtitle;
+
+  /// No description provided for @pkmCategoryArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get pkmCategoryArea;
+
+  /// No description provided for @pkmCategoryAreaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-term · Responsibility · Standards'**
+  String get pkmCategoryAreaSubtitle;
+
+  /// No description provided for @pkmCategoryResource.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource'**
+  String get pkmCategoryResource;
+
+  /// No description provided for @pkmCategoryResourceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests · Inspiration · Reserve'**
+  String get pkmCategoryResourceSubtitle;
+
+  /// No description provided for @pkmCategoryArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get pkmCategoryArchive;
+
+  /// No description provided for @pkmCategoryArchiveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Done · Dormant · Reference'**
+  String get pkmCategoryArchiveSubtitle;
+
+  /// No description provided for @recentChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent changes'**
+  String get recentChanges;
+
+  /// No description provided for @noRecentChangesInThreeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes in the last 3 days'**
+  String get noRecentChangesInThreeDays;
+
+  /// No description provided for @unpinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpinned'**
+  String get unpinned;
+
+  /// No description provided for @pinnedStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style pinned'**
+  String get pinnedStyle;
+
+  /// No description provided for @operationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed: {error}'**
+  String operationFailed(Object error);
+
+  /// No description provided for @refreshingInsightData.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing insight data, this may take a moment...'**
+  String get refreshingInsightData;
+
+  /// No description provided for @refreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh failed: {error}'**
+  String refreshFailed(Object error);
+
+  /// No description provided for @sortUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort order updated'**
+  String get sortUpdated;
+
+  /// No description provided for @sortSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save sort: {error}'**
+  String sortSaveFailed(Object error);
+
+  /// No description provided for @insightCardDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Insight card deleted'**
+  String get insightCardDeleted;
+
+  /// No description provided for @deleteFailedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String deleteFailedShort(Object error);
+
+  /// No description provided for @knowledgeInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge insight'**
+  String get knowledgeInsight;
+
+  /// No description provided for @completeSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete sort'**
+  String get completeSort;
+
+  /// No description provided for @noKnowledgeInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'No knowledge insight'**
+  String get noKnowledgeInsight;
+
+  /// No description provided for @insightProcessingBacklogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} background tasks are still processing.'**
+  String insightProcessingBacklogMessage(Object count);
+
+  /// No description provided for @insightUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This insight is still being generated or was updated. Refresh insights and try again later.'**
+  String get insightUnavailableMessage;
+
+  /// No description provided for @noScheduleAggregation.
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule aggregation'**
+  String get noScheduleAggregation;
+
+  /// No description provided for @scheduleAggregationEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Update to organize schedules and todos from real temporal cards.'**
+  String get scheduleAggregationEmptyHint;
+
+  /// No description provided for @scheduleAggregationLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load schedule data'**
+  String get scheduleAggregationLoadFailed;
+
+  /// No description provided for @scheduleAggregationRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to refresh schedule data'**
+  String get scheduleAggregationRefreshFailed;
+
+  /// No description provided for @scheduleTaskUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update task'**
+  String get scheduleTaskUpdateFailed;
+
+  /// No description provided for @scheduleFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get scheduleFeatured;
+
+  /// No description provided for @scheduleThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get scheduleThisWeek;
+
+  /// No description provided for @scheduleDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get scheduleDone;
+
+  /// No description provided for @scheduleTbd.
+  ///
+  /// In en, this message translates to:
+  /// **'TBD'**
+  String get scheduleTbd;
+
+  /// No description provided for @scheduleWeekOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get scheduleWeekOverview;
+
+  /// No description provided for @scheduleImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get scheduleImportant;
+
+  /// No description provided for @scheduleBriefingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule briefing'**
+  String get scheduleBriefingTitle;
+
+  /// No description provided for @scheduleBriefingOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get scheduleBriefingOpen;
+
+  /// No description provided for @scheduleBriefingNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule briefing yet'**
+  String get scheduleBriefingNoData;
+
+  /// No description provided for @scheduleBriefingUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time}'**
+  String scheduleBriefingUpdated(Object time);
+
+  /// No description provided for @scheduleBriefingDoneCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} done'**
+  String scheduleBriefingDoneCount(Object count);
+
+  /// No description provided for @updating.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating...'**
+  String get updating;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
+  /// No description provided for @appLockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock enabled'**
+  String get appLockOn;
+
+  /// No description provided for @appLockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock disabled'**
+  String get appLockOff;
+
+  /// No description provided for @enableAppLockFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable app lock first'**
+  String get enableAppLockFirst;
+
+  /// No description provided for @enterFourDigitPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 4-digit password'**
+  String get enterFourDigitPassword;
+
+  /// No description provided for @passwordSetAndLockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Password set and app lock enabled'**
+  String get passwordSetAndLockOn;
+
+  /// No description provided for @appLockSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock settings'**
+  String get appLockSettings;
+
+  /// No description provided for @enableAppLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable app lock'**
+  String get enableAppLock;
+
+  /// No description provided for @enableAppLockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password required when launching the app'**
+  String get enableAppLockSubtitle;
+
+  /// No description provided for @enableBiometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable biometrics'**
+  String get enableBiometrics;
+
+  /// No description provided for @biometricsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Face ID or Touch ID to unlock'**
+  String get biometricsSubtitle;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePassword;
+
+  /// No description provided for @setFourDigitPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set 4-digit password'**
+  String get setFourDigitPassword;
+
+  /// No description provided for @reenterPasswordToConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter password to confirm'**
+  String get reenterPasswordToConfirm;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match. Please try again.'**
+  String get passwordMismatch;
+
+  /// No description provided for @confirmDeleteCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete character \"{name}\"? This cannot be undone.'**
+  String confirmDeleteCharacter(Object name);
+
+  /// No description provided for @configureAiCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure AI character'**
+  String get configureAiCharacter;
+
+  /// No description provided for @addCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add character'**
+  String get addCharacter;
+
+  /// No description provided for @addCharacterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose AI characters to join your insight team. They will analyze your life data from different angles.'**
+  String get addCharacterSubtitle;
+
+  /// No description provided for @noCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'No characters'**
+  String get noCharacters;
+
+  /// No description provided for @loadCharacterFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load characters: {error}'**
+  String loadCharacterFailed(Object error);
+
+  /// No description provided for @noTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags'**
+  String get noTags;
+
+  /// No description provided for @createSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Created successfully'**
+  String get createSuccess;
+
+  /// No description provided for @updateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated successfully'**
+  String get updateSuccess;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String saveFailed(Object error);
+
+  /// No description provided for @newCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'New character'**
+  String get newCharacter;
+
+  /// No description provided for @editCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit character'**
+  String get editCharacter;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @goalsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Goals'**
+  String get goalsPageTitle;
+
+  /// No description provided for @goalsTabActive.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get goalsTabActive;
+
+  /// No description provided for @goalsTabCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get goalsTabCompleted;
+
+  /// No description provided for @goalFormPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Goal'**
+  String get goalFormPageTitle;
+
+  /// No description provided for @goalFormTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get goalFormTitleLabel;
+
+  /// No description provided for @goalFormTypeQuantitative.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurable'**
+  String get goalFormTypeQuantitative;
+
+  /// No description provided for @goalFormTypeBinary.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes/No'**
+  String get goalFormTypeBinary;
+
+  /// No description provided for @goalFormTargetValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get goalFormTargetValueLabel;
+
+  /// No description provided for @goalFormUnitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit (optional)'**
+  String get goalFormUnitLabel;
+
+  /// No description provided for @goalFormDeadlineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a deadline'**
+  String get goalFormDeadlineLabel;
+
+  /// No description provided for @goalFormNoDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'No deadline'**
+  String get goalFormNoDeadline;
+
+  /// No description provided for @goalFormTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get goalFormTitleRequired;
+
+  /// No description provided for @goalFormTargetValueRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid target value'**
+  String get goalFormTargetValueRequired;
+
+  /// No description provided for @goalMarkCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark complete'**
+  String get goalMarkCompleted;
+
+  /// No description provided for @goalReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get goalReopen;
+
+  /// No description provided for @goalDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Goal'**
+  String get goalDeleteConfirmTitle;
+
+  /// No description provided for @mediaStatusWant.
+  ///
+  /// In en, this message translates to:
+  /// **'Want to'**
+  String get mediaStatusWant;
+
+  /// No description provided for @mediaStatusDoing.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get mediaStatusDoing;
+
+  /// No description provided for @mediaStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get mediaStatusDone;
+
+  /// No description provided for @mediaCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a short review (optional)'**
+  String get mediaCommentHint;
+
+  /// No description provided for @mediaStatusUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'No status set'**
+  String get mediaStatusUnset;
+
+  /// No description provided for @mediaUnrated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not rated yet'**
+  String get mediaUnrated;
+
+  /// No description provided for @mediaLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Media Library'**
+  String get mediaLibraryTitle;
+
+  /// No description provided for @mediaLibraryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No media records yet'**
+  String get mediaLibraryEmpty;
+
+  /// No description provided for @mediaTypeBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get mediaTypeBook;
+
+  /// No description provided for @mediaTypeMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie'**
+  String get mediaTypeMovie;
+
+  /// No description provided for @mediaTypeTv.
+  ///
+  /// In en, this message translates to:
+  /// **'TV'**
+  String get mediaTypeTv;
+
+  /// No description provided for @mediaTypeMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get mediaTypeMusic;
+
+  /// No description provided for @mediaTypePodcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Podcast'**
+  String get mediaTypePodcast;
+
+  /// No description provided for @mediaTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get mediaTypeOther;
+
+  /// No description provided for @mediaLibraryAddEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry manually'**
+  String get mediaLibraryAddEntry;
+
+  /// No description provided for @mediaLibraryEntryTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get mediaLibraryEntryTitleLabel;
+
+  /// No description provided for @mediaLibraryEntryTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get mediaLibraryEntryTitleRequired;
+
+  /// No description provided for @mediaLibraryEntryRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating (1-10, optional)'**
+  String get mediaLibraryEntryRatingLabel;
+
+  /// No description provided for @taskListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To-dos'**
+  String get taskListTitle;
+
+  /// No description provided for @taskListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No to-dos yet'**
+  String get taskListEmpty;
+
+  /// No description provided for @taskListAddEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to-do manually'**
+  String get taskListAddEntry;
+
+  /// No description provided for @taskEntryTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get taskEntryTitleLabel;
+
+  /// No description provided for @taskEntryTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get taskEntryTitleRequired;
+
+  /// No description provided for @taskEntryDueDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get taskEntryDueDateLabel;
+
+  /// No description provided for @taskEntryPriorityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as important'**
+  String get taskEntryPriorityLabel;
+
+  /// No description provided for @characterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Character name'**
+  String get characterName;
+
+  /// No description provided for @characterNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give your character a name'**
+  String get characterNameHint;
+
+  /// No description provided for @pleaseEnterCharacterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter character name'**
+  String get pleaseEnterCharacterName;
+
+  /// No description provided for @tagsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get tagsLabel;
+
+  /// No description provided for @tagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. wisdom, recognition, macro\nSeparate multiple tags with commas'**
+  String get tagsHint;
+
+  /// No description provided for @characterPersonaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Character persona'**
+  String get characterPersonaLabel;
+
+  /// No description provided for @characterPersonaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Include persona, style guide, example dialogue, knowledge filters, etc.\nUse ## for section headers.'**
+  String get characterPersonaHint;
+
+  /// No description provided for @pleaseEnterCharacterPersona.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter character persona'**
+  String get pleaseEnterCharacterPersona;
+
+  /// No description provided for @permissionRequestError.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission request error: {error}'**
+  String permissionRequestError(Object error);
+
+  /// No description provided for @permissionRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission required'**
+  String get permissionRequiredTitle;
+
+  /// No description provided for @permissionPermanentlyDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have permanently denied this permission or the system requires it. Please enable it in system settings.'**
+  String get permissionPermanentlyDeniedMessage;
+
+  /// No description provided for @getting.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting...'**
+  String get getting;
+
+  /// No description provided for @unauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized'**
+  String get unauthorized;
+
+  /// No description provided for @authorizedGoToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized. Go to system settings to change.'**
+  String get authorizedGoToSettings;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @locationPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For recording places and location-related features'**
+  String get locationPermissionReason;
+
+  /// No description provided for @photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// No description provided for @photosPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For selecting photos, saving generated images, etc.'**
+  String get photosPermissionReason;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @cameraPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For taking photos and videos'**
+  String get cameraPermissionReason;
+
+  /// No description provided for @microphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get microphone;
+
+  /// No description provided for @microphonePermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For voice recognition, recording, etc.'**
+  String get microphonePermissionReason;
+
+  /// No description provided for @calendarPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For recording schedule and reading calendar events'**
+  String get calendarPermissionReason;
+
+  /// No description provided for @remindersPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For recording and reading your reminders'**
+  String get remindersPermissionReason;
+
+  /// No description provided for @fitnessAndMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness & motion'**
+  String get fitnessAndMotion;
+
+  /// No description provided for @fitnessPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For recording health and motion data'**
+  String get fitnessPermissionReason;
+
+  /// No description provided for @notification.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notification;
+
+  /// No description provided for @notificationPermissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'For sending schedule and important reminders'**
+  String get notificationPermissionReason;
+
+  /// No description provided for @memexAgentNotificationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Memex Agent running in the background'**
+  String get memexAgentNotificationPermissionTitle;
+
+  /// No description provided for @memexAgentNotificationPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex Agent runs locally on your device. Notifications let Memex show progress and keep processing after you leave the app or turn off the screen. If notifications are off, keep Memex open in the foreground until the task finishes.'**
+  String get memexAgentNotificationPermissionMessage;
+
+  /// No description provided for @loadDetailFailedRetryShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Load detail failed, please retry later.'**
+  String get loadDetailFailedRetryShort;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @estimatedCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated cost'**
+  String get estimatedCost;
+
+  /// No description provided for @byAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'By Agent'**
+  String get byAgent;
+
+  /// No description provided for @timeUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Time updated'**
+  String get timeUpdated;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed: {error}'**
+  String updateFailed(Object error);
+
+  /// No description provided for @locationUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Location updated'**
+  String get locationUpdated;
+
+  /// No description provided for @confirmDeleteCardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this card? This cannot be undone.'**
+  String get confirmDeleteCardMessage;
+
+  /// No description provided for @cardDetailNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Card detail not found'**
+  String get cardDetailNotFound;
+
+  /// No description provided for @saySomething.
+  ///
+  /// In en, this message translates to:
+  /// **'Say something...'**
+  String get saySomething;
+
+  /// No description provided for @relatedMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'Related memories'**
+  String get relatedMemories;
+
+  /// No description provided for @viewMore.
+  ///
+  /// In en, this message translates to:
+  /// **'View more'**
+  String get viewMore;
+
+  /// No description provided for @relatedRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Related records'**
+  String get relatedRecords;
+
+  /// No description provided for @reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get reply;
+
+  /// No description provided for @replySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply sent'**
+  String get replySent;
+
+  /// No description provided for @insightTemplateGalleryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Insight card templates'**
+  String get insightTemplateGalleryTitle;
+
+  /// No description provided for @timelineTemplateGalleryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline card templates'**
+  String get timelineTemplateGalleryTitle;
+
+  /// No description provided for @categoryTextual.
+  ///
+  /// In en, this message translates to:
+  /// **'Textual'**
+  String get categoryTextual;
+
+  /// No description provided for @timelineFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL'**
+  String get timelineFilterAll;
+
+  /// No description provided for @insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights'**
+  String get insights;
+
+  /// No description provided for @memoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory'**
+  String get memoryTitle;
+
+  /// No description provided for @longTermProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-term Profile'**
+  String get longTermProfile;
+
+  /// No description provided for @recentBuffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Buffer'**
+  String get recentBuffer;
+
+  /// No description provided for @errorLoadingMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading memory: {error}'**
+  String errorLoadingMemory(Object error);
+
+  /// No description provided for @memoryStatusUpdating.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing'**
+  String get memoryStatusUpdating;
+
+  /// No description provided for @memoryStatusPendingUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync pending'**
+  String get memoryStatusPendingUpdate;
+
+  /// No description provided for @memoryStatusUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get memoryStatusUpToDate;
+
+  /// No description provided for @memoryUpdateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Update memory'**
+  String get memoryUpdateAction;
+
+  /// No description provided for @memoryForceArchiveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive now'**
+  String get memoryForceArchiveAction;
+
+  /// No description provided for @memoryArchiveDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Buffer consolidated into long-term memory'**
+  String get memoryArchiveDone;
+
+  /// No description provided for @memoryArchiveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in the buffer to archive'**
+  String get memoryArchiveEmpty;
+
+  /// No description provided for @memoryArchiveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to archive: {error}'**
+  String memoryArchiveFailed(Object error);
+
+  /// No description provided for @agentConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Configuration'**
+  String get agentConfiguration;
+
+  /// No description provided for @resetToDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Defaults'**
+  String get resetToDefaults;
+
+  /// No description provided for @resetAllAgentConfigurationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Agent Configurations'**
+  String get resetAllAgentConfigurationsTitle;
+
+  /// No description provided for @resetAllAgentConfigurationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reset all agent configurations to their default values? This action cannot be undone.'**
+  String get resetAllAgentConfigurationsMessage;
+
+  /// No description provided for @resetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetButton;
+
+  /// No description provided for @loadDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load data: {error}'**
+  String loadDataFailed(Object error);
+
+  /// No description provided for @saveConfigFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save config: {error}'**
+  String saveConfigFailed(Object error);
+
+  /// No description provided for @selectLlmClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Select LLM Client:'**
+  String get selectLlmClient;
+
+  /// No description provided for @agentConfigurationsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent configurations reset'**
+  String get agentConfigurationsReset;
+
+  /// No description provided for @resetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to reset: {error}'**
+  String resetFailed(Object error);
+
+  /// No description provided for @modelConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Configuration'**
+  String get modelConfiguration;
+
+  /// No description provided for @resetAllConfigurationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Configurations'**
+  String get resetAllConfigurationsTitle;
+
+  /// No description provided for @resetAllModelConfigurationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reset all model configurations to their default values? This action cannot be undone.'**
+  String get resetAllModelConfigurationsMessage;
+
+  /// No description provided for @modelConfigurationsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Model configurations reset'**
+  String get modelConfigurationsReset;
+
+  /// No description provided for @cannotDeleteDefaultConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete default configuration'**
+  String get cannotDeleteDefaultConfiguration;
+
+  /// No description provided for @cannotDeleteConfigurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Delete Configuration'**
+  String get cannotDeleteConfigurationTitle;
+
+  /// No description provided for @configUsedByAgentsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This configuration is currently used by the following agents:\n\n{agentList}\n\nPlease reassign these agents before deleting.'**
+  String configUsedByAgentsMessage(Object agentList);
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @deleteConfigurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Configuration'**
+  String get deleteConfigurationTitle;
+
+  /// No description provided for @confirmDeleteConfigMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{key}\"?'**
+  String confirmDeleteConfigMessage(Object key);
+
+  /// No description provided for @defaultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultLabel;
+
+  /// No description provided for @setAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get setAsDefault;
+
+  /// No description provided for @invalidJsonInExtraField.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid JSON in Extra field'**
+  String get invalidJsonInExtraField;
+
+  /// No description provided for @keyAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Key already exists'**
+  String get keyAlreadyExists;
+
+  /// No description provided for @resetConfigurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Configuration'**
+  String get resetConfigurationTitle;
+
+  /// No description provided for @resetConfigurationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset this configuration to its initial default values? Current changes will be lost.'**
+  String get resetConfigurationMessage;
+
+  /// No description provided for @configurationResetPressSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration reset. Press Save to apply.'**
+  String get configurationResetPressSave;
+
+  /// No description provided for @addConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Configuration'**
+  String get addConfiguration;
+
+  /// No description provided for @editConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Configuration'**
+  String get editConfiguration;
+
+  /// No description provided for @duplicateConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Configuration'**
+  String get duplicateConfiguration;
+
+  /// No description provided for @duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicate;
+
+  /// No description provided for @keyIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Config ID'**
+  String get keyIdLabel;
+
+  /// No description provided for @keyIdHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Name this setup, such as deepseek or work-gpt.'**
+  String get keyIdHelper;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required;
+
+  /// No description provided for @clientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model provider'**
+  String get clientLabel;
+
+  /// No description provided for @providerGroupOpenAi.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI'**
+  String get providerGroupOpenAi;
+
+  /// No description provided for @providerGroupAnthropic.
+  ///
+  /// In en, this message translates to:
+  /// **'Anthropic'**
+  String get providerGroupAnthropic;
+
+  /// No description provided for @providerGroupGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google'**
+  String get providerGroupGoogle;
+
+  /// No description provided for @providerGroupOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get providerGroupOthers;
+
+  /// No description provided for @providerOpenAiApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get providerOpenAiApiKey;
+
+  /// No description provided for @providerOpenAiResponses.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key (Responses)'**
+  String get providerOpenAiResponses;
+
+  /// No description provided for @providerChatGptOauth.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT Pro/Plus'**
+  String get providerChatGptOauth;
+
+  /// No description provided for @providerClaudeApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get providerClaudeApiKey;
+
+  /// No description provided for @providerBedrockSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedrock Secret'**
+  String get providerBedrockSecret;
+
+  /// No description provided for @providerGemini.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini'**
+  String get providerGemini;
+
+  /// No description provided for @providerGeminiOauth.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini (Google OAuth)'**
+  String get providerGeminiOauth;
+
+  /// No description provided for @providerKimi.
+  ///
+  /// In en, this message translates to:
+  /// **'Kimi (Moonshot)'**
+  String get providerKimi;
+
+  /// No description provided for @providerQwen.
+  ///
+  /// In en, this message translates to:
+  /// **'Aliyun'**
+  String get providerQwen;
+
+  /// No description provided for @providerSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Volcengine'**
+  String get providerSeed;
+
+  /// No description provided for @providerZhipu.
+  ///
+  /// In en, this message translates to:
+  /// **'Zhipu GLM'**
+  String get providerZhipu;
+
+  /// No description provided for @providerDeepSeek.
+  ///
+  /// In en, this message translates to:
+  /// **'DeepSeek'**
+  String get providerDeepSeek;
+
+  /// No description provided for @providerMinimax.
+  ///
+  /// In en, this message translates to:
+  /// **'MiniMax'**
+  String get providerMinimax;
+
+  /// No description provided for @providerOpenRouter.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenRouter'**
+  String get providerOpenRouter;
+
+  /// No description provided for @providerOllama.
+  ///
+  /// In en, this message translates to:
+  /// **'Ollama (Local)'**
+  String get providerOllama;
+
+  /// No description provided for @providerMimo.
+  ///
+  /// In en, this message translates to:
+  /// **'Xiaomi MIMO'**
+  String get providerMimo;
+
+  /// No description provided for @providerMemex.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex proxy service'**
+  String get providerMemex;
+
+  /// No description provided for @memexSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get memexSignIn;
+
+  /// No description provided for @memexCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get memexCreateAccount;
+
+  /// No description provided for @memexUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get memexUsername;
+
+  /// No description provided for @memexPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get memexPassword;
+
+  /// No description provided for @memexCreateAccountLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get memexCreateAccountLink;
+
+  /// No description provided for @memexSignInLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in instead'**
+  String get memexSignInLink;
+
+  /// No description provided for @memexTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up to start using Memex AI'**
+  String get memexTopUp;
+
+  /// No description provided for @memexTopUpSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up successful!'**
+  String get memexTopUpSuccess;
+
+  /// No description provided for @memexFillAllFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all fields'**
+  String get memexFillAllFields;
+
+  /// No description provided for @memexUsernameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Username must be at least 6 characters'**
+  String get memexUsernameTooShort;
+
+  /// No description provided for @memexAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed'**
+  String get memexAuthFailed;
+
+  /// No description provided for @memexPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create payment'**
+  String get memexPaymentFailed;
+
+  /// No description provided for @memexLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get memexLogout;
+
+  /// No description provided for @memexTopUpButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up'**
+  String get memexTopUpButton;
+
+  /// No description provided for @memexTopUpChooseAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an amount'**
+  String get memexTopUpChooseAmount;
+
+  /// No description provided for @memexTopUpEstimatedRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'About {range} records'**
+  String memexTopUpEstimatedRecords(Object range);
+
+  /// No description provided for @memexTopUpPlanStarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter'**
+  String get memexTopUpPlanStarter;
+
+  /// No description provided for @memexTopUpPlanEveryday.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday'**
+  String get memexTopUpPlanEveryday;
+
+  /// No description provided for @memexTopUpPlanHighVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'High volume'**
+  String get memexTopUpPlanHighVolume;
+
+  /// No description provided for @memexTopUpPlanCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom credits'**
+  String get memexTopUpPlanCustom;
+
+  /// No description provided for @memexTopUpPlanStarterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Good for trying Memex AI'**
+  String get memexTopUpPlanStarterSubtitle;
+
+  /// No description provided for @memexTopUpPlanEverydaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Good for regular organizing'**
+  String get memexTopUpPlanEverydaySubtitle;
+
+  /// No description provided for @memexTopUpPlanHighVolumeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Good for larger batches'**
+  String get memexTopUpPlanHighVolumeSubtitle;
+
+  /// No description provided for @memexTopUpPlanCustomSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter USD 1-10,000'**
+  String get memexTopUpPlanCustomSubtitle;
+
+  /// No description provided for @memexTopUpCustomEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate is based on the amount entered'**
+  String get memexTopUpCustomEstimate;
+
+  /// No description provided for @memexCustomAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Amount'**
+  String get memexCustomAmount;
+
+  /// No description provided for @memexViewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage History'**
+  String get memexViewHistory;
+
+  /// No description provided for @memexBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance: {amount}'**
+  String memexBalanceLabel(Object amount);
+
+  /// No description provided for @memexConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get memexConfirmPassword;
+
+  /// No description provided for @memexPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get memexPasswordMismatch;
+
+  /// No description provided for @memexPayAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up {amount}'**
+  String memexPayAmount(Object amount);
+
+  /// No description provided for @modelIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get modelIdLabel;
+
+  /// No description provided for @modelIdHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. gemini-3.1-pro-preview, gpt-4o'**
+  String get modelIdHelper;
+
+  /// No description provided for @fetchingModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching models...'**
+  String get fetchingModels;
+
+  /// No description provided for @fetchModelsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch Models'**
+  String get fetchModelsButton;
+
+  /// No description provided for @enterApiKeyFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter API Key first to fetch models'**
+  String get enterApiKeyFirst;
+
+  /// No description provided for @apiKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get apiKeyLabel;
+
+  /// No description provided for @baseUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'API endpoint'**
+  String get baseUrlLabel;
+
+  /// No description provided for @advancedSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Settings'**
+  String get advancedSettings;
+
+  /// No description provided for @testConnectionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Successful'**
+  String get testConnectionSuccess;
+
+  /// No description provided for @testConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Failed'**
+  String get testConnectionFailed;
+
+  /// No description provided for @testTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get testTypeText;
+
+  /// No description provided for @testTypeVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision'**
+  String get testTypeVision;
+
+  /// No description provided for @testButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get testButton;
+
+  /// No description provided for @testing.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing...'**
+  String get testing;
+
+  /// No description provided for @proxyUrlOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy URL (Optional)'**
+  String get proxyUrlOptional;
+
+  /// No description provided for @proxyUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. http://127.0.0.1:7890'**
+  String get proxyUrlHelper;
+
+  /// No description provided for @temperatureLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get temperatureLabel;
+
+  /// No description provided for @topPLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Top P'**
+  String get topPLabel;
+
+  /// No description provided for @maxTokensLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Tokens'**
+  String get maxTokensLabel;
+
+  /// No description provided for @extraParamsJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Params (JSON)'**
+  String get extraParamsJson;
+
+  /// No description provided for @invalidJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid JSON'**
+  String get invalidJson;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete Setup'**
+  String get warning;
+
+  /// No description provided for @invalidConfigurationWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration is not complete yet (e.g., API Key or Model ID is missing). You can still save and configure it later. Continue?'**
+  String get invalidConfigurationWarning;
+
+  /// No description provided for @invalidModelConfigDetailed.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Agent \"{agentId}\" needs a valid model configuration (key: \"{configKey}\") to operate. Please check the model settings.'**
+  String invalidModelConfigDetailed(Object agentId, Object configKey);
+
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this page?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'If you made any changes, please save them before leaving.'**
+  String get discardChangesMessage;
+
+  /// No description provided for @discardButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardButton;
+
+  /// No description provided for @chooseLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Language'**
+  String get chooseLanguage;
+
+  /// No description provided for @chooseAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Avatar'**
+  String get chooseAvatar;
+
+  /// No description provided for @configureNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Now'**
+  String get configureNow;
+
+  /// No description provided for @modelNotConfiguredBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'AI model not configured yet. Set it up to unlock all features.'**
+  String get modelNotConfiguredBanner;
+
+  /// No description provided for @modelNotConfiguredSubmitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please configure an AI model before publishing'**
+  String get modelNotConfiguredSubmitHint;
+
+  /// No description provided for @processingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get processingStatus;
+
+  /// No description provided for @failedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get failedStatus;
+
+  /// No description provided for @failureReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Failure Reason'**
+  String get failureReason;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error occurred'**
+  String get unknownError;
+
+  /// No description provided for @enableFitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Fitness'**
+  String get enableFitness;
+
+  /// No description provided for @fitnessBannerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow fitness access to track your health and activity data.'**
+  String get fitnessBannerMessage;
+
+  /// No description provided for @fitnessDismissTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Fitness Access?'**
+  String get fitnessDismissTitle;
+
+  /// No description provided for @fitnessDismissMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Without fitness permission, the app won\'t be able to automatically collect your health data for insights and auto-recording.'**
+  String get fitnessDismissMessage;
+
+  /// No description provided for @skipAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Anyway'**
+  String get skipAnyway;
+
+  /// No description provided for @proModelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This model requires a ChatGPT Pro/Plus subscription.'**
+  String get proModelHint;
+
+  /// No description provided for @searchKnowledgeBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Search knowledge base...'**
+  String get searchKnowledgeBase;
+
+  /// No description provided for @searchKnowledgeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter keyword to search file names or content'**
+  String get searchKnowledgeHint;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for \"{query}\"'**
+  String noSearchResults(Object query);
+
+  /// No description provided for @onlyMarkdownPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Only Markdown preview supported'**
+  String get onlyMarkdownPreview;
+
+  /// No description provided for @backupAndRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & Restore'**
+  String get backupAndRestore;
+
+  /// No description provided for @createBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Backup'**
+  String get createBackup;
+
+  /// No description provided for @restoreBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Backup'**
+  String get restoreBackup;
+
+  /// No description provided for @backupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack all your data (cards, knowledge base, insights, settings) into a .memex file. Save it to iCloud Drive, Google Drive, or any location via the share sheet.'**
+  String get backupDescription;
+
+  /// No description provided for @restoreDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a .memex backup file to restore all data. This will overwrite current data.'**
+  String get restoreDescription;
+
+  /// No description provided for @selectBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Backup File'**
+  String get selectBackupFile;
+
+  /// No description provided for @estimatedSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated size'**
+  String get estimatedSize;
+
+  /// No description provided for @backupComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup created'**
+  String get backupComplete;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed: {error}'**
+  String backupFailed(Object error);
+
+  /// No description provided for @confirmRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Restore'**
+  String get confirmRestore;
+
+  /// No description provided for @confirmRestoreMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring will overwrite all current data including cards, knowledge base, insights, and settings. This cannot be undone. Continue?'**
+  String get confirmRestoreMessage;
+
+  /// No description provided for @restoreComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore complete'**
+  String get restoreComplete;
+
+  /// No description provided for @restoreRestartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Data has been restored. Please restart the app for all changes to take effect.'**
+  String get restoreRestartHint;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String restoreFailed(Object error);
+
+  /// No description provided for @invalidBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid backup file. Please select a .memex file.'**
+  String get invalidBackupFile;
+
+  /// No description provided for @automaticBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Backup'**
+  String get automaticBackup;
+
+  /// No description provided for @autoBackupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, Memex creates at most one local snapshot per day after startup or when returning to the foreground.'**
+  String get autoBackupDescription;
+
+  /// No description provided for @backupSensitiveSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups include settings and model provider keys. Keep backup files somewhere you trust.'**
+  String get backupSensitiveSettingsHint;
+
+  /// No description provided for @backupLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get backupLocation;
+
+  /// No description provided for @backupLocationDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Location details'**
+  String get backupLocationDetails;
+
+  /// No description provided for @backupLocationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in app'**
+  String get backupLocationSummary;
+
+  /// No description provided for @backupLocationFullPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Full path'**
+  String get backupLocationFullPath;
+
+  /// No description provided for @backupLocationUri.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder access URI'**
+  String get backupLocationUri;
+
+  /// No description provided for @copyBackupLocationPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy path'**
+  String get copyBackupLocationPath;
+
+  /// No description provided for @backupLocationCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup location copied'**
+  String get backupLocationCopied;
+
+  /// No description provided for @androidBackupLocationSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected folder: {folderName}'**
+  String androidBackupLocationSelected(Object folderName);
+
+  /// No description provided for @iosICloudBackupLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'iCloud Drive > Memex > Backups'**
+  String get iosICloudBackupLocation;
+
+  /// No description provided for @iosAppDocumentsBackupLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Files > On My iPhone > Memex > Backups'**
+  String get iosAppDocumentsBackupLocation;
+
+  /// No description provided for @autoBackupStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get autoBackupStatus;
+
+  /// No description provided for @noAutoBackupYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No automatic backup yet'**
+  String get noAutoBackupYet;
+
+  /// No description provided for @lastBackupAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {time}'**
+  String lastBackupAt(Object time);
+
+  /// No description provided for @autoBackupRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Retention'**
+  String get autoBackupRetention;
+
+  /// No description provided for @autoBackupRetentionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String autoBackupRetentionDays(Object days);
+
+  /// No description provided for @autoBackupRetentionForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep forever'**
+  String get autoBackupRetentionForever;
+
+  /// No description provided for @autoBackupMaxSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage cap'**
+  String get autoBackupMaxSize;
+
+  /// No description provided for @autoBackupRetentionLimitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic cleanup keeps automatic snapshots under {size}. Safety snapshots and manual exports are kept separately.'**
+  String autoBackupRetentionLimitHint(Object size);
+
+  /// No description provided for @createSnapshotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get createSnapshotNow;
+
+  /// No description provided for @backupLocationMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Change location'**
+  String get backupLocationMenu;
+
+  /// No description provided for @defaultBackupLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Default backup folder'**
+  String get defaultBackupLocation;
+
+  /// No description provided for @defaultBackupLocationAndroidDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Memex\'s app-specific external files folder. No storage permission needed.'**
+  String get defaultBackupLocationAndroidDesc;
+
+  /// No description provided for @chooseBackupLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose backup folder'**
+  String get chooseBackupLocation;
+
+  /// No description provided for @chooseBackupLocationAndroidDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a folder with Android\'s system picker and grant Memex persistent access.'**
+  String get chooseBackupLocationAndroidDesc;
+
+  /// No description provided for @storedBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored Backups'**
+  String get storedBackups;
+
+  /// No description provided for @noStoredBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups will appear here after the first snapshot.'**
+  String get noStoredBackups;
+
+  /// No description provided for @backupTypeAutoSnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic snapshot'**
+  String get backupTypeAutoSnapshot;
+
+  /// No description provided for @backupTypeSafetySnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety snapshot'**
+  String get backupTypeSafetySnapshot;
+
+  /// No description provided for @backupTypeManualBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual backup'**
+  String get backupTypeManualBackup;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @restoreThisBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup'**
+  String get restoreThisBackup;
+
+  /// No description provided for @deleteThisBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this backup'**
+  String get deleteThisBackup;
+
+  /// No description provided for @confirmDeleteBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete backup?'**
+  String get confirmDeleteBackup;
+
+  /// No description provided for @confirmDeleteBackupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {fileName}? This removes the stored backup file and cannot be undone.'**
+  String confirmDeleteBackupMessage(Object fileName);
+
+  /// No description provided for @backupDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup deleted: {fileName}'**
+  String backupDeleted(Object fileName);
+
+  /// No description provided for @backupDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete backup: {error}'**
+  String backupDeleteFailed(Object error);
+
+  /// No description provided for @creatingSafetySnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating safety snapshot...'**
+  String get creatingSafetySnapshot;
+
+  /// No description provided for @autoBackupCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot created: {fileName}'**
+  String autoBackupCreated(Object fileName);
+
+  /// No description provided for @backupLocationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update backup location: {error}'**
+  String backupLocationFailed(Object error);
+
+  /// No description provided for @backupImportCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get backupImportCreatedAt;
+
+  /// No description provided for @backupImportSourceVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Source version'**
+  String get backupImportSourceVersion;
+
+  /// No description provided for @backupImportFlavor.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get backupImportFlavor;
+
+  /// No description provided for @backupLegacyFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy backup (no manifest)'**
+  String get backupLegacyFormat;
+
+  /// No description provided for @restoreInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring backup...'**
+  String get restoreInProgress;
+
+  /// No description provided for @dataStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Storage'**
+  String get dataStorage;
+
+  /// No description provided for @dataStorageDescriptionAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a custom folder to store your workspace. Data is kept when you reinstall the app.'**
+  String get dataStorageDescriptionAndroid;
+
+  /// No description provided for @dataStorageDescriptionIOS.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on iCloud to sync your workspace across devices and keep data when you reinstall the app.'**
+  String get dataStorageDescriptionIOS;
+
+  /// No description provided for @storageLocationApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App storage'**
+  String get storageLocationApp;
+
+  /// No description provided for @storageLocationAppDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Data is stored inside the app and will be removed when you uninstall.'**
+  String get storageLocationAppDesc;
+
+  /// No description provided for @storageLocationCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Device storage (custom folder)'**
+  String get storageLocationCustom;
+
+  /// No description provided for @storageLocationCustomDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Store data in a folder you choose. Data persists across reinstall if the folder remains.'**
+  String get storageLocationCustomDesc;
+
+  /// No description provided for @storageLocationICloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Store in iCloud'**
+  String get storageLocationICloud;
+
+  /// No description provided for @storageLocationICloudDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync your workspace across Apple devices. Data stays after reinstall.'**
+  String get storageLocationICloudDesc;
+
+  /// No description provided for @storageLocationCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {location}'**
+  String storageLocationCurrent(Object location);
+
+  /// No description provided for @icloudRequiresCapability.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to iCloud and turn on iCloud Drive to use iCloud storage.'**
+  String get icloudRequiresCapability;
+
+  /// No description provided for @loadingFromICloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring data from iCloud…'**
+  String get loadingFromICloud;
+
+  /// No description provided for @switchingToICloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching to iCloud storage…'**
+  String get switchingToICloud;
+
+  /// No description provided for @switchingStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching storage…'**
+  String get switchingStorage;
+
+  /// No description provided for @customFolderAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read or write this folder. Please grant storage permission or choose another location.'**
+  String get customFolderAccessDenied;
+
+  /// No description provided for @configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured'**
+  String get configured;
+
+  /// No description provided for @apiKeyNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key not set — tap to configure'**
+  String get apiKeyNotSet;
+
+  /// No description provided for @bottomNavTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get bottomNavTimeline;
+
+  /// No description provided for @bottomNavLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get bottomNavLibrary;
+
+  /// No description provided for @aiGeneratedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Generated'**
+  String get aiGeneratedLabel;
+
+  /// No description provided for @sourceTraceWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCE TRACE ({count})'**
+  String sourceTraceWithCount(Object count);
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete all local data and reset the app.'**
+  String get deleteAccountDesc;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all your data including timeline cards, knowledge base, recordings, and settings. This action cannot be undone.'**
+  String get deleteAccountConfirmMessage;
+
+  /// No description provided for @deleteAccountSafetySnapshotNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A safety snapshot will be created before deletion — you can restore it from Backup & Restore.'**
+  String get deleteAccountSafetySnapshotNote;
+
+  /// No description provided for @deleteAccountTypeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Type \"{name}\" to confirm'**
+  String deleteAccountTypeName(Object name);
+
+  /// No description provided for @deleteAccountTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your username to confirm'**
+  String get deleteAccountTypeHint;
+
+  /// No description provided for @llmConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Sharing Consent'**
+  String get llmConsentTitle;
+
+  /// No description provided for @llmConsentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To enable AI features, Memex needs to send your data to {provider} for processing. This includes:\n\n• Text you enter (notes, voice transcriptions)\n• Photo metadata and extracted text (OCR)\n• Health and fitness summaries\n• Timeline card content\n\nYour data is sent directly from your device to {provider}. Memex does not store or relay your data through any other server.\n\nPlease review {provider}\'s privacy policy for how they handle your data.\n\nDo you agree to send your data to {provider} for AI processing?'**
+  String llmConsentMessage(Object provider);
+
+  /// No description provided for @llmConsentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I Agree'**
+  String get llmConsentAgree;
+
+  /// No description provided for @llmConsentDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get llmConsentDecline;
+
+  /// No description provided for @customAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Agents'**
+  String get customAgents;
+
+  /// No description provided for @noCustomAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom agents configured.'**
+  String get noCustomAgents;
+
+  /// No description provided for @deleteAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Agent'**
+  String get deleteAgent;
+
+  /// No description provided for @deleteAgentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete custom agent \"{name}\"?'**
+  String deleteAgentConfirm(Object name);
+
+  /// No description provided for @deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get deleted;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @newAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'New Agent'**
+  String get newAgent;
+
+  /// No description provided for @editAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Agent'**
+  String get editAgent;
+
+  /// No description provided for @agentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Name'**
+  String get agentName;
+
+  /// No description provided for @agentNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'my-custom-agent'**
+  String get agentNameHint;
+
+  /// No description provided for @agentNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get agentNameRequired;
+
+  /// No description provided for @agentNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Only letters, digits, and hyphens'**
+  String get agentNameInvalid;
+
+  /// No description provided for @agentNameExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Name already exists'**
+  String get agentNameExists;
+
+  /// No description provided for @hostAgentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Host Agent Type'**
+  String get hostAgentType;
+
+  /// No description provided for @skillDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill Directory'**
+  String get skillDirectory;
+
+  /// No description provided for @skillDirInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be a relative path (no leading / or ..)'**
+  String get skillDirInvalid;
+
+  /// No description provided for @workingDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Directory (optional)'**
+  String get workingDirectory;
+
+  /// No description provided for @workingDirectoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for workspace default'**
+  String get workingDirectoryHint;
+
+  /// No description provided for @llmConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM Config'**
+  String get llmConfig;
+
+  /// No description provided for @eventType.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Type'**
+  String get eventType;
+
+  /// No description provided for @executionMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution Mode'**
+  String get executionMode;
+
+  /// No description provided for @executionModeAsync.
+  ///
+  /// In en, this message translates to:
+  /// **'Async'**
+  String get executionModeAsync;
+
+  /// No description provided for @executionModeSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get executionModeSync;
+
+  /// No description provided for @dependsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Depends On'**
+  String get dependsOn;
+
+  /// No description provided for @dependsOnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select dependencies'**
+  String get dependsOnHint;
+
+  /// No description provided for @priority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get priority;
+
+  /// No description provided for @maxRetries.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Retries'**
+  String get maxRetries;
+
+  /// No description provided for @systemPromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'System Prompt (optional)'**
+  String get systemPromptLabel;
+
+  /// No description provided for @systemPromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional instructions appended to host agent prompt'**
+  String get systemPromptHint;
+
+  /// No description provided for @eventSerializer.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Serializer'**
+  String get eventSerializer;
+
+  /// No description provided for @eventSerializerDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default (XML)'**
+  String get eventSerializerDefault;
+
+  /// No description provided for @enabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabledLabel;
+
+  /// No description provided for @skillsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills Management'**
+  String get skillsManagement;
+
+  /// No description provided for @skillsManagementEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No skills yet'**
+  String get skillsManagementEmpty;
+
+  /// No description provided for @downloadSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Skill'**
+  String get downloadSkill;
+
+  /// No description provided for @downloadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Download file'**
+  String get downloadFile;
+
+  /// No description provided for @downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading...'**
+  String get downloading;
+
+  /// No description provided for @downloadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill downloaded successfully'**
+  String get downloadSuccess;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String downloadFailed(Object error);
+
+  /// No description provided for @deleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get deleteConfirm;
+
+  /// No description provided for @deleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String deleteConfirmMessage(String name);
+
+  /// No description provided for @invalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid URL'**
+  String get invalidUrl;
+
+  /// No description provided for @urlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com/skill.zip'**
+  String get urlHint;
+
+  /// No description provided for @newFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'New Folder'**
+  String get newFolder;
+
+  /// No description provided for @newFile.
+  ///
+  /// In en, this message translates to:
+  /// **'New File'**
+  String get newFile;
+
+  /// No description provided for @folderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder Name'**
+  String get folderName;
+
+  /// No description provided for @fileName.
+  ///
+  /// In en, this message translates to:
+  /// **'File Name'**
+  String get fileName;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get nameRequired;
+
+  /// No description provided for @nameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Name cannot contain / or ..'**
+  String get nameInvalid;
+
+  /// No description provided for @createFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create failed: {error}'**
+  String createFailed(Object error);
+
+  /// No description provided for @fileContent.
+  ///
+  /// In en, this message translates to:
+  /// **'File Content'**
+  String get fileContent;
+
+  /// No description provided for @saveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved successfully'**
+  String get saveSuccess;
+
+  /// No description provided for @downloadToCurrentDir.
+  ///
+  /// In en, this message translates to:
+  /// **'The zip will be extracted to current directory: {dir}'**
+  String downloadToCurrentDir(String dir);
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyPolicyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'How Memex handles your data'**
+  String get privacyPolicyDesc;
+
+  /// No description provided for @llmAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'API authentication failed. Please check your LLM configuration in Settings.'**
+  String get llmAuthError;
+
+  /// No description provided for @llmBadRequestError.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was rejected by the LLM provider. The input format may not be supported by the current model.'**
+  String get llmBadRequestError;
+
+  /// No description provided for @llmRateLimitError.
+  ///
+  /// In en, this message translates to:
+  /// **'API rate limit exceeded. Please try again later.'**
+  String get llmRateLimitError;
+
+  /// No description provided for @llmServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM service is temporarily unavailable. Please try again later.'**
+  String get llmServerError;
+
+  /// No description provided for @llmNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network connection failed. Please check your internet connection.'**
+  String get llmNetworkError;
+
+  /// No description provided for @llmUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while processing your content.'**
+  String get llmUnknownError;
+
+  /// No description provided for @llmErrorDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Failed'**
+  String get llmErrorDialogTitle;
+
+  /// No description provided for @goToModelConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings'**
+  String get goToModelConfig;
+
+  /// No description provided for @speechModelDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Speech Model'**
+  String get speechModelDownloadTitle;
+
+  /// No description provided for @speechModelDownloadDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A one-time model download (~{sizeMB}MB) is required.\n\nOnce downloaded, transcription runs entirely on-device.'**
+  String speechModelDownloadDesc(Object sizeMB);
+
+  /// No description provided for @speechModelStartDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Download'**
+  String get speechModelStartDownload;
+
+  /// No description provided for @speechModelChooseSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose download source:'**
+  String get speechModelChooseSource;
+
+  /// No description provided for @speechModelChinaMirror.
+  ///
+  /// In en, this message translates to:
+  /// **'🇨🇳 China Mirror (Faster in CN)'**
+  String get speechModelChinaMirror;
+
+  /// No description provided for @speechModelGithub.
+  ///
+  /// In en, this message translates to:
+  /// **'🌐 GitHub (Global)'**
+  String get speechModelGithub;
+
+  /// No description provided for @speechModelDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading model...'**
+  String get speechModelDownloading;
+
+  /// No description provided for @speechModelConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get speechModelConnecting;
+
+  /// No description provided for @deleteSpeechModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete speech model'**
+  String get deleteSpeechModel;
+
+  /// No description provided for @confirmDeleteSpeechModelMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the downloaded local speech recognition model files? They will be downloaded again the next time local speech-to-text is used.'**
+  String get confirmDeleteSpeechModelMessage;
+
+  /// No description provided for @speechModelDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech model files deleted'**
+  String get speechModelDeletedSuccess;
+
+  /// No description provided for @speechModelNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'No downloaded speech model files found'**
+  String get speechModelNotDownloaded;
+
+  /// No description provided for @speechModelDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete speech model files: {error}'**
+  String speechModelDeleteFailed(Object error);
+
+  /// No description provided for @speechTranscribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognizing...'**
+  String get speechTranscribing;
+
+  /// No description provided for @speechNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No speech detected'**
+  String get speechNoResult;
+
+  /// No description provided for @useLocalSpeechToTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use local speech to text'**
+  String get useLocalSpeechToTextTitle;
+
+  /// No description provided for @useLocalSpeechToTextDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, audio is transcribed on-device before sending — useful for models that do not support audio input. When disabled, the original audio is sent directly to the model.'**
+  String get useLocalSpeechToTextDesc;
+
+  /// No description provided for @summaryRemindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary reminders'**
+  String get summaryRemindersTitle;
+
+  /// No description provided for @summaryRemindersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me at 9:00 PM to write or view a summary'**
+  String get summaryRemindersSubtitle;
+
+  /// No description provided for @pendingAiProcessingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up AI model to process'**
+  String get pendingAiProcessingHint;
+
+  /// No description provided for @demoWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Memex!\nLet\'s take a quick tour of what AI can do for your records.'**
+  String get demoWelcome;
+
+  /// No description provided for @demoTapAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap here to create your first record'**
+  String get demoTapAdd;
+
+  /// No description provided for @demoTapSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to send your first record'**
+  String get demoTapSend;
+
+  /// No description provided for @demoTapCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see how AI organized your record'**
+  String get demoTapCard;
+
+  /// No description provided for @demoDetailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your AI-organized record detail. Scroll around, then go back to continue the tour.'**
+  String get demoDetailHint;
+
+  /// No description provided for @demoTapInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see AI-generated insights'**
+  String get demoTapInsight;
+
+  /// No description provided for @demoTapInsightUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to generate insights from your records'**
+  String get demoTapInsightUpdate;
+
+  /// No description provided for @demoTapKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your auto-organized knowledge files'**
+  String get demoTapKnowledge;
+
+  /// No description provided for @demoDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Start recording your life.'**
+  String get demoDone;
+
+  /// No description provided for @demoStartTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Tour'**
+  String get demoStartTour;
+
+  /// No description provided for @demoGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get demoGetStarted;
+
+  /// No description provided for @demoSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get demoSkip;
+
+  /// No description provided for @demoPrefillText.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello Memex! This is my first record 🎉'**
+  String get demoPrefillText;
+
+  /// No description provided for @visionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision'**
+  String get visionBadge;
+
+  /// No description provided for @notMultimodalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex relies on multimodal model capabilities for media analysis. If your records contain images, please make sure the model you configured supports image input.'**
+  String get notMultimodalHint;
+
+  /// No description provided for @defaultModelPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultModelPrefix;
+
+  /// No description provided for @recommendedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommendedBadge;
+
+  /// No description provided for @readOnlyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'CHAT'**
+  String get readOnlyBadge;
+
+  /// No description provided for @switchCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch companion'**
+  String get switchCompanion;
+
+  /// No description provided for @personaChatInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get personaChatInputHint;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @showInsightTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Memex insight comment'**
+  String get showInsightTextTitle;
+
+  /// No description provided for @showInsightTextDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether to show the Memex insight as a pinned comment in the card detail comment section.'**
+  String get showInsightTextDesc;
+
+  /// No description provided for @enableCharacterCommentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Character auto-comment'**
+  String get enableCharacterCommentTitle;
+
+  /// No description provided for @enableCharacterCommentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters automatically comment on new records.'**
+  String get enableCharacterCommentDesc;
+
+  /// No description provided for @maxCommentCharactersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Max commenting characters'**
+  String get maxCommentCharactersTitle;
+
+  /// No description provided for @maxCommentCharactersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'How many characters can comment on each record.'**
+  String get maxCommentCharactersDesc;
+
+  /// No description provided for @replyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply to {name}'**
+  String replyTo(String name);
+
+  /// No description provided for @cdnSignalsComments.
+  ///
+  /// In en, this message translates to:
+  /// **'New reply received'**
+  String get cdnSignalsComments;
+
+  /// No description provided for @cdnSignalsInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'New insight generated'**
+  String get cdnSignalsInsight;
+
+  /// No description provided for @cdnSignalsBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'New reply and insight'**
+  String get cdnSignalsBoth;
+
+  /// No description provided for @untitledCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled card'**
+  String get untitledCard;
+
+  /// No description provided for @locationContextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Context'**
+  String get locationContextTitle;
+
+  /// No description provided for @locationContextDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Current city and neighborhood context for agent chat'**
+  String get locationContextDescription;
+
+  /// No description provided for @locationContextAttachTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach current location to chat'**
+  String get locationContextAttachTitle;
+
+  /// No description provided for @locationContextAttachDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses device GPS and reverse geocoding to provide city, district, and neighborhood context to the agent.'**
+  String get locationContextAttachDesc;
+
+  /// No description provided for @reverseGeocodingProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse geocoding provider'**
+  String get reverseGeocodingProvider;
+
+  /// No description provided for @amapProviderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Amap'**
+  String get amapProviderName;
+
+  /// No description provided for @amapApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Amap API Key'**
+  String get amapApiKey;
+
+  /// No description provided for @amapGcj02Note.
+  ///
+  /// In en, this message translates to:
+  /// **'Amap uses GCJ-02 coordinates. Device GPS is converted before reverse geocoding.'**
+  String get amapGcj02Note;
+
+  /// No description provided for @contextGranularity.
+  ///
+  /// In en, this message translates to:
+  /// **'Context granularity'**
+  String get contextGranularity;
+
+  /// No description provided for @granularityCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get granularityCity;
+
+  /// No description provided for @granularityDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get granularityDistrict;
+
+  /// No description provided for @granularityNeighborhood.
+  ///
+  /// In en, this message translates to:
+  /// **'Neighborhood'**
+  String get granularityNeighborhood;
+
+  /// No description provided for @granularityStreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get granularityStreet;
+
+  /// No description provided for @granularityFullAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Full address candidate'**
+  String get granularityFullAddress;
+
+  /// No description provided for @locationFreshness.
+  ///
+  /// In en, this message translates to:
+  /// **'Location freshness'**
+  String get locationFreshness;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes'**
+  String minutesShort(int minutes);
+
+  /// No description provided for @oneHour.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour'**
+  String get oneHour;
+
+  /// No description provided for @testCurrentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Test current location'**
+  String get testCurrentLocation;
+
+  /// No description provided for @locationTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {error}'**
+  String locationTestFailed(String error);
+
+  /// No description provided for @locationDebugGps.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS'**
+  String get locationDebugGps;
+
+  /// No description provided for @locationDebugReverseGeocode.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse geocode'**
+  String get locationDebugReverseGeocode;
+
+  /// No description provided for @locationDebugProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get locationDebugProvider;
+
+  /// No description provided for @locationDebugAgentContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent context'**
+  String get locationDebugAgentContext;
+
+  /// No description provided for @locationDebugSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get locationDebugSource;
+
+  /// No description provided for @locationDebugAddressSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Address summary'**
+  String get locationDebugAddressSummary;
+
+  /// No description provided for @locationDebugFullAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Full address'**
+  String get locationDebugFullAddress;
+
+  /// No description provided for @locationDebugCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates'**
+  String get locationDebugCoordinates;
+
+  /// No description provided for @locationDebugAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get locationDebugAccuracy;
+
+  /// No description provided for @locationDebugReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get locationDebugReason;
+
+  /// No description provided for @locationDebugOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get locationDebugOk;
+
+  /// No description provided for @locationDebugUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'unavailable'**
+  String get locationDebugUnavailable;
+
+  /// No description provided for @locationDebugInjected.
+  ///
+  /// In en, this message translates to:
+  /// **'injected'**
+  String get locationDebugInjected;
+
+  /// No description provided for @locationDebugNotInjected.
+  ///
+  /// In en, this message translates to:
+  /// **'not injected'**
+  String get locationDebugNotInjected;
+
+  /// No description provided for @locationStatusUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get locationStatusUpdatedAt;
+
+  /// No description provided for @locationStatusSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current location is ready'**
+  String get locationStatusSuccessTitle;
+
+  /// No description provided for @locationStatusSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex can attach this location summary when location context is relevant.'**
+  String get locationStatusSuccessBody;
+
+  /// No description provided for @locationStatusApproximateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate location only'**
+  String get locationStatusApproximateTitle;
+
+  /// No description provided for @locationStatusApproximateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy looks city or area level. You can keep using it, or enable Precise Location in system settings for a tighter context.'**
+  String get locationStatusApproximateBody;
+
+  /// No description provided for @locationStatusServiceDisabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System location is off'**
+  String get locationStatusServiceDisabledTitle;
+
+  /// No description provided for @locationStatusServiceDisabledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex only uses device GPS and will not infer location from network or IP. On Android, open Location settings; on iOS, enable Settings > Privacy & Security > Location Services.'**
+  String get locationStatusServiceDisabledBody;
+
+  /// No description provided for @locationStatusPermissionDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is needed'**
+  String get locationStatusPermissionDeniedTitle;
+
+  /// No description provided for @locationStatusPermissionDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Memex to use location while testing or when location context is needed. Always access is not requested.'**
+  String get locationStatusPermissionDeniedBody;
+
+  /// No description provided for @locationStatusPermissionForeverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is blocked'**
+  String get locationStatusPermissionForeverTitle;
+
+  /// No description provided for @locationStatusPermissionForeverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open app settings and allow location for Memex. On iOS, While Using the App is enough.'**
+  String get locationStatusPermissionForeverBody;
+
+  /// No description provided for @locationStatusDisabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Context is off'**
+  String get locationStatusDisabledTitle;
+
+  /// No description provided for @locationStatusDisabledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on the switch above and save when you want Memex to attach device location to agent context.'**
+  String get locationStatusDisabledBody;
+
+  /// No description provided for @locationStatusGeocodeUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS works, address lookup failed'**
+  String get locationStatusGeocodeUnavailableTitle;
+
+  /// No description provided for @locationStatusGeocodeUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex has coordinates but will not inject GPS-only context into the agent. Check the reverse geocoding provider and try again.'**
+  String get locationStatusGeocodeUnavailableBody;
+
+  /// No description provided for @locationStatusUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location unavailable'**
+  String get locationStatusUnavailableTitle;
+
+  /// No description provided for @locationStatusUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check system location services and app permission, then test again.'**
+  String get locationStatusUnavailableBody;
+
+  /// No description provided for @allowLocationPermissionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location permission'**
+  String get allowLocationPermissionButton;
+
+  /// No description provided for @openAppSettingsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open app settings'**
+  String get openAppSettingsButton;
+
+  /// No description provided for @openLocationSettingsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open location settings'**
+  String get openLocationSettingsButton;
+
+  /// No description provided for @locationSettingsOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open system settings.'**
+  String get locationSettingsOpenFailed;
+
+  /// No description provided for @locationActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Location action failed: {error}'**
+  String locationActionFailed(String error);
+
+  /// No description provided for @settingsSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings...'**
+  String get settingsSearchPlaceholder;
+
+  /// No description provided for @settingsSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching settings found'**
+  String get settingsSearchEmpty;
+
+  /// No description provided for @importCharacterCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Character Card'**
+  String get importCharacterCard;
+
+  /// No description provided for @firstMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First Message'**
+  String get firstMessageLabel;
+
+  /// No description provided for @firstMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Greeting sent on first conversation (optional)'**
+  String get firstMessageHint;
+
+  /// No description provided for @systemPromptOverrideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'System Prompt Override'**
+  String get systemPromptOverrideLabel;
+
+  /// No description provided for @systemPromptOverrideHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Override default system prompt (advanced, optional)'**
+  String get systemPromptOverrideHint;
+
+  /// No description provided for @postHistoryInstructionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-History Instructions'**
+  String get postHistoryInstructionsLabel;
+
+  /// No description provided for @postHistoryInstructionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions injected after chat history, before reply (optional)'**
+  String get postHistoryInstructionsHint;
+
+  /// No description provided for @mesExampleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Examples'**
+  String get mesExampleLabel;
+
+  /// No description provided for @mesExampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example dialogues showing character style (optional)'**
+  String get mesExampleHint;
+
+  /// No description provided for @worldBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'World Book'**
+  String get worldBookTitle;
+
+  /// No description provided for @worldBookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background knowledge injected when keywords are triggered'**
+  String get worldBookSubtitle;
+
+  /// No description provided for @characterMemoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Character Memory'**
+  String get characterMemoryTitle;
+
+  /// No description provided for @characterMemorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship dynamics and interaction memories between character and user'**
+  String get characterMemorySubtitle;
+
+  /// No description provided for @addTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addTooltip;
+
+  /// No description provided for @constantBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Constant'**
+  String get constantBadge;
+
+  /// No description provided for @worldEntryFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry {index}'**
+  String worldEntryFallbackName(Object index);
+
+  /// No description provided for @keywordsPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Keywords: {keys}'**
+  String keywordsPrefix(Object keys);
+
+  /// No description provided for @memoryFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory {index}'**
+  String memoryFallbackName(Object index);
+
+  /// No description provided for @addWorldEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add World Book Entry'**
+  String get addWorldEntry;
+
+  /// No description provided for @editWorldEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit World Book Entry'**
+  String get editWorldEntry;
+
+  /// No description provided for @commentTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment / Title'**
+  String get commentTitleLabel;
+
+  /// No description provided for @entryDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry description (optional)'**
+  String get entryDescriptionHint;
+
+  /// No description provided for @triggerKeywordsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger Keywords'**
+  String get triggerKeywordsLabel;
+
+  /// No description provided for @triggerKeywordsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated, e.g.: magic, spell'**
+  String get triggerKeywordsHint;
+
+  /// No description provided for @contentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get contentLabel;
+
+  /// No description provided for @worldEntryContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Background knowledge injected when keywords trigger'**
+  String get worldEntryContentHint;
+
+  /// No description provided for @enabledCheckbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabledCheckbox;
+
+  /// No description provided for @addMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Memory'**
+  String get addMemory;
+
+  /// No description provided for @editMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Memory'**
+  String get editMemory;
+
+  /// No description provided for @memoryLabelField.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get memoryLabelField;
+
+  /// No description provided for @memoryLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique identifier, e.g.: name preference'**
+  String get memoryLabelHint;
+
+  /// No description provided for @memoryContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory content'**
+  String get memoryContentHint;
+
+  /// No description provided for @salienceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Salience: '**
+  String get salienceLabel;
+
+  /// No description provided for @labelCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Label cannot be empty'**
+  String get labelCannotBeEmpty;
+
+  /// No description provided for @importSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} imported successfully'**
+  String importSuccess(Object name);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String importFailed(Object error);
+
+  /// No description provided for @supportedFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Formats'**
+  String get supportedFormats;
+
+  /// No description provided for @tavernImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'• SillyTavern V2 character cards (.json)\n• PNG images with embedded cards (.png)\n\nFields like persona, world book, etc. will be automatically mapped to Memex character format.'**
+  String get tavernImportDescription;
+
+  /// No description provided for @pickCharacterFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Character File'**
+  String get pickCharacterFile;
+
+  /// No description provided for @repickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Another File'**
+  String get repickFile;
+
+  /// No description provided for @personaSettingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Persona'**
+  String get personaSettingSection;
+
+  /// No description provided for @systemPromptSection.
+  ///
+  /// In en, this message translates to:
+  /// **'System Prompt'**
+  String get systemPromptSection;
+
+  /// No description provided for @worldEntriesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'World Book: {count} entries'**
+  String worldEntriesCount(Object count);
+
+  /// No description provided for @fileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {filename}'**
+  String fileLabel(Object filename);
+
+  /// No description provided for @conflictWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Character with same name already exists: {names}. Importing will create a new character without overwriting existing ones.'**
+  String conflictWarning(Object names);
+
+  /// No description provided for @setPrimaryCompanionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Primary Companion'**
+  String get setPrimaryCompanionTitle;
+
+  /// No description provided for @setPrimaryCompanionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically set as your primary companion after import'**
+  String get setPrimaryCompanionSubtitle;
+
+  /// No description provided for @confirmImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Import'**
+  String get confirmImport;
+
+  /// No description provided for @chatBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Background'**
+  String get chatBackground;
+
+  /// No description provided for @chooseChatBackgroundImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose background image'**
+  String get chooseChatBackgroundImage;
+
+  /// No description provided for @earlyUpdateSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Early access updates'**
+  String get earlyUpdateSettingsTitle;
+
+  /// No description provided for @earlyUpdateSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Check GitHub pre-releases for the matching Early APK, download it, and hand it to Android\'s installer.'**
+  String get earlyUpdateSettingsDesc;
+
+  /// No description provided for @earlyUpdateUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Early updates are only available in the Android Early build.'**
+  String get earlyUpdateUnsupported;
+
+  /// No description provided for @earlyUpdateAutoCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto check for updates'**
+  String get earlyUpdateAutoCheckTitle;
+
+  /// No description provided for @earlyUpdateAutoCheckDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Check at startup at most once every 12 hours.'**
+  String get earlyUpdateAutoCheckDesc;
+
+  /// No description provided for @earlyUpdateWifiOnlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download on Wi-Fi only'**
+  String get earlyUpdateWifiOnlyTitle;
+
+  /// No description provided for @earlyUpdateWifiOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip update downloads while using mobile data.'**
+  String get earlyUpdateWifiOnlyDesc;
+
+  /// No description provided for @earlyUpdateAutoInstallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto download and install'**
+  String get earlyUpdateAutoInstallTitle;
+
+  /// No description provided for @earlyUpdateAutoInstallDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When a new build is found, download it and open the Android installer automatically.'**
+  String get earlyUpdateAutoInstallDesc;
+
+  /// No description provided for @earlyUpdateCheckNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Check now'**
+  String get earlyUpdateCheckNow;
+
+  /// No description provided for @earlyUpdateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking GitHub pre-releases...'**
+  String get earlyUpdateChecking;
+
+  /// No description provided for @earlyUpdateSkippedMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped because Wi-Fi-only downloads are enabled.'**
+  String get earlyUpdateSkippedMobile;
+
+  /// No description provided for @earlyUpdateNoUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already on the latest Early build.'**
+  String get earlyUpdateNoUpdate;
+
+  /// No description provided for @earlyUpdateFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Early build {version}+{build} is available.'**
+  String earlyUpdateFound(Object version, Object build);
+
+  /// No description provided for @earlyUpdateDownloadAndInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Download and install'**
+  String get earlyUpdateDownloadAndInstall;
+
+  /// No description provided for @earlyUpdateDownloadInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update...'**
+  String get earlyUpdateDownloadInProgress;
+
+  /// No description provided for @earlyUpdateDownloadingPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update: {percent}%'**
+  String earlyUpdateDownloadingPercent(Object percent);
+
+  /// No description provided for @earlyUpdateDownloadReadyToInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Update package downloaded. Ready to install.'**
+  String get earlyUpdateDownloadReadyToInstall;
+
+  /// No description provided for @earlyUpdateInstallDownloadedPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Install downloaded package'**
+  String get earlyUpdateInstallDownloadedPackage;
+
+  /// No description provided for @earlyUpdateClearDownloadedPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear downloaded package'**
+  String get earlyUpdateClearDownloadedPackage;
+
+  /// No description provided for @earlyUpdateClearDownloadedPackageSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded update package cleared.'**
+  String get earlyUpdateClearDownloadedPackageSuccess;
+
+  /// No description provided for @earlyUpdateInstallStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Android installer opened.'**
+  String get earlyUpdateInstallStarted;
+
+  /// No description provided for @earlyUpdateInstallPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Memex to install unknown apps, then tap download and install again.'**
+  String get earlyUpdateInstallPermissionRequired;
+
+  /// No description provided for @earlyUpdateLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked: {time}'**
+  String earlyUpdateLastChecked(Object time);
+
+  /// No description provided for @earlyUpdateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update check failed: {error}'**
+  String earlyUpdateCheckFailed(Object error);
+
+  /// No description provided for @earlyUpdateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Early update available'**
+  String get earlyUpdateDialogTitle;
+
+  /// No description provided for @earlyUpdateReleaseNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Release notes'**
+  String get earlyUpdateReleaseNotes;
+
+  /// No description provided for @dismissAllNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get dismissAllNotifications;
+
+  /// No description provided for @dismissByType.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear by type'**
+  String get dismissByType;
+
+  /// No description provided for @dismissTypeSystemAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders & events'**
+  String get dismissTypeSystemAction;
+
+  /// No description provided for @dismissTypeClarification.
+  ///
+  /// In en, this message translates to:
+  /// **'Clarifications'**
+  String get dismissTypeClarification;
+
+  /// No description provided for @dismissTypeCardUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Card updates'**
+  String get dismissTypeCardUpdate;
+
+  /// No description provided for @dismissedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cleared'**
+  String dismissedCount(Object count);
+
+  /// No description provided for @dataImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import files'**
+  String get dataImportTitle;
+
+  /// No description provided for @dataImportSettingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring old files into Memex, then decide whether to organize them.'**
+  String get dataImportSettingsDescription;
+
+  /// No description provided for @dataImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose old notes, exported records, documents, or ZIP archives. Memex saves a copy first and leaves the original files untouched. After import, you can decide whether Memex should help organize them.'**
+  String get dataImportDescription;
+
+  /// No description provided for @dataImportSelectFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose files to import'**
+  String get dataImportSelectFiles;
+
+  /// No description provided for @dataImportImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving files...'**
+  String get dataImportImporting;
+
+  /// No description provided for @dataImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Files saved in Memex'**
+  String get dataImportSuccess;
+
+  /// No description provided for @dataImportOnlyStored.
+  ///
+  /// In en, this message translates to:
+  /// **'Files saved. No organization started.'**
+  String get dataImportOnlyStored;
+
+  /// No description provided for @dataImportQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will organize this import in the background.'**
+  String get dataImportQueued;
+
+  /// No description provided for @dataImportResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import complete'**
+  String get dataImportResultTitle;
+
+  /// No description provided for @dataImportResultSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files have been saved. You can organize them now or leave them as original source material.'**
+  String dataImportResultSummary(Object count);
+
+  /// No description provided for @dataImportRenamedConflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} item(s) had the same name and were renamed to avoid overwriting anything.'**
+  String dataImportRenamedConflicts(Object count);
+
+  /// No description provided for @dataImportSkippedUnsafeEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unusual archive item(s) were skipped; the rest was imported normally.'**
+  String dataImportSkippedUnsafeEntries(Object count);
+
+  /// No description provided for @dataImportChooseProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize these files'**
+  String get dataImportChooseProcessing;
+
+  /// No description provided for @dataImportProcessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize this import?'**
+  String get dataImportProcessTitle;
+
+  /// No description provided for @dataImportProcessPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You imported {count} files. Choose whether Memex should organize them now, or just keep the originals.'**
+  String dataImportProcessPrompt(Object count);
+
+  /// No description provided for @dataImportProcessKnowledgeBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize into knowledge base'**
+  String get dataImportProcessKnowledgeBase;
+
+  /// No description provided for @dataImportProcessKnowledgeBaseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Best for documents, notes, project material, and references. Memex will extract useful information and group it for later use.'**
+  String get dataImportProcessKnowledgeBaseDesc;
+
+  /// No description provided for @dataImportProcessTimelineCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Create timeline records'**
+  String get dataImportProcessTimelineCards;
+
+  /// No description provided for @dataImportProcessTimelineCardsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Best for diaries, chat logs, activity history, and old exports. Memex will turn time-based content into records when it makes sense.'**
+  String get dataImportProcessTimelineCardsDesc;
+
+  /// No description provided for @dataImportImpactNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will only keep these original files. No AI organization will start.'**
+  String get dataImportImpactNone;
+
+  /// No description provided for @dataImportImpactKnowledgeBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will read these files and organize useful long-term information into the knowledge base. It will not proactively create timeline records.'**
+  String get dataImportImpactKnowledgeBase;
+
+  /// No description provided for @dataImportImpactTimelineCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will read these files and create timeline records for life events or dated history when appropriate. It will not proactively organize the knowledge base.'**
+  String get dataImportImpactTimelineCards;
+
+  /// No description provided for @dataImportImpactBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Memex will try to create timeline records and organize reusable information into the knowledge base. This is best for a complete personal archive.'**
+  String get dataImportImpactBoth;
+
+  /// No description provided for @dataImportFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Just save them'**
+  String get dataImportFinish;
+
+  /// No description provided for @polishOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get polishOriginal;
+
+  /// No description provided for @polishPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get polishPlain;
+
+  /// No description provided for @polishLiterary.
+  ///
+  /// In en, this message translates to:
+  /// **'Polished'**
+  String get polishLiterary;
+
+  /// No description provided for @polishUseThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this'**
+  String get polishUseThis;
+
+  /// No description provided for @polishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed'**
+  String get polishFailed;
+
+  /// No description provided for @exportBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Backup'**
+  String get exportBackupTitle;
+
+  /// No description provided for @exportBackupNeverExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Never exported ⚠️'**
+  String get exportBackupNeverExported;
+
+  /// No description provided for @exportBackupLastExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Last exported: {date}'**
+  String exportBackupLastExported(String date);
+
+  /// No description provided for @exportReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s been a while since you backed up'**
+  String get exportReminderTitle;
+
+  /// No description provided for @exportReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting to \"Files\" survives an uninstall · exporting externally is what actually keeps you safe'**
+  String get exportReminderBody;
+
+  /// No description provided for @exportReminderExportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get exportReminderExportButton;
+
+  /// No description provided for @exportReminderExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting...'**
+  String get exportReminderExporting;
+
+  /// No description provided for @exportReminderSnoozeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get exportReminderSnoozeButton;
+
+  /// No description provided for @iCloudDailyBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'iCloud daily backup'**
+  String get iCloudDailyBackupTitle;
+
+  /// No description provided for @iCloudDailyBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically backs up to your chosen iCloud folder every time you open the app, keeping the latest two copies — survives an uninstall.'**
+  String get iCloudDailyBackupDesc;
+
+  /// No description provided for @iCloudPickFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose iCloud folder'**
+  String get iCloudPickFolder;
+
+  /// No description provided for @iCloudChangeFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Change folder'**
+  String get iCloudChangeFolder;
+
+  /// No description provided for @iCloudFolderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up to: {name}'**
+  String iCloudFolderLabel(Object name);
+
+  /// No description provided for @iCloudLastBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {time}'**
+  String iCloudLastBackup(Object time);
+
+  /// No description provided for @iCloudNeedsRepick.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t access this folder — please choose an iCloud folder again'**
+  String get iCloudNeedsRepick;
+
+  /// No description provided for @iCloudNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No folder chosen yet — choose one to start daily backups'**
+  String get iCloudNotConfigured;
+
+  /// No description provided for @iCloudRollingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrites daily, keeps the latest two'**
+  String get iCloudRollingNote;
+
+  /// No description provided for @iCloudSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get iCloudSynced;
+
+  /// No description provided for @iCloudUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get iCloudUploading;
+
+  /// No description provided for @iCloudNotUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not uploaded'**
+  String get iCloudNotUploaded;
+
+  /// No description provided for @goalSuggestionIncrement.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {delta} to \"{title}\"?'**
+  String goalSuggestionIncrement(String title, String delta);
+
+  /// No description provided for @goalSuggestionMarkComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark \"{title}\" complete?'**
+  String goalSuggestionMarkComplete(String title);
+
+  /// No description provided for @goalSuggestionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get goalSuggestionConfirm;
+
+  /// No description provided for @goalSuggestionConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get goalSuggestionConfirmed;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) => <String>[
+        'ar',
+        'de',
+        'en',
+        'es',
+        'fr',
+        'hi',
+        'id',
+        'ja',
+        'ko',
+        'pt',
+        'ru',
+        'zh'
+      ].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+script codes are specified.
+  switch (locale.languageCode) {
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hant':
+            return AppLocalizationsZhHant();
+        }
+        break;
+      }
+  }
+
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'id':
+      return AppLocalizationsId();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'zh':
+      return AppLocalizationsZh();
+  }
+
+  throw FlutterError(
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
+}

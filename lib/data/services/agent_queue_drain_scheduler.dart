@@ -1,0 +1,56 @@
+import 'package:flutter/foundation.dart';
+import 'package:workmanager/workmanager.dart';
+
+abstract class AgentQueueDrainScheduler {
+  Future<void> schedule({Duration? initialDelay, bool expedited});
+
+  Future<void> cancel();
+}
+
+class WorkmanagerAgentQueueDrainScheduler implements AgentQueueDrainScheduler {
+  static const String uniqueName = 'agent_queue_drain';
+  static const String taskName = 'agentQueueDrainTask';
+  static const String tag = 'agent_queue';
+  @visibleForTesting
+  static const ExistingWorkPolicy existingWorkPolicy = ExistingWorkPolicy.keep;
+
+  @override
+  Future<void> schedule({
+    Duration? initialDelay,
+    bool expedited = false,
+  }) async {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    await Workmanager().registerOneOffTask(
+      uniqueName,
+      taskName,
+      inputData: const {'source': 'agent_background_coordinator'},
+      initialDelay: initialDelay,
+      constraints: Constraints(
+        networkType: NetworkType.notRequired,
+        requiresBatteryNotLow: false,
+        requiresCharging: false,
+        requiresDeviceIdle: false,
+        requiresStorageNotLow: false,
+      ),
+      existingWorkPolicy: existingWorkPolicy,
+      tag: tag,
+      outOfQuotaPolicy:
+          expedited ? OutOfQuotaPolicy.runAsNonExpeditedWorkRequest : null,
+    );
+    debugPrint(
+      'Agent queue drain scheduled '
+      '(delay: ${initialDelay?.inSeconds ?? 0}s, expedited: $expedited)',
+    );
+  }
+
+  @override
+  Future<void> cancel() {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      return Future<void>.value();
+    }
+    return Workmanager().cancelByUniqueName(uniqueName);
+  }
+}

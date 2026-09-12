@@ -1,0 +1,120 @@
+name: memex
+description: A personal knowledge management and insights app
+publish_to: "none"
+version: 1.0.36+120
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # UI & Styling
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+  fl_chart: ^0.66.0
+  shimmer: ^3.0.0
+  flutter_svg: ^2.2.4
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+
+  # State Management
+  provider: ^6.1.1
+  go_router: ^14.6.2
+
+  # Network & API
+  http: ^1.1.2
+  dio: ^5.4.0
+  web_socket_channel: ^3.0.1
+
+  # Local Storage
+  shared_preferences: ^2.2.2
+  path_provider: ^2.1.1
+  package_info_plus: ^9.0.0
+
+  # Quick Actions (app icon long-press shortcuts)
+  quick_actions: ^1.1.0
+
+  # Media
+  image_picker: ^1.0.7
+  record: ^6.0.0
+  permission_handler: ^11.1.0
+  photo_manager: ^3.5.0
+  wechat_assets_picker: ^10.1.0
+
+  # Calendar sync (task due-dates -> system calendar events)
+  device_calendar: ^4.3.3
+
+  # WebView (for future HTML card rendering)
+  webview_flutter: ^4.4.4
+
+  # Utils
+  intl: ^0.20.2
+  uuid: ^4.3.3
+  collection: ^1.18.0
+  crypto: ^3.0.7
+  dart_jsonwebtoken: ^2.9.1
+  logging: ^1.2.0
+  share_handler: ^0.0.25
+  agent_background_android:
+    path: plugins/agent_background_android
+  archive: ^4.0.0
+  xml: ^6.6.1
+  yaml: ^3.1.2
+  audioplayers: ^6.5.1
+  flutter_markdown: ^0.7.7+1
+  local_auth: ^2.3.0
+  workmanager: ^0.9.0
+  dart_agent_core: ^2.0.4
+  flutter_js: ^0.8.7
+  drift: ^2.30.0
+  sqlite3_flutter_libs: ^0.5.41
+  drift_flutter: ^0.2.8
+  path: ^1.9.1
+  google_generative_ai: ^0.4.7
+  synchronized: ^3.4.0
+  exif: ^3.3.0
+  video_player: ^2.10.1
+  chewie: ^1.13.0
+  wakelock_plus: ^1.4.0
+  image: ^4.7.2
+  flutter_image_compress: ^2.4.0
+  photo_view: ^0.15.0
+  camera: ^0.11.3+1
+  google_mlkit_text_recognition: ^0.15.1
+  google_mlkit_image_labeling: ^0.14.2
+  url_launcher: ^6.3.2
+  share_plus: ^10.1.4
+  file_picker: ^8.1.7
+  screenshot: ^3.0.0
+  sherpa_onnx: 1.13.2
+  geolocator: ^14.0.2
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  pdf: ^3.11.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  test: ^1.26.3
+  drift_dev: ^2.30.0
+  build_runner: ^2.10.4
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
+  sqlite3: ^2.4.6
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/startup.png
+    - assets/icon.png
+    - assets/icons/
+    - assets/silero_vad.onnx
+    - assets/jieba_dict.txt
+    - assets/fonts/NotoSansSC.ttf

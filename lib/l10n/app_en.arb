@@ -1,0 +1,1616 @@
+{
+  "@@locale": "en",
+  "timesLabel": "Times",
+  "@modelSetAsDefault": {
+    "placeholders": {
+      "modelId": {}
+    }
+  },
+  "modelSetAsDefault": "Set {modelId} as default model",
+  "retry": "Retry",
+  "unknownModel": "Unknown model",
+  "notSet": "Not set",
+  "confirmClear": "Confirm clear",
+  "confirmClearTokenMessage": "Clear current user? You will need to enter user ID again.",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "showOriginal": "Show original",
+  "showPolished": "Show polished",
+  "tokenCleared": "User cleared",
+  "@clearTokenFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "clearTokenFailed": "Failed to clear user: {error}",
+  "selectDateRangeOptional": "Select date range (optional):",
+  "startDate": "Start date",
+  "endDate": "End date",
+  "select": "Select",
+  "processLimitOptional": "Process limit (optional)",
+  "leaveEmptyForAll": "Leave empty to process all",
+  "startProcessing": "Start processing",
+  "userIdNotFound": "User ID not found",
+  "@createTaskFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "createTaskFailed": "Failed to create task: {error}",
+  "reprocessCards": "Reprocess cards",
+  "reprocessCardsTaskCreated": "Reprocess request queued in Super Agent",
+  "memorySyncCompletedToast": "Recent memory synced",
+  "reprocessCardsDownstreamMode": "Scope",
+  "reprocessCardsCardOnly": "Cards only",
+  "reprocessCardsCardOnlyDesc": "Ask Super Agent to review and regenerate the selected timeline cards.",
+  "reprocessCardsRerunDownstream": "Cards and related follow-ups",
+  "reprocessCardsRerunDownstreamDesc": "Ask Super Agent to also consider related PKM, schedule, and insight updates when needed.",
+  "reanalyzeMediaAssets": "Re-read media attachments",
+  "reanalyzeMediaAssetsDesc": "Ask Super Agent to inspect attached media again when regenerating cards.",
+  "regenerateComments": "Regenerate comments",
+  "regenerateCommentsTaskCreated": "Regenerate comments task created, running in background",
+  "rebuildSearchIndex": "Rebuild search index",
+  "rebuildSearchIndexSuccess": "Search index rebuilt successfully",
+  "rebuildSearchIndexFailed": "Failed to rebuild search index",
+  "clearData": "Clear data",
+  "confirmClearDataMessage": "Clear data?",
+  "confirmClearDataDeletesWorkspaceMessage": "All local workspace data for the current user will be deleted, including cards, media, knowledge files, insights, memory, chat history, and system state.\n\nThis action cannot be undone!",
+  "clearFailedAgentContexts": "Clear failed conversation context",
+  "confirmClearFailedAgentContextsMessage": "Clear the saved conversation context for Insight and Schedule agents? This is useful after changing models when previous agent messages are no longer compatible. Facts, cards, knowledge, memories, and model settings will not be deleted.",
+  "failedAgentContextsCleared": "Cleared {count} saved conversation context(s)",
+  "@failedAgentContextsCleared": { "placeholders": { "count": {} } },
+  "clearFailedAgentContextsFailed": "Failed to clear conversation context: {error}",
+  "@clearFailedAgentContextsFailed": { "placeholders": { "error": {} } },
+  "cloneToTestUser": "Clone to test user",
+  "confirmCloneToTestUserMessage": "Copy the current workspace into a new local test user and switch to it. Agent runtime state is not copied. Your current user data will not be modified.",
+  "testUserIdLabel": "Test user ID",
+  "testUserIdHelper": "Use letters, numbers, hyphen, or underscore.",
+  "testUserIdInvalid": "Use only letters, numbers, hyphen, or underscore.",
+  "overwriteExistingTestUser": "Replace existing test user with the same ID",
+  "testUserCloneSuccess": "Switched to test user {userId}",
+  "@testUserCloneSuccess": { "placeholders": { "userId": {} } },
+  "testUserCloneFailed": "Failed to clone test user: {error}",
+  "@testUserCloneFailed": { "placeholders": { "error": {} } },
+  "dataClearedSuccess": "Data cleared successfully",
+  "@clearDataFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "clearDataFailed": "Failed to clear data: {error}",
+  "personalCenter": "Personal center",
+  "viewLogs": "View logs",
+  "systemAuthorization": "System authorization",
+  "aiCharacterConfig": "AI character config",
+  "modelConfig": "Model config",
+  "agentConfig": "Agent config",
+  "experimentalLab": "Labs",
+  "experimentalLabDescription": "Experimental features that may change or move later.",
+  "modelUsageStats": "Model usage stats",
+  "asyncTaskList": "Async task list",
+  "clearLocalToken": "Clear user",
+  "insightCardTemplates": "Insight card templates",
+  "timelineCardTemplates": "Timeline card templates",
+  "logViewer": "Log viewer",
+  "autoRefresh": "Auto refresh",
+  "lineCount": "Line count: ",
+  "all": "All",
+  "schedule": "Schedule",
+  "statistics": "Stats",
+  "appLockConfig": "App lock config",
+  "activityStats": "Activity stats",
+  "activityStatsSummary": "In this period you recorded {inputs} time(s) and generated {cards} card(s).",
+  "@activityStatsSummary": {
+    "placeholders": {
+      "inputs": {},
+      "cards": {}
+    }
+  },
+  "last7Days": "7 days",
+  "last30Days": "30 days",
+  "last90Days": "90 days",
+  "records": "Records",
+  "words": "Words",
+  "cards": "Cards",
+  "knowledgeUnits": "Knowledge units",
+  "completedTodos": "Completed todos",
+  "activeDays": "Active days",
+  "streakDays": "Streak",
+  "dailyRhythm": "Daily rhythm",
+  "recordToOutput": "Record to output",
+  "sourceBreakdown": "Source breakdown",
+  "topThemes": "Top themes",
+  "textInput": "Text",
+  "imageInput": "Images",
+  "audioInput": "Audio",
+  "noStatsYet": "No activity stats yet",
+  "tapDayForDetails": "Tap a day to view details",
+  "dayDetails": "Day details",
+  "@loadStatsFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "loadStatsFailed": "Failed to load stats: {error}",
+  "overview": "Overview",
+  "daily": "Daily",
+  "modelStatsByAgent": "By agent",
+  "detail": "Detail",
+  "date": "Date",
+  "agent": "Agent",
+  "noData": "No data",
+  "totalCalls": "Total calls",
+  "calls": "Calls",
+  "@callsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "callsCount": "{count} calls",
+  "selectDateRange": "Select date range",
+  "totalTokens": "Total tokens",
+  "cacheRate": "Cache rate",
+  "promptTokens": "Prompt tokens",
+  "completionTokens": "Completion tokens",
+  "cachedTokens": "Cached tokens",
+  "thoughtTokens": "Thought tokens",
+  "prompt": "Prompt",
+  "completion": "Completion",
+  "cached": "Cached",
+  "thought": "Thought",
+  "model": "Model",
+  "scene": "Scene",
+  "sceneId": "Scene ID",
+  "tokenUsage": "Token usage",
+  "handler": "Handler",
+  "modelBreakdown": "Model breakdown",
+  "callDetails": "Call details",
+  "@recordDetailsTitle": {
+    "placeholders": {
+      "scene": {}
+    }
+  },
+  "recordDetailsTitle": "Record details: {scene}",
+  "@saveLlmConfigFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "saveLlmConfigFailed": "Failed to save LLM config: {error}",
+  "webHtmlPreviewUnavailable": "HTML preview is not available on web. Please view on mobile.",
+  "@saveUserInfoFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "saveUserInfoFailed": "Failed to save user info: {error}",
+  "totalEstimatedCost": "Total estimated cost",
+  "close": "Close",
+  "totalTokenConsumption": "Total token consumption",
+  "dataLoadFailedRetry": "Data load failed, please retry later.",
+  "timelineLoadFailedRetry": "Timeline load failed, please retry later.",
+  "newPerspective": "New perspective",
+  "startPoint": "Start",
+  "endPoint": "End",
+  "originalInput": "Original input",
+  "referenceContent": "Reference content",
+  "@referenceWithTitle": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "referenceWithTitle": "Reference: {title}",
+  "actionCenterTitle": "Pending actions",
+  "noPendingActions": "No pending actions",
+  "clarificationNeeded": "Memex wants to confirm",
+  "clarificationTextHint": "Type a short answer",
+  "clarificationTextRequired": "Add a short answer first",
+  "clarificationAnswered": "Answered",
+  "@clarificationAnswerPrefix": {
+    "placeholders": {
+      "answer": {}
+    }
+  },
+  "clarificationAnswerPrefix": "Answer: {answer}",
+  "answerSaved": "Answer saved",
+  "clarificationOtherAnswer": "Manual input",
+  "clarificationNotSure": "Not sure / prefer not to say",
+  "yes": "Yes",
+  "no": "No",
+  "footprintMap": "Footprint map",
+  "waypointPlaces": "Waypoint places",
+  "unknownPlace": "Unknown place",
+  "releaseToSend": "Release to send",
+  "selectFromAlbum": "Select from album",
+  "clipboardPreviewTitle": "New clipboard",
+  "clipboardPreviewImageTitle": "Clipboard image",
+  "clipboardPreviewImageDescription": "Image ready to add",
+  "clipboardPreviewUnprocessed": "Not pasted yet",
+  "clipboardPreviewPasteToInput": "Paste to input",
+  "clipboardPreviewAddImageToInput": "Add image",
+  "clipboardPreviewImageFailed": "Couldn't read clipboard image",
+  "tellAiWhatHappened": "Tell AI what happened...",
+  "@recordingWithDuration": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "recordingWithDuration": "Recording: {duration}",
+  "playing": "Playing...",
+  "sendLabel": "Send",
+  "attachedImagesMessage": "Sent {count} image(s)",
+  "@attachedImagesMessage": { "placeholders": { "count": {} } },
+  "noTaskData": "No task data",
+  "@createdAtDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "createdAtDate": "Created: {date}",
+  "@updatedAtDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "updatedAtDate": "Updated: {date}",
+  "@durationLabel": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "durationLabel": "Duration: {duration}",
+  "@retryCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "retryCount": "Retry: {count}",
+  "loadDetailFailedRetry": "Load detail failed, please retry later.",
+  "loadFailed": "Load failed",
+  "reload": "Reload",
+  "aiInsightDetail": "Insight Detail",
+  "@relatedRecordsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "relatedRecordsCount": "Related records ({count})",
+  "noRelatedRecords": "No related records",
+  "useFingerprintToUnlock": "Use fingerprint to unlock",
+  "locked": "Locked",
+  "wrongPassword": "Wrong password",
+  "enterPassword": "Enter password",
+  "memexLocked": "Memex is locked",
+  "calendarShortSun": "Sun",
+  "calendarShortMon": "Mon",
+  "calendarShortTue": "Tue",
+  "calendarShortWed": "Wed",
+  "calendarShortThu": "Thu",
+  "calendarShortFri": "Fri",
+  "calendarShortSat": "Sat",
+  "@noRecordsOnDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "noRecordsOnDate": "No records on {date}",
+  "footprintPath": "Footprint path",
+  "lifeCompositionTable": "Life composition",
+  "emotionReframe": "Emotion reframe",
+  "chronicleOfThings": "Chronicle of things",
+  "goalProgress": "Goal progress",
+  "trendChart": "Trend chart",
+  "comparisonChart": "Comparison chart",
+  "todayTimeFlow": "Today's time flow",
+  "aiInputHint": "Whether it's memories or the present, I'm here...",
+  "actionCreateCard": "Create card",
+  "actionAiInteract": "AI chat",
+  "actionPolish": "Polish",
+  "modelOfflineToast": "Model not connected",
+  "refreshSuperAgentStateTooltip": "Clear Memex Agent context",
+  "refreshSuperAgentStateTitle": "Clear Memex Agent history context?",
+  "refreshSuperAgentStateMessage": "The visible chat history will stay, but Memex Agent's historical runtime context will be cleared and future replies will start from a fresh context. Persistent memory, knowledge base files, cards, and other saved data are not affected. Use this when Memex Agent keeps behaving abnormally. Continue?",
+  "refreshSuperAgentStateActiveRunMessage": "Wait until the current Memex Agent message finishes before clearing context.",
+  "refreshSuperAgentStateSuccess": "Memex Agent context cleared",
+  "@refreshSuperAgentStateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "refreshSuperAgentStateFailed": "Failed to clear Memex Agent context: {error}",
+  "nothingHere": "Nothing here yet",
+  "nothingHereHint": "Tap the button below to create your first card",
+  "agentProcessing": "AI is processing...",
+  "keepAppOpen": "Don't close the app",
+  "activityDetail": "Activity Detail",
+  "noAgentActivityYet": "No agent activity yet",
+  "processingEllipsis": "Processing...",
+  "agentBackgroundTitle": "Memex Agent",
+  "agentBackgroundPausedTitle": "Memex Agent paused",
+  "agentBackgroundNeedsAttentionTitle": "Memex Agent needs attention",
+  "agentBackgroundStageIdle": "Idle",
+  "agentBackgroundStageProcessing": "Processing",
+  "agentBackgroundStageQueued": "Queued",
+  "agentBackgroundStageRetrying": "Waiting to retry",
+  "agentBackgroundStagePaused": "Paused",
+  "agentBackgroundStageCompleted": "Completed",
+  "agentBackgroundStageNeedsAttention": "Needs attention",
+  "agentBackgroundStageAnalyzingMedia": "Analyzing media",
+  "agentBackgroundStageGeneratingCard": "Generating card",
+  "agentBackgroundStageUpdatingKnowledge": "Updating knowledge",
+  "agentBackgroundStagePreparingComment": "Preparing comment",
+  "agentBackgroundStageRoutingFollowUps": "Routing follow-ups",
+  "@agentBackgroundTaskSummary": {
+    "placeholders": {
+      "running": {},
+      "pending": {},
+      "retrying": {}
+    }
+  },
+  "agentBackgroundTaskSummary": "Running {running}, Pending {pending}, Retry {retrying}",
+  "@agentBackgroundTaskDetail": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "agentBackgroundTaskDetail": "Processing {count} queued task(s).",
+  "agentBackgroundNoTasks": "No background tasks.",
+  "agentBackgroundStarting": "Processing is starting.",
+  "agentBackgroundCompletedDetail": "All background tasks finished.",
+  "agentBackgroundFailedDetail": "Processing stopped with an error.",
+  "agentBackgroundPausedDetail": "Processing is paused and will continue later.",
+  "agentBackgroundQueuedDetail": "Waiting for the next processing step.",
+  "agentBackgroundRetryingDetail": "The current step will retry automatically.",
+  "agentBackgroundAnalyzeMediaDetail": "Reading attachments and local context.",
+  "agentBackgroundGeneratingCardDetail": "Turning the record into a timeline card.",
+  "agentBackgroundUpdatingKnowledgeDetail": "Updating local knowledge and memory.",
+  "agentBackgroundPreparingCommentDetail": "Preparing an assistant follow-up.",
+  "agentBackgroundRoutingFollowUpsDetail": "Checking follow-up actions for this card.",
+  "@agentBackgroundPausedStatus": {
+    "placeholders": {
+      "summary": {}
+    }
+  },
+  "agentBackgroundPausedStatus": "Paused - {summary}",
+  "@agentBackgroundNeedsAttentionStatus": {
+    "placeholders": {
+      "summary": {}
+    }
+  },
+  "agentBackgroundNeedsAttentionStatus": "Needs attention - {summary}",
+  "settings": "Settings",
+  "languageSettings": "Language",
+  "languageSettingsDesc": "Change the app display language",
+  "noPendingActionsToast": "No pending actions",
+  "knowledgeNewDiscovery": "Knowledge new discovery",
+  "@discoveredNewInsightsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "discoveredNewInsightsCount": "Discovered {count} new insight(s)",
+  "@updatedExistingInsightsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "updatedExistingInsightsCount": "Updated {count} existing insight(s)",
+  "sectionNewInsights": "New insights",
+  "sectionUpdatedInsights": "Updated insights",
+  "unnamedInsight": "Unnamed insight",
+  "copiedToClipboard": "Copied to clipboard",
+  "copy": "Copy",
+  "selectedLocation": "Selected location",
+  "confirmLocationName": "Confirm location name",
+  "confirmLocationNameHint": "You can edit the name (coordinates stay the same)",
+  "nameLabel": "Name",
+  "inputPlaceNameHint": "Enter place name...",
+  "@currentCoordinates": {
+    "placeholders": {
+      "lat": {},
+      "lng": {}
+    }
+  },
+  "currentCoordinates": "Coordinates: {lat}, {lng}",
+  "confirmLocation": "Confirm location",
+  "welcomeToMemex": "Welcome to Memex",
+  "createUserIdToStart": "Create your profile",
+  "userIdLabel": "Your Name / Nickname",
+  "userIdHint": "Enter your name or nickname",
+  "pleaseEnterUserId": "Please enter your name",
+  "userIdMaxLength": "Name must not exceed 50 characters",
+  "startUsing": "Continue",
+  "userIdTip": "This will be used to personalize your experience.",
+  "setupModelConfigTitle": "Set up an AI model",
+  "setupModelConfigSubtitle": "Memex needs a frontier AI model to organize records, analyze images, and generate insights. Choose one connection method.",
+  "setupModelConfigComplete": "Complete & Go",
+  "aiService": "Memex Model Service",
+  "aiModelHubTitle": "AI models and services",
+  "aiModelHubSubtitle": "Choose Memex's official service or bring your own provider. Advanced model routing stays available when you need it.",
+  "aiSetupCurrentStatusTitle": "Current setup",
+  "aiSetupStatusNotConfiguredTitle": "AI service is not configured",
+  "aiSetupStatusNotConfiguredDescription": "Choose one connection method to enable AI organization for records, media, and insights.",
+  "aiSetupStatusMemexTitle": "Using MemeX official service",
+  "aiSetupStatusMemexDescription": "Memex will use the official connection and API credentials managed by your MemeX account.",
+  "aiSetupStatusCustomTitle": "Using custom provider settings",
+  "aiSetupStatusCustomDescription": "Memex will use your configured provider credentials and model role selections.",
+  "aiSetupChooseConnectionTitle": "Choose a connection method",
+  "aiSetupChooseConnectionDescription": "Start with the path that matches how you want Memex to access AI models.",
+  "aiSetupOfficialRouteDescription": "Sign in to MemeX and use the official service without choosing providers, keys, or agent-level models.",
+  "aiSetupCustomRouteDescription": "Add your own provider credentials, choose the model Super Agent should use, and optionally override models per agent.",
+  "aiSetupCustomPageTitle": "Custom AI service",
+  "aiSetupCustomPageSubtitle": "Configure provider credentials first, then choose the model Memex should use.",
+  "aiSetupProviderCredentialsTitle": "Provider and API keys",
+  "aiSetupProviderCredentialsDescription": "Add or edit OpenAI, Anthropic, DeepSeek, Gemini, OpenRouter, Ollama, or another compatible provider.",
+  "modelRolesTitle": "Choose primary model",
+  "modelRolesDescription": "Super Agent uses one model for text and image inputs. Advanced agent overrides stay available below.",
+  "textModelRoleTitle": "Primary model",
+  "textModelRoleDescription": "Used by Super Agent for text, images, cards, knowledge, insights, chat, comments, schedule, and memory.",
+  "modelConnectionsTitle": "Model providers and API keys",
+  "modelConnectionsDescription": "Connect Memex's official service or add your own provider credentials.",
+  "relatedAiCapabilitiesTitle": "Advanced and related capabilities",
+  "relatedAiCapabilitiesDescription": "Fine-tune agent assignments, location provider, and speech transcription behavior.",
+  "aiSetupServiceCapabilitiesTitle": "Service capabilities",
+  "aiSetupServiceCapabilitiesDescription": "Choose the providers Memex uses for adjacent AI-powered capabilities such as speech and reverse geocoding.",
+  "aiSetupAdvancedCustomizationTitle": "Advanced model routing",
+  "aiSetupAdvancedCustomizationDescription": "For power users who want individual agents to use different providers or model configs.",
+  "locationProviderSettings": "Location provider",
+  "speechProviderSettings": "Speech transcription",
+  "advancedAgentModelAssignments": "Agent model assignments",
+  "openAdvancedAgentModelAssignments": "Override individual agents",
+  "noConfiguredModelOptions": "Add a provider or API key before choosing model roles.",
+  "modelSlotUpdated": "Model role updated",
+  "aiServiceMemexRouteTitle": "Connect through Memex",
+  "aiServiceLongDescription": "Memex uses a multi-agent system to organize life records, knowledge notes, and social context, discover deeper insights, and provide AI companionship with persistent memory. Your data is stored as plain-text Markdown, preserving data freedom and portability.",
+  "aiServiceCustomApiRouteTitle": "I have an API key",
+  "aiServiceCustomModelDescription": "Choose this first if you already have an API key from OpenAI, Anthropic, DeepSeek, Gemini, or another provider.",
+  "enableAiService": "Connect with Memex",
+  "aiServiceReadyToast": "AI organization is on",
+  "aiServiceSettingsDescription": "If you do not have an API key, use a Memex account to connect to mainstream model services.",
+  "advancedModelConfiguration": "Configure API key",
+  "skipForNow": "Skip for now",
+  "clearAuth": "Clear auth",
+  "authorizing": "Authorizing...",
+  "@authFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "authFailed": "Auth failed: {error}",
+  "authorized": "Authorized",
+  "config": "Config",
+  "calendar": "Calendar",
+  "reminders": "Reminders",
+  "writeToSystemFailed": "Failed to write to system",
+  "@permissionRequired": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "permissionRequired": "{name} permission required",
+  "@permissionRationale": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "permissionRationale": "Please allow the app to access your {name} in Settings so we can create it for you.",
+  "goToSettings": "Go to Settings",
+  "unknownAction": "Unknown action",
+  "discoveredCalendarEvent": "Calendar event found",
+  "discoveredReminder": "Reminder found",
+  "addToCalendar": "Add to calendar",
+  "addToReminders": "Add to reminders",
+  "@addedToSuccess": {
+    "placeholders": {
+      "target": {}
+    }
+  },
+  "addedToSuccess": "Successfully added to {target}",
+  "ignore": "Ignore",
+  "confirmDelete": "Confirm delete",
+  "confirmDeleteSessionMessage": "Delete this conversation? This cannot be undone.",
+  "delete": "Delete",
+  "deleteSuccess": "Deleted successfully",
+  "@deleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "deleteFailed": "Delete failed: {error}",
+  "daysAgo": "{count} days ago",
+  "chatHistory": "Chat history",
+  "enterFullScreenTooltip": "Enter full screen",
+  "exitFullScreenTooltip": "Exit full screen",
+  "noConversations": "No conversations",
+  "@loadSessionListFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "loadSessionListFailed": "Failed to load session list: {error}",
+  "@yesterdayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "yesterdayAt": "Yesterday {time}",
+  "newChat": "New chat",
+  "@messageCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "messageCount": "{count} messages",
+  "organize": "Organize",
+  "pkmCategoryProject": "Project",
+  "pkmCategoryProjectSubtitle": "Short-term · Goals · Deadlines",
+  "pkmCategoryArea": "Area",
+  "pkmCategoryAreaSubtitle": "Long-term · Responsibility · Standards",
+  "pkmCategoryResource": "Resource",
+  "pkmCategoryResourceSubtitle": "Interests · Inspiration · Reserve",
+  "pkmCategoryArchive": "Archive",
+  "pkmCategoryArchiveSubtitle": "Done · Dormant · Reference",
+  "recentChanges": "Recent changes",
+  "noRecentChangesInThreeDays": "No changes in the last 3 days",
+  "unpinned": "Unpinned",
+  "pinnedStyle": "Style pinned",
+  "@operationFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "operationFailed": "Operation failed: {error}",
+  "refreshingInsightData": "Refreshing insight data, this may take a moment...",
+  "@refreshFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "refreshFailed": "Refresh failed: {error}",
+  "sortUpdated": "Sort order updated",
+  "@sortSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "sortSaveFailed": "Failed to save sort: {error}",
+  "insightCardDeleted": "Insight card deleted",
+  "@deleteFailedShort": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "deleteFailedShort": "Delete failed: {error}",
+  "knowledgeInsight": "Knowledge insight",
+  "completeSort": "Complete sort",
+  "noKnowledgeInsight": "No knowledge insight",
+  "@insightProcessingBacklogMessage": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "insightProcessingBacklogMessage": "{count} background tasks are still processing.",
+  "insightUnavailableMessage": "This insight is still being generated or was updated. Refresh insights and try again later.",
+  "noScheduleAggregation": "No schedule aggregation",
+  "scheduleAggregationEmptyHint": "Tap Update to organize schedules and todos from real temporal cards.",
+  "scheduleAggregationLoadFailed": "Failed to load schedule data",
+  "scheduleAggregationRefreshFailed": "Failed to refresh schedule data",
+  "scheduleTaskUpdateFailed": "Failed to update task",
+  "scheduleFeatured": "Featured",
+  "scheduleThisWeek": "This week",
+  "scheduleDone": "Done",
+  "scheduleTbd": "TBD",
+  "scheduleWeekOverview": "This week",
+  "scheduleImportant": "Important",
+  "scheduleBriefingTitle": "Schedule briefing",
+  "scheduleBriefingOpen": "Open",
+  "scheduleBriefingNoData": "No schedule briefing yet",
+  "@scheduleBriefingUpdated": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "scheduleBriefingUpdated": "Updated {time}",
+  "@scheduleBriefingDoneCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "scheduleBriefingDoneCount": "{count} done",
+  "updating": "Updating...",
+  "update": "Update",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "appLockOn": "App lock enabled",
+  "appLockOff": "App lock disabled",
+  "enableAppLockFirst": "Please enable app lock first",
+  "enterFourDigitPassword": "Enter 4-digit password",
+  "passwordSetAndLockOn": "Password set and app lock enabled",
+  "appLockSettings": "App lock settings",
+  "enableAppLock": "Enable app lock",
+  "enableAppLockSubtitle": "Password required when launching the app",
+  "enableBiometrics": "Enable biometrics",
+  "biometricsSubtitle": "Use Face ID or Touch ID to unlock",
+  "changePassword": "Change password",
+  "setFourDigitPassword": "Set 4-digit password",
+  "reenterPasswordToConfirm": "Re-enter password to confirm",
+  "passwordMismatch": "Passwords do not match. Please try again.",
+  "@confirmDeleteCharacter": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "confirmDeleteCharacter": "Delete character \"{name}\"? This cannot be undone.",
+  "configureAiCharacter": "Configure AI character",
+  "addCharacter": "Add character",
+  "addCharacterSubtitle": "Choose AI characters to join your insight team. They will analyze your life data from different angles.",
+  "noCharacters": "No characters",
+  "@loadCharacterFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "loadCharacterFailed": "Failed to load characters: {error}",
+  "noTags": "No tags",
+  "createSuccess": "Created successfully",
+  "updateSuccess": "Updated successfully",
+  "@saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "saveFailed": "Save failed: {error}",
+  "newCharacter": "New character",
+  "editCharacter": "Edit character",
+  "save": "Save",
+  "goalsPageTitle": "My Goals",
+  "goalsTabActive": "In Progress",
+  "goalsTabCompleted": "Completed",
+  "goalFormPageTitle": "New Goal",
+  "goalFormTitleLabel": "Title",
+  "goalFormTypeQuantitative": "Measurable",
+  "goalFormTypeBinary": "Yes/No",
+  "goalFormTargetValueLabel": "Target",
+  "goalFormUnitLabel": "Unit (optional)",
+  "goalFormDeadlineLabel": "Pick a deadline",
+  "goalFormNoDeadline": "No deadline",
+  "goalFormTitleRequired": "Title is required",
+  "goalFormTargetValueRequired": "Enter a valid target value",
+  "goalMarkCompleted": "Mark complete",
+  "goalReopen": "Reopen",
+  "goalDeleteConfirmTitle": "Delete Goal",
+  "mediaStatusWant": "Want to",
+  "mediaStatusDoing": "In progress",
+  "mediaStatusDone": "Finished",
+  "mediaCommentHint": "Add a short review (optional)",
+  "mediaStatusUnset": "No status set",
+  "mediaUnrated": "Not rated yet",
+  "mediaLibraryTitle": "Media Library",
+  "mediaLibraryEmpty": "No media records yet",
+  "mediaTypeBook": "Book",
+  "mediaTypeMovie": "Movie",
+  "mediaTypeTv": "TV",
+  "mediaTypeMusic": "Music",
+  "mediaTypePodcast": "Podcast",
+  "mediaTypeOther": "Other",
+  "mediaLibraryAddEntry": "Add entry manually",
+  "mediaLibraryEntryTitleLabel": "Title",
+  "mediaLibraryEntryTitleRequired": "Please enter a title",
+  "mediaLibraryEntryRatingLabel": "Rating (1-10, optional)",
+  "taskListTitle": "To-dos",
+  "taskListEmpty": "No to-dos yet",
+  "taskListAddEntry": "Add to-do manually",
+  "taskEntryTitleLabel": "Title",
+  "taskEntryTitleRequired": "Please enter a title",
+  "taskEntryDueDateLabel": "No due date",
+  "taskEntryPriorityLabel": "Mark as important",
+  "characterName": "Character name",
+  "characterNameHint": "Give your character a name",
+  "pleaseEnterCharacterName": "Please enter character name",
+  "tagsLabel": "Tags",
+  "tagsHint": "e.g. wisdom, recognition, macro\nSeparate multiple tags with commas",
+  "characterPersonaLabel": "Character persona",
+  "characterPersonaHint": "Include persona, style guide, example dialogue, knowledge filters, etc.\nUse ## for section headers.",
+  "pleaseEnterCharacterPersona": "Please enter character persona",
+  "@permissionRequestError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "permissionRequestError": "Permission request error: {error}",
+  "permissionRequiredTitle": "Permission required",
+  "permissionPermanentlyDeniedMessage": "You have permanently denied this permission or the system requires it. Please enable it in system settings.",
+  "getting": "Getting...",
+  "unauthorized": "Unauthorized",
+  "authorizedGoToSettings": "Authorized. Go to system settings to change.",
+  "location": "Location",
+  "locationPermissionReason": "For recording places and location-related features",
+  "photos": "Photos",
+  "photosPermissionReason": "For selecting photos, saving generated images, etc.",
+  "camera": "Camera",
+  "cameraPermissionReason": "For taking photos and videos",
+  "microphone": "Microphone",
+  "microphonePermissionReason": "For voice recognition, recording, etc.",
+  "calendarPermissionReason": "For recording schedule and reading calendar events",
+  "remindersPermissionReason": "For recording and reading your reminders",
+  "fitnessAndMotion": "Fitness & motion",
+  "fitnessPermissionReason": "For recording health and motion data",
+  "notification": "Notification",
+  "notificationPermissionReason": "For sending schedule and important reminders",
+  "memexAgentNotificationPermissionTitle": "Keep Memex Agent running in the background",
+  "memexAgentNotificationPermissionMessage": "Memex Agent runs locally on your device. Notifications let Memex show progress and keep processing after you leave the app or turn off the screen. If notifications are off, keep Memex open in the foreground until the task finishes.",
+  "loadDetailFailedRetryShort": "Load detail failed, please retry later.",
+  "total": "Total",
+  "estimatedCost": "Estimated cost",
+  "byAgent": "By Agent",
+  "timeUpdated": "Time updated",
+  "@updateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "updateFailed": "Update failed: {error}",
+  "locationUpdated": "Location updated",
+  "confirmDeleteCardMessage": "Delete this card? This cannot be undone.",
+  "cardDetailNotFound": "Card detail not found",
+  "saySomething": "Say something...",
+  "relatedMemories": "Related memories",
+  "viewMore": "View more",
+  "relatedRecords": "Related records",
+  "reply": "Reply",
+  "replySent": "Reply sent",
+  "insightTemplateGalleryTitle": "Insight card templates",
+  "timelineTemplateGalleryTitle": "Timeline card templates",
+  "categoryTextual": "Textual",
+  "timelineFilterAll": "ALL",
+  "insights": "Insights",
+  "memoryTitle": "Memory",
+  "longTermProfile": "Long-term Profile",
+  "recentBuffer": "Recent Buffer",
+  "@errorLoadingMemory": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingMemory": "Error loading memory: {error}",
+  "memoryStatusUpdating": "Syncing",
+  "memoryStatusPendingUpdate": "Sync pending",
+  "memoryStatusUpToDate": "Synced",
+  "memoryUpdateAction": "Update memory",
+  "memoryForceArchiveAction": "Archive now",
+  "memoryArchiveDone": "Buffer consolidated into long-term memory",
+  "memoryArchiveEmpty": "Nothing in the buffer to archive",
+  "@memoryArchiveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "memoryArchiveFailed": "Failed to archive: {error}",
+  "agentConfiguration": "Agent Configuration",
+  "resetToDefaults": "Reset to Defaults",
+  "resetAllAgentConfigurationsTitle": "Reset All Agent Configurations",
+  "resetAllAgentConfigurationsMessage": "Are you sure you want to reset all agent configurations to their default values? This action cannot be undone.",
+  "resetButton": "Reset",
+  "@loadDataFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "loadDataFailed": "Failed to load data: {error}",
+  "@saveConfigFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "saveConfigFailed": "Failed to save config: {error}",
+  "selectLlmClient": "Select LLM Client:",
+  "agentConfigurationsReset": "Agent configurations reset",
+  "@resetFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "resetFailed": "Failed to reset: {error}",
+  "modelConfiguration": "Model Configuration",
+  "resetAllConfigurationsTitle": "Reset All Configurations",
+  "resetAllModelConfigurationsMessage": "Are you sure you want to reset all model configurations to their default values? This action cannot be undone.",
+  "modelConfigurationsReset": "Model configurations reset",
+  "cannotDeleteDefaultConfiguration": "Cannot delete default configuration",
+  "cannotDeleteConfigurationTitle": "Cannot Delete Configuration",
+  "@configUsedByAgentsMessage": {
+    "placeholders": {
+      "agentList": {}
+    }
+  },
+  "configUsedByAgentsMessage": "This configuration is currently used by the following agents:\n\n{agentList}\n\nPlease reassign these agents before deleting.",
+  "ok": "OK",
+  "deleteConfigurationTitle": "Delete Configuration",
+  "@confirmDeleteConfigMessage": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "confirmDeleteConfigMessage": "Are you sure you want to delete \"{key}\"?",
+  "defaultLabel": "Default",
+  "setAsDefault": "Set as default",
+  "invalidJsonInExtraField": "Invalid JSON in Extra field",
+  "keyAlreadyExists": "Key already exists",
+  "resetConfigurationTitle": "Reset Configuration",
+  "resetConfigurationMessage": "Reset this configuration to its initial default values? Current changes will be lost.",
+  "configurationResetPressSave": "Configuration reset. Press Save to apply.",
+  "addConfiguration": "Add Configuration",
+  "editConfiguration": "Edit Configuration",
+  "duplicateConfiguration": "Duplicate Configuration",
+  "duplicate": "Duplicate",
+  "keyIdLabel": "Config ID",
+  "keyIdHelper": "Name this setup, such as deepseek or work-gpt.",
+  "required": "Required",
+  "clientLabel": "Model provider",
+  "providerGroupOpenAi": "OpenAI",
+  "providerGroupAnthropic": "Anthropic",
+  "providerGroupGoogle": "Google",
+  "providerGroupOthers": "Popular",
+  "providerOpenAiApiKey": "API Key",
+  "providerOpenAiResponses": "API Key (Responses)",
+  "providerChatGptOauth": "ChatGPT Pro/Plus",
+  "providerClaudeApiKey": "API Key",
+  "providerBedrockSecret": "Bedrock Secret",
+  "providerGemini": "Gemini",
+  "providerGeminiOauth": "Gemini (Google OAuth)",
+  "providerKimi": "Kimi (Moonshot)",
+  "providerQwen": "Aliyun",
+  "providerSeed": "Volcengine",
+  "providerZhipu": "Zhipu GLM",
+  "providerDeepSeek": "DeepSeek",
+  "providerMinimax": "MiniMax",
+  "providerOpenRouter": "OpenRouter",
+  "providerOllama": "Ollama (Local)",
+  "providerMimo": "Xiaomi MIMO",
+  "providerMemex": "Memex proxy service",
+  "memexSignIn": "Sign In",
+  "memexCreateAccount": "Create Account",
+  "memexUsername": "Username",
+  "memexPassword": "Password",
+  "memexCreateAccountLink": "Create account",
+  "memexSignInLink": "Sign in instead",
+  "memexTopUp": "Top up to start using Memex AI",
+  "memexTopUpSuccess": "Top up successful!",
+  "memexFillAllFields": "Please fill in all fields",
+  "memexUsernameTooShort": "Username must be at least 6 characters",
+  "memexAuthFailed": "Authentication failed",
+  "memexPaymentFailed": "Failed to create payment",
+  "memexLogout": "Logout",
+  "memexTopUpButton": "Top up",
+  "memexTopUpChooseAmount": "Choose an amount",
+  "memexTopUpEstimatedRecords": "About {range} records",
+  "@memexTopUpEstimatedRecords": {
+    "placeholders": {
+      "range": {}
+    }
+  },
+  "memexTopUpPlanStarter": "Starter",
+  "memexTopUpPlanEveryday": "Everyday",
+  "memexTopUpPlanHighVolume": "High volume",
+  "memexTopUpPlanCustom": "Custom credits",
+  "memexTopUpPlanStarterSubtitle": "Good for trying Memex AI",
+  "memexTopUpPlanEverydaySubtitle": "Good for regular organizing",
+  "memexTopUpPlanHighVolumeSubtitle": "Good for larger batches",
+  "memexTopUpPlanCustomSubtitle": "Enter USD 1-10,000",
+  "memexTopUpCustomEstimate": "Estimate is based on the amount entered",
+  "memexCustomAmount": "Custom Amount",
+  "memexViewHistory": "Usage History",
+  "memexBalanceLabel": "Balance: {amount}",
+  "@memexBalanceLabel": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "memexConfirmPassword": "Confirm Password",
+  "memexPasswordMismatch": "Passwords do not match",
+  "memexPayAmount": "Top up {amount}",
+  "@memexPayAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "modelIdLabel": "Model",
+  "modelIdHelper": "e.g. gemini-3.1-pro-preview, gpt-4o",
+  "fetchingModels": "Fetching models...",
+  "fetchModelsButton": "Fetch Models",
+  "enterApiKeyFirst": "Enter API Key first to fetch models",
+  "apiKeyLabel": "API Key",
+  "baseUrlLabel": "API endpoint",
+  "advancedSettings": "Advanced Settings",
+  "testConnectionSuccess": "Connection Successful",
+  "testConnectionFailed": "Connection Failed",
+  "testTypeText": "Text",
+  "testTypeVision": "Vision",
+  "testButton": "Test",
+  "testing": "Testing...",
+  "proxyUrlOptional": "Proxy URL (Optional)",
+  "proxyUrlHelper": "e.g. http://127.0.0.1:7890",
+  "temperatureLabel": "Temperature",
+  "topPLabel": "Top P",
+  "maxTokensLabel": "Max Tokens",
+  "extraParamsJson": "Extra Params (JSON)",
+  "invalidJson": "Invalid JSON",
+  "warning": "Incomplete Setup",
+  "invalidConfigurationWarning": "The configuration is not complete yet (e.g., API Key or Model ID is missing). You can still save and configure it later. Continue?",
+  "invalidModelConfigDetailed": "AI Agent \"{agentId}\" needs a valid model configuration (key: \"{configKey}\") to operate. Please check the model settings.",
+  "discardChangesTitle": "Leave this page?",
+  "discardChangesMessage": "If you made any changes, please save them before leaving.",
+  "discardButton": "Discard",
+  "chooseLanguage": "Choose Language",
+  "chooseAvatar": "Choose Avatar",
+  "configureNow": "Configure Now",
+  "modelNotConfiguredBanner": "AI model not configured yet. Set it up to unlock all features.",
+  "modelNotConfiguredSubmitHint": "Please configure an AI model before publishing",
+  "processingStatus": "Processing",
+  "failedStatus": "Failed",
+  "failureReason": "Failure Reason",
+  "unknownError": "Unknown error occurred",
+  "enableFitness": "Enable Fitness",
+  "fitnessBannerMessage": "Allow fitness access to track your health and activity data.",
+  "fitnessDismissTitle": "Skip Fitness Access?",
+  "fitnessDismissMessage": "Without fitness permission, the app won't be able to automatically collect your health data for insights and auto-recording.",
+  "skipAnyway": "Skip Anyway",
+  "proModelHint": "This model requires a ChatGPT Pro/Plus subscription.",
+  "searchKnowledgeBase": "Search knowledge base...",
+  "searchKnowledgeHint": "Enter keyword to search file names or content",
+  "@noSearchResults": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "noSearchResults": "No results found for \"{query}\"",
+  "onlyMarkdownPreview": "Only Markdown preview supported",
+  "backupAndRestore": "Backup & Restore",
+  "createBackup": "Create Backup",
+  "restoreBackup": "Restore Backup",
+  "backupDescription": "Pack all your data (cards, knowledge base, insights, settings) into a .memex file. Save it to iCloud Drive, Google Drive, or any location via the share sheet.",
+  "restoreDescription": "Select a .memex backup file to restore all data. This will overwrite current data.",
+  "selectBackupFile": "Select Backup File",
+  "estimatedSize": "Estimated size",
+  "backupComplete": "Backup created",
+  "@backupFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "backupFailed": "Backup failed: {error}",
+  "confirmRestore": "Confirm Restore",
+  "confirmRestoreMessage": "Restoring will overwrite all current data including cards, knowledge base, insights, and settings. This cannot be undone. Continue?",
+  "restoreComplete": "Restore complete",
+  "restoreRestartHint": "Data has been restored. Please restart the app for all changes to take effect.",
+  "@restoreFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "restoreFailed": "Restore failed: {error}",
+  "invalidBackupFile": "Invalid backup file. Please select a .memex file.",
+  "automaticBackup": "Automatic Backup",
+  "autoBackupDescription": "When enabled, Memex creates at most one local snapshot per day after startup or when returning to the foreground.",
+  "backupSensitiveSettingsHint": "Backups include settings and model provider keys. Keep backup files somewhere you trust.",
+  "backupLocation": "Location",
+  "backupLocationDetails": "Location details",
+  "backupLocationSummary": "Shown in app",
+  "backupLocationFullPath": "Full path",
+  "backupLocationUri": "Folder access URI",
+  "copyBackupLocationPath": "Copy path",
+  "backupLocationCopied": "Backup location copied",
+  "androidBackupLocationSelected": "Selected folder: {folderName}",
+  "@androidBackupLocationSelected": {
+    "placeholders": {
+      "folderName": {}
+    }
+  },
+  "iosICloudBackupLocation": "iCloud Drive > Memex > Backups",
+  "iosAppDocumentsBackupLocation": "Files > On My iPhone > Memex > Backups",
+  "autoBackupStatus": "Status",
+  "noAutoBackupYet": "No automatic backup yet",
+  "@lastBackupAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "lastBackupAt": "Last backup: {time}",
+  "autoBackupRetention": "Retention",
+  "@autoBackupRetentionDays": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "autoBackupRetentionDays": "{days} days",
+  "autoBackupRetentionForever": "Keep forever",
+  "autoBackupMaxSize": "Storage cap",
+  "@autoBackupRetentionLimitHint": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "autoBackupRetentionLimitHint": "Automatic cleanup keeps automatic snapshots under {size}. Safety snapshots and manual exports are kept separately.",
+  "createSnapshotNow": "Back up now",
+  "backupLocationMenu": "Change location",
+  "defaultBackupLocation": "Default backup folder",
+  "defaultBackupLocationAndroidDesc": "Use Memex's app-specific external files folder. No storage permission needed.",
+  "chooseBackupLocation": "Choose backup folder",
+  "chooseBackupLocationAndroidDesc": "Pick a folder with Android's system picker and grant Memex persistent access.",
+  "storedBackups": "Stored Backups",
+  "noStoredBackups": "Automatic backups will appear here after the first snapshot.",
+  "backupTypeAutoSnapshot": "Automatic snapshot",
+  "backupTypeSafetySnapshot": "Safety snapshot",
+  "backupTypeManualBackup": "Manual backup",
+  "refresh": "Refresh",
+  "restoreThisBackup": "Restore this backup",
+  "deleteThisBackup": "Delete this backup",
+  "confirmDeleteBackup": "Delete backup?",
+  "@confirmDeleteBackupMessage": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "confirmDeleteBackupMessage": "Delete {fileName}? This removes the stored backup file and cannot be undone.",
+  "@backupDeleted": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "backupDeleted": "Backup deleted: {fileName}",
+  "@backupDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "backupDeleteFailed": "Could not delete backup: {error}",
+  "creatingSafetySnapshot": "Creating safety snapshot...",
+  "@autoBackupCreated": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "autoBackupCreated": "Snapshot created: {fileName}",
+  "@backupLocationFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "backupLocationFailed": "Could not update backup location: {error}",
+  "backupImportCreatedAt": "Created",
+  "backupImportSourceVersion": "Source version",
+  "backupImportFlavor": "Build",
+  "backupLegacyFormat": "Legacy backup (no manifest)",
+  "restoreInProgress": "Restoring backup...",
+  "dataStorage": "Data Storage",
+  "dataStorageDescriptionAndroid": "Choose a custom folder to store your workspace. Data is kept when you reinstall the app.",
+  "dataStorageDescriptionIOS": "Turn on iCloud to sync your workspace across devices and keep data when you reinstall the app.",
+  "storageLocationApp": "App storage",
+  "storageLocationAppDesc": "Data is stored inside the app and will be removed when you uninstall.",
+  "storageLocationCustom": "Device storage (custom folder)",
+  "storageLocationCustomDesc": "Store data in a folder you choose. Data persists across reinstall if the folder remains.",
+  "storageLocationICloud": "Store in iCloud",
+  "storageLocationICloudDesc": "Sync your workspace across Apple devices. Data stays after reinstall.",
+  "storageLocationCurrent": "Current: {location}",
+  "icloudRequiresCapability": "Sign in to iCloud and turn on iCloud Drive to use iCloud storage.",
+  "loadingFromICloud": "Restoring data from iCloud…",
+  "switchingToICloud": "Switching to iCloud storage…",
+  "switchingStorage": "Switching storage…",
+  "customFolderAccessDenied": "Cannot read or write this folder. Please grant storage permission or choose another location.",
+  "@storageLocationCurrent": {
+    "placeholders": {
+      "location": {}
+    }
+  },
+  "configured": "Configured",
+  "apiKeyNotSet": "API Key not set — tap to configure",
+  "bottomNavTimeline": "Timeline",
+  "bottomNavLibrary": "Library",
+  "aiGeneratedLabel": "AI Generated",
+  "@sourceTraceWithCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "sourceTraceWithCount": "SOURCE TRACE ({count})",
+  "deleteAccount": "Delete Account",
+  "deleteAccountDesc": "Permanently delete all local data and reset the app.",
+  "deleteAccountConfirmTitle": "Delete Account?",
+  "deleteAccountConfirmMessage": "This will permanently delete all your data including timeline cards, knowledge base, recordings, and settings. This action cannot be undone.",
+  "deleteAccountSafetySnapshotNote": "A safety snapshot will be created before deletion — you can restore it from Backup & Restore.",
+  "deleteAccountTypeName": "Type \"{name}\" to confirm",
+  "@deleteAccountTypeName": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "deleteAccountTypeHint": "Enter your username to confirm",
+  "llmConsentTitle": "Data Sharing Consent",
+  "llmConsentMessage": "To enable AI features, Memex needs to send your data to {provider} for processing. This includes:\n\n• Text you enter (notes, voice transcriptions)\n• Photo metadata and extracted text (OCR)\n• Health and fitness summaries\n• Timeline card content\n\nYour data is sent directly from your device to {provider}. Memex does not store or relay your data through any other server.\n\nPlease review {provider}'s privacy policy for how they handle your data.\n\nDo you agree to send your data to {provider} for AI processing?",
+  "@llmConsentMessage": {
+    "placeholders": {
+      "provider": {}
+    }
+  },
+  "llmConsentAgree": "I Agree",
+  "llmConsentDecline": "Decline",
+  "customAgents": "Custom Agents",
+  "noCustomAgents": "No custom agents configured.",
+  "deleteAgent": "Delete Agent",
+  "deleteAgentConfirm": "Delete custom agent \"{name}\"?",
+  "@deleteAgentConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "deleted": "Deleted",
+  "saved": "Saved",
+  "newAgent": "New Agent",
+  "editAgent": "Edit Agent",
+  "save": "Save",
+  "agentName": "Agent Name",
+  "agentNameHint": "my-custom-agent",
+  "agentNameRequired": "Required",
+  "agentNameInvalid": "Only letters, digits, and hyphens",
+  "agentNameExists": "Name already exists",
+  "hostAgentType": "Host Agent Type",
+  "skillDirectory": "Skill Directory",
+  "skillDirInvalid": "Must be a relative path (no leading / or ..)",
+  "workingDirectory": "Working Directory (optional)",
+  "workingDirectoryHint": "Leave empty for workspace default",
+  "llmConfig": "LLM Config",
+  "eventType": "Event Type",
+  "executionMode": "Execution Mode",
+  "executionModeAsync": "Async",
+  "executionModeSync": "Sync",
+  "dependsOn": "Depends On",
+  "dependsOnHint": "Select dependencies",
+  "priority": "Priority",
+  "maxRetries": "Max Retries",
+  "systemPromptLabel": "System Prompt (optional)",
+  "systemPromptHint": "Additional instructions appended to host agent prompt",
+  "eventSerializer": "Event Serializer",
+  "eventSerializerDefault": "Default (XML)",
+  "enabledLabel": "Enabled",
+  "skillsManagement": "Skills Management",
+  "skillsManagementEmpty": "No skills yet",
+  "downloadSkill": "Download Skill",
+  "downloadFile": "Download file",
+  "downloading": "Downloading...",
+  "downloadSuccess": "Skill downloaded successfully",
+  "downloadFailed": "Download failed: {error}",
+  "@downloadFailed": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "deleteConfirm": "Confirm Delete",
+  "deleteConfirmMessage": "Are you sure you want to delete \"{name}\"?",
+  "@deleteConfirmMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "invalidUrl": "Please enter a valid URL",
+  "urlHint": "https://example.com/skill.zip",
+  "newFolder": "New Folder",
+  "newFile": "New File",
+  "folderName": "Folder Name",
+  "fileName": "File Name",
+  "nameRequired": "Name is required",
+  "nameInvalid": "Name cannot contain / or ..",
+  "createFailed": "Create failed: {error}",
+  "@createFailed": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "fileContent": "File Content",
+  "saveSuccess": "Saved successfully",
+  "downloadToCurrentDir": "The zip will be extracted to current directory: {dir}",
+  "@downloadToCurrentDir": {
+    "placeholders": {
+      "dir": { "type": "String" }
+      }
+      },
+  "privacyPolicy": "Privacy Policy",
+  "privacyPolicyDesc": "How Memex handles your data",
+  "llmAuthError": "API authentication failed. Please check your LLM configuration in Settings.",
+  "llmBadRequestError": "The request was rejected by the LLM provider. The input format may not be supported by the current model.",
+  "llmRateLimitError": "API rate limit exceeded. Please try again later.",
+  "llmServerError": "LLM service is temporarily unavailable. Please try again later.",
+  "llmNetworkError": "Network connection failed. Please check your internet connection.",
+  "llmUnknownError": "An unexpected error occurred while processing your content.",
+  "llmErrorDialogTitle": "Processing Failed",
+  "goToModelConfig": "Go to Settings",
+  "speechModelDownloadTitle": "Download Speech Model",
+  "speechModelDownloadDesc": "A one-time model download (~{sizeMB}MB) is required.\n\nOnce downloaded, transcription runs entirely on-device.",
+  "@speechModelDownloadDesc": { "placeholders": { "sizeMB": {} } },
+  "speechModelStartDownload": "Start Download",
+  "speechModelChooseSource": "Choose download source:",
+  "speechModelChinaMirror": "🇨🇳 China Mirror (Faster in CN)",
+  "speechModelGithub": "🌐 GitHub (Global)",
+  "speechModelDownloading": "Downloading model...",
+  "speechModelConnecting": "Connecting...",
+  "deleteSpeechModel": "Delete speech model",
+  "confirmDeleteSpeechModelMessage": "Delete the downloaded local speech recognition model files? They will be downloaded again the next time local speech-to-text is used.",
+  "speechModelDeletedSuccess": "Speech model files deleted",
+  "speechModelNotDownloaded": "No downloaded speech model files found",
+  "speechModelDeleteFailed": "Failed to delete speech model files: {error}",
+  "@speechModelDeleteFailed": { "placeholders": { "error": {} } },
+  "speechTranscribing": "Recognizing...",
+  "speechNoResult": "No speech detected",
+  "useLocalSpeechToTextTitle": "Use local speech to text",
+  "useLocalSpeechToTextDesc": "When enabled, audio is transcribed on-device before sending — useful for models that do not support audio input. When disabled, the original audio is sent directly to the model.",
+  "summaryRemindersTitle": "Summary reminders",
+  "summaryRemindersSubtitle": "Remind me at 9:00 PM to write or view a summary",
+  "pendingAiProcessingHint": "Set up AI model to process",
+  "demoWelcome": "Welcome to Memex!\nLet's take a quick tour of what AI can do for your records.",
+  "demoTapAdd": "Tap here to create your first record",
+  "demoTapSend": "Tap to send your first record",
+  "demoTapCard": "Tap to see how AI organized your record",
+  "demoDetailHint": "This is your AI-organized record detail. Scroll around, then go back to continue the tour.",
+  "demoTapInsight": "Tap to see AI-generated insights",
+  "demoTapInsightUpdate": "Tap to generate insights from your records",
+  "demoTapKnowledge": "Check your auto-organized knowledge files",
+  "demoDone": "Start recording your life.",
+  "demoStartTour": "Start Tour",
+  "demoGetStarted": "Get Started",
+  "demoSkip": "Skip",
+  "demoPrefillText": "Hello Memex! This is my first record 🎉",
+  "visionBadge": "Vision",
+  "notMultimodalHint": "Memex relies on multimodal model capabilities for media analysis. If your records contain images, please make sure the model you configured supports image input.",
+  "defaultModelPrefix": "Default",
+  "recommendedBadge": "Recommended",
+  "readOnlyBadge": "CHAT",
+  "switchCompanion": "Switch companion",
+  "personaChatInputHint": "Type a message...",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "yesterday": "Yesterday",
+  "showInsightTextTitle": "Show Memex insight comment",
+  "showInsightTextDesc": "Whether to show the Memex insight as a pinned comment in the card detail comment section.",
+  "enableCharacterCommentTitle": "Character auto-comment",
+  "enableCharacterCommentDesc": "Characters automatically comment on new records.",
+  "maxCommentCharactersTitle": "Max commenting characters",
+  "maxCommentCharactersDesc": "How many characters can comment on each record.",
+  "replyTo": "Reply to {name}",
+  "@replyTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cdnSignalsComments": "New reply received",
+  "cdnSignalsInsight": "New insight generated",
+  "cdnSignalsBoth": "New reply and insight",
+  "untitledCard": "Untitled card",
+  "locationContextTitle": "Location Context",
+  "locationContextDescription": "Current city and neighborhood context for agent chat",
+  "locationContextAttachTitle": "Attach current location to chat",
+  "locationContextAttachDesc": "Uses device GPS and reverse geocoding to provide city, district, and neighborhood context to the agent.",
+  "reverseGeocodingProvider": "Reverse geocoding provider",
+  "amapProviderName": "Amap",
+  "amapApiKey": "Amap API Key",
+  "amapGcj02Note": "Amap uses GCJ-02 coordinates. Device GPS is converted before reverse geocoding.",
+  "contextGranularity": "Context granularity",
+  "granularityCity": "City",
+  "granularityDistrict": "District",
+  "granularityNeighborhood": "Neighborhood",
+  "granularityStreet": "Street",
+  "granularityFullAddress": "Full address candidate",
+  "locationFreshness": "Location freshness",
+  "minutesShort": "{minutes} minutes",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "oneHour": "1 hour",
+  "testCurrentLocation": "Test current location",
+  "locationTestFailed": "Failed: {error}",
+  "@locationTestFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "locationDebugGps": "GPS",
+  "locationDebugReverseGeocode": "Reverse geocode",
+  "locationDebugProvider": "Provider",
+  "locationDebugAgentContext": "Agent context",
+  "locationDebugSource": "Source",
+  "locationDebugAddressSummary": "Address summary",
+  "locationDebugFullAddress": "Full address",
+  "locationDebugCoordinates": "Coordinates",
+  "locationDebugAccuracy": "Accuracy",
+  "locationDebugReason": "Reason",
+  "locationDebugOk": "OK",
+  "locationDebugUnavailable": "unavailable",
+  "locationDebugInjected": "injected",
+  "locationDebugNotInjected": "not injected",
+  "locationStatusUpdatedAt": "Updated",
+  "locationStatusSuccessTitle": "Current location is ready",
+  "locationStatusSuccessBody": "Memex can attach this location summary when location context is relevant.",
+  "locationStatusApproximateTitle": "Approximate location only",
+  "locationStatusApproximateBody": "Accuracy looks city or area level. You can keep using it, or enable Precise Location in system settings for a tighter context.",
+  "locationStatusServiceDisabledTitle": "System location is off",
+  "locationStatusServiceDisabledBody": "Memex only uses device GPS and will not infer location from network or IP. On Android, open Location settings; on iOS, enable Settings > Privacy & Security > Location Services.",
+  "locationStatusPermissionDeniedTitle": "Location permission is needed",
+  "locationStatusPermissionDeniedBody": "Allow Memex to use location while testing or when location context is needed. Always access is not requested.",
+  "locationStatusPermissionForeverTitle": "Location permission is blocked",
+  "locationStatusPermissionForeverBody": "Open app settings and allow location for Memex. On iOS, While Using the App is enough.",
+  "locationStatusDisabledTitle": "Location Context is off",
+  "locationStatusDisabledBody": "Turn on the switch above and save when you want Memex to attach device location to agent context.",
+  "locationStatusGeocodeUnavailableTitle": "GPS works, address lookup failed",
+  "locationStatusGeocodeUnavailableBody": "Memex has coordinates but will not inject GPS-only context into the agent. Check the reverse geocoding provider and try again.",
+  "locationStatusUnavailableTitle": "Location unavailable",
+  "locationStatusUnavailableBody": "Check system location services and app permission, then test again.",
+  "allowLocationPermissionButton": "Allow location permission",
+  "openAppSettingsButton": "Open app settings",
+  "openLocationSettingsButton": "Open location settings",
+  "locationSettingsOpenFailed": "Could not open system settings.",
+  "locationActionFailed": "Location action failed: {error}",
+  "@locationActionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSearchPlaceholder": "Search settings...",
+  "settingsSearchEmpty": "No matching settings found",
+  "importCharacterCard": "Import Character Card",
+  "firstMessageLabel": "First Message",
+  "firstMessageHint": "Greeting sent on first conversation (optional)",
+  "systemPromptOverrideLabel": "System Prompt Override",
+  "systemPromptOverrideHint": "Override default system prompt (advanced, optional)",
+  "postHistoryInstructionsLabel": "Post-History Instructions",
+  "postHistoryInstructionsHint": "Instructions injected after chat history, before reply (optional)",
+  "mesExampleLabel": "Message Examples",
+  "mesExampleHint": "Example dialogues showing character style (optional)",
+  "worldBookTitle": "World Book",
+  "worldBookSubtitle": "Background knowledge injected when keywords are triggered",
+  "characterMemoryTitle": "Character Memory",
+  "characterMemorySubtitle": "Relationship dynamics and interaction memories between character and user",
+  "addTooltip": "Add",
+  "constantBadge": "Constant",
+  "@worldEntryFallbackName": {
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "worldEntryFallbackName": "Entry {index}",
+  "@keywordsPrefix": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "keywordsPrefix": "Keywords: {keys}",
+  "@memoryFallbackName": {
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "memoryFallbackName": "Memory {index}",
+  "addWorldEntry": "Add World Book Entry",
+  "editWorldEntry": "Edit World Book Entry",
+  "commentTitleLabel": "Comment / Title",
+  "entryDescriptionHint": "Entry description (optional)",
+  "triggerKeywordsLabel": "Trigger Keywords",
+  "triggerKeywordsHint": "Comma-separated, e.g.: magic, spell",
+  "contentLabel": "Content",
+  "worldEntryContentHint": "Background knowledge injected when keywords trigger",
+  "enabledCheckbox": "Enabled",
+  "addMemory": "Add Memory",
+  "editMemory": "Edit Memory",
+  "memoryLabelField": "Label",
+  "memoryLabelHint": "Unique identifier, e.g.: name preference",
+  "memoryContentHint": "Memory content",
+  "salienceLabel": "Salience: ",
+  "labelCannotBeEmpty": "Label cannot be empty",
+  "@importSuccess": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "importSuccess": "{name} imported successfully",
+  "@importFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importFailed": "Import failed: {error}",
+  "supportedFormats": "Supported Formats",
+  "tavernImportDescription": "• SillyTavern V2 character cards (.json)\n• PNG images with embedded cards (.png)\n\nFields like persona, world book, etc. will be automatically mapped to Memex character format.",
+  "pickCharacterFile": "Pick Character File",
+  "repickFile": "Pick Another File",
+  "personaSettingSection": "Persona",
+  "systemPromptSection": "System Prompt",
+  "@worldEntriesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "worldEntriesCount": "World Book: {count} entries",
+  "@fileLabel": {
+    "placeholders": {
+      "filename": {}
+    }
+  },
+  "fileLabel": "File: {filename}",
+  "@conflictWarning": {
+    "placeholders": {
+      "names": {}
+    }
+  },
+  "conflictWarning": "Character with same name already exists: {names}. Importing will create a new character without overwriting existing ones.",
+  "setPrimaryCompanionTitle": "Set as Primary Companion",
+  "setPrimaryCompanionSubtitle": "Automatically set as your primary companion after import",
+  "confirmImport": "Confirm Import",
+  "chatBackground": "Chat Background",
+  "chooseChatBackgroundImage": "Choose background image",
+  "earlyUpdateSettingsTitle": "Early access updates",
+  "earlyUpdateSettingsDesc": "Check GitHub pre-releases for the matching Early APK, download it, and hand it to Android's installer.",
+  "earlyUpdateUnsupported": "Early updates are only available in the Android Early build.",
+  "earlyUpdateAutoCheckTitle": "Auto check for updates",
+  "earlyUpdateAutoCheckDesc": "Check at startup at most once every 12 hours.",
+  "earlyUpdateWifiOnlyTitle": "Download on Wi-Fi only",
+  "earlyUpdateWifiOnlyDesc": "Skip update downloads while using mobile data.",
+  "earlyUpdateAutoInstallTitle": "Auto download and install",
+  "earlyUpdateAutoInstallDesc": "When a new build is found, download it and open the Android installer automatically.",
+  "earlyUpdateCheckNow": "Check now",
+  "earlyUpdateChecking": "Checking GitHub pre-releases...",
+  "earlyUpdateSkippedMobile": "Skipped because Wi-Fi-only downloads are enabled.",
+  "earlyUpdateNoUpdate": "You are already on the latest Early build.",
+  "@earlyUpdateFound": {
+    "placeholders": {
+      "version": {},
+      "build": {}
+    }
+  },
+  "earlyUpdateFound": "Early build {version}+{build} is available.",
+  "earlyUpdateDownloadAndInstall": "Download and install",
+  "earlyUpdateDownloadInProgress": "Downloading update...",
+  "@earlyUpdateDownloadingPercent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "earlyUpdateDownloadingPercent": "Downloading update: {percent}%",
+  "earlyUpdateDownloadReadyToInstall": "Update package downloaded. Ready to install.",
+  "earlyUpdateInstallDownloadedPackage": "Install downloaded package",
+  "earlyUpdateClearDownloadedPackage": "Clear downloaded package",
+  "earlyUpdateClearDownloadedPackageSuccess": "Downloaded update package cleared.",
+  "earlyUpdateInstallStarted": "Android installer opened.",
+  "earlyUpdateInstallPermissionRequired": "Allow Memex to install unknown apps, then tap download and install again.",
+  "@earlyUpdateLastChecked": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "earlyUpdateLastChecked": "Last checked: {time}",
+  "@earlyUpdateCheckFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "earlyUpdateCheckFailed": "Update check failed: {error}",
+  "earlyUpdateDialogTitle": "Early update available",
+  "earlyUpdateReleaseNotes": "Release notes",
+  "dismissAllNotifications": "Clear all",
+  "dismissByType": "Clear by type",
+  "dismissTypeSystemAction": "Reminders & events",
+  "dismissTypeClarification": "Clarifications",
+  "dismissTypeCardUpdate": "Card updates",
+  "dismissedCount": "{count} cleared",
+  "@dismissedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dataImportTitle": "Import files",
+  "dataImportSettingsDescription": "Bring old files into Memex, then decide whether to organize them.",
+  "dataImportDescription": "Choose old notes, exported records, documents, or ZIP archives. Memex saves a copy first and leaves the original files untouched. After import, you can decide whether Memex should help organize them.",
+  "dataImportSelectFiles": "Choose files to import",
+  "dataImportImporting": "Saving files...",
+  "dataImportSuccess": "Files saved in Memex",
+  "dataImportOnlyStored": "Files saved. No organization started.",
+  "dataImportQueued": "Memex will organize this import in the background.",
+  "dataImportResultTitle": "Import complete",
+  "dataImportResultSummary": "{count} files have been saved. You can organize them now or leave them as original source material.",
+  "@dataImportResultSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dataImportRenamedConflicts": "{count} item(s) had the same name and were renamed to avoid overwriting anything.",
+  "@dataImportRenamedConflicts": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dataImportSkippedUnsafeEntries": "{count} unusual archive item(s) were skipped; the rest was imported normally.",
+  "@dataImportSkippedUnsafeEntries": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dataImportChooseProcessing": "Organize these files",
+  "dataImportProcessTitle": "Organize this import?",
+  "dataImportProcessPrompt": "You imported {count} files. Choose whether Memex should organize them now, or just keep the originals.",
+  "@dataImportProcessPrompt": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dataImportProcessKnowledgeBase": "Organize into knowledge base",
+  "dataImportProcessKnowledgeBaseDesc": "Best for documents, notes, project material, and references. Memex will extract useful information and group it for later use.",
+  "dataImportProcessTimelineCards": "Create timeline records",
+  "dataImportProcessTimelineCardsDesc": "Best for diaries, chat logs, activity history, and old exports. Memex will turn time-based content into records when it makes sense.",
+  "dataImportImpactNone": "Memex will only keep these original files. No AI organization will start.",
+  "dataImportImpactKnowledgeBase": "Memex will read these files and organize useful long-term information into the knowledge base. It will not proactively create timeline records.",
+  "dataImportImpactTimelineCards": "Memex will read these files and create timeline records for life events or dated history when appropriate. It will not proactively organize the knowledge base.",
+  "dataImportImpactBoth": "Memex will try to create timeline records and organize reusable information into the knowledge base. This is best for a complete personal archive.",
+  "dataImportFinish": "Just save them",
+  "polishOriginal": "Original",
+  "polishPlain": "Clear",
+  "polishLiterary": "Polished",
+  "polishUseThis": "Use this",
+  "polishFailed": "Generation failed",
+  "exportBackupTitle": "Export Backup",
+  "exportBackupNeverExported": "Never exported ⚠️",
+  "@exportBackupLastExported": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exportBackupLastExported": "Last exported: {date}",
+  "exportReminderTitle": "It's been a while since you backed up",
+  "exportReminderBody": "Exporting to \"Files\" survives an uninstall · exporting externally is what actually keeps you safe",
+  "exportReminderExportButton": "Export",
+  "exportReminderExporting": "Exporting...",
+  "exportReminderSnoozeButton": "Later",
+  "iCloudDailyBackupTitle": "iCloud daily backup",
+  "iCloudDailyBackupDesc": "Automatically backs up to your chosen iCloud folder every time you open the app, keeping the latest two copies — survives an uninstall.",
+  "iCloudPickFolder": "Choose iCloud folder",
+  "iCloudChangeFolder": "Change folder",
+  "@iCloudFolderLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "iCloudFolderLabel": "Backing up to: {name}",
+  "@iCloudLastBackup": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "iCloudLastBackup": "Last backup: {time}",
+  "iCloudNeedsRepick": "Can't access this folder — please choose an iCloud folder again",
+  "iCloudNotConfigured": "No folder chosen yet — choose one to start daily backups",
+  "iCloudRollingNote": "Overwrites daily, keeps the latest two",
+  "iCloudSynced": "Synced",
+  "iCloudUploading": "Uploading…",
+  "iCloudNotUploaded": "Not uploaded",
+  "goalSuggestionIncrement": "Add {delta} to \"{title}\"?",
+  "@goalSuggestionIncrement": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "delta": {"type": "String"}
+    }
+  },
+  "goalSuggestionMarkComplete": "Mark \"{title}\" complete?",
+  "@goalSuggestionMarkComplete": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "goalSuggestionConfirm": "Confirm",
+  "goalSuggestionConfirmed": "Confirmed"
+}
