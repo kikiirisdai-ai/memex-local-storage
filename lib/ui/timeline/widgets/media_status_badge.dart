@@ -157,11 +157,9 @@ class MediaRatingEditor extends StatefulWidget {
   const MediaRatingEditor({
     super.key,
     this.currentRating,
-    this.currentComment,
   });
 
   final int? currentRating;
-  final String? currentComment;
 
   @override
   State<MediaRatingEditor> createState() => _MediaRatingEditorState();
@@ -169,19 +167,11 @@ class MediaRatingEditor extends StatefulWidget {
 
 class _MediaRatingEditorState extends State<MediaRatingEditor> {
   late int _rating;
-  late final TextEditingController _commentController;
 
   @override
   void initState() {
     super.initState();
     _rating = widget.currentRating ?? 5;
-    _commentController = TextEditingController(text: widget.currentComment);
-  }
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    super.dispose();
   }
 
   @override
@@ -221,15 +211,6 @@ class _MediaRatingEditorState extends State<MediaRatingEditor> {
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _commentController,
-              maxLines: 2,
-              decoration: InputDecoration(
-                hintText: UserStorage.l10n.mediaCommentHint,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -240,14 +221,7 @@ class _MediaRatingEditorState extends State<MediaRatingEditor> {
                 const SizedBox(width: 8),
                 FilledButton(
                   onPressed: () {
-                    final comment = _commentController.text.trim();
-                    Navigator.pop(
-                      context,
-                      (
-                        rating: _rating,
-                        comment: comment.isEmpty ? null : comment
-                      ),
-                    );
+                    Navigator.pop(context, _rating);
                   },
                   child: Text(UserStorage.l10n.save),
                 ),

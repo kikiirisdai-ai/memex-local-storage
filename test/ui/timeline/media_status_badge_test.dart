@@ -214,20 +214,17 @@ void main() {
       expect(find.byType(GestureDetector), findsNothing);
     });
 
-    testWidgets('MediaRatingEditor pops rating and comment', (tester) async {
-      ({int rating, String? comment})? result;
+    testWidgets('MediaRatingEditor pops the selected rating, no comment field',
+        (tester) async {
+      int? result;
       await tester.pumpWidget(
         _buildTestableWidget(
           Builder(
             builder: (context) => TextButton(
               onPressed: () async {
-                result =
-                    await showModalBottomSheet<({int rating, String? comment})>(
+                result = await showModalBottomSheet<int>(
                   context: context,
-                  builder: (_) => const MediaRatingEditor(
-                    currentRating: 5,
-                    currentComment: '还行',
-                  ),
+                  builder: (_) => const MediaRatingEditor(currentRating: 5),
                 );
               },
               child: const Text('open'),
@@ -237,12 +234,13 @@ void main() {
       );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), '真的好看');
+
+      expect(find.byType(TextField), findsNothing);
+
       await tester.tap(find.text('9'));
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
-      expect(result?.rating, 9);
-      expect(result?.comment, '真的好看');
+      expect(result, 9);
     });
   });
 }

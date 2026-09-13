@@ -437,8 +437,7 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
   Future<void> _editMediaRating() async {
     if (_detail == null) return;
 
-    final result =
-        await showModalBottomSheet<({int rating, String? comment})>(
+    final result = await showModalBottomSheet<int>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -446,27 +445,22 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
       ),
       builder: (context) => MediaRatingEditor(
         currentRating: _detail!.mediaRatingValue,
-        currentComment: _detail!.mediaComment,
       ),
     );
     if (result == null || !mounted) return;
 
     final oldDetail = _detail;
+    final existingComment = _detail!.mediaComment;
     setState(() {
       final metadata = {...?_detail!.metadata};
-      metadata[CardMetadataKeys.userMediaRating] = result.rating;
-      if (result.comment != null) {
-        metadata[CardMetadataKeys.mediaComment] = result.comment;
-      } else {
-        metadata.remove(CardMetadataKeys.mediaComment);
-      }
+      metadata[CardMetadataKeys.userMediaRating] = result;
       _detail = _detail!.copyWith(metadata: metadata);
     });
 
     final ok = await _memexRouter.updateCardMediaRating(
       widget.cardId,
-      result.rating,
-      result.comment,
+      result,
+      existingComment,
     );
     if (!mounted) return;
     if (ok) {
