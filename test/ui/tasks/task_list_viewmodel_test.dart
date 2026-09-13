@@ -147,8 +147,30 @@ void main() {
       await vm.toggleCompleted(entry);
 
       expect(capturedCardId, 'a');
-      expect(capturedData, {'is_completed': true});
+      expect(capturedData?['is_completed'], isTrue);
+      expect(capturedData?['completed_at'], isNotNull);
       expect(reloadCount, 2);
+    });
+
+    test('clears completed_at when marking an entry incomplete again',
+        () async {
+      Map<String, dynamic>? capturedData;
+      final vm = TaskListViewModel.forTest(
+        fetchTimelineCards: ({page = 1, limit = 20}) async => Ok([
+          _taskCard(id: 'a', title: 'Done', isCompleted: true),
+        ]),
+        updateUiConfig: (cardId, configIndex, data) async {
+          capturedData = data;
+          return true;
+        },
+      );
+
+      await vm.load();
+      final entry = vm.completedEntries.single;
+      await vm.toggleCompleted(entry);
+
+      expect(capturedData?['is_completed'], isFalse);
+      expect(capturedData?['completed_at'], isNull);
     });
   });
 }

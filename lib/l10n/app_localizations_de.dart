@@ -1612,6 +1612,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get taskEntryPriorityLabel => 'Mark as important';
 
   @override
+  String get taskCompletedAtPrefix => 'Completed ';
+
+  @override
   String get characterName => 'Charaktername';
 
   @override

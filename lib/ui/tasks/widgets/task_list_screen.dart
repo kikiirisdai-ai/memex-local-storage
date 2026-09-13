@@ -116,6 +116,7 @@ class _TaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = UserStorage.l10n;
     final now = DateTime.now();
     final isOverdue = !entry.isCompleted &&
         entry.dueDate != null &&
@@ -195,7 +196,19 @@ class _TaskTile extends StatelessWidget {
                               size: 16, color: AppColors.danger),
                       ],
                     ),
-                    if (entry.dueDate != null) ...[
+                    if (entry.isCompleted && entry.completedAt != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        '${l10n.taskCompletedAtPrefix}'
+                        '${entry.completedAt!.year}-${entry.completedAt!.month.toString().padLeft(2, '0')}-'
+                        '${entry.completedAt!.day.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ] else if (!entry.isCompleted && entry.dueDate != null) ...[
                       const SizedBox(height: 6),
                       Text(
                         '${entry.dueDate!.year}-${entry.dueDate!.month.toString().padLeft(2, '0')}-'

@@ -1544,6 +1544,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskEntryPriorityLabel => '标记为重要';
 
   @override
+  String get taskCompletedAtPrefix => '完成于 ';
+
+  @override
   String get characterName => '角色名称';
 
   @override

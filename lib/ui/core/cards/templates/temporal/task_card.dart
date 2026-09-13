@@ -28,6 +28,7 @@ class TaskCard extends StatefulWidget {
 class _TaskCardState extends State<TaskCard> {
   late bool _isCompleted;
   late List<dynamic> _subtasks;
+  String? _completedAt;
 
   /// Set on a local tap, before the async persist round-trips back through
   /// `widget.data`. `NativeCardFactory.build` rebuilds `data` as a fresh Map
@@ -70,11 +71,17 @@ class _TaskCardState extends State<TaskCard> {
     if (_isCompleted && _subtasks.isNotEmpty) {
       _subtasks = _setSubtasksCompletion(_subtasks, completed: true);
     }
+    _completedAt = widget.data['completed_at'] as String?;
+  }
+
+  void _setCompletion(bool completed) {
+    _isCompleted = completed;
+    _completedAt = completed ? DateTime.now().toIso8601String() : null;
   }
 
   void _toggleCompletion() {
     setState(() {
-      _isCompleted = !_isCompleted;
+      _setCompletion(!_isCompleted);
       _hasPendingEdit = true;
       if (_subtasks.isNotEmpty) {
         _subtasks = _setSubtasksCompletion(_subtasks, completed: _isCompleted);
@@ -88,8 +95,8 @@ class _TaskCardState extends State<TaskCard> {
       final task = Map<String, dynamic>.from(_subtasks[index]);
       task['completed'] = !_parseCompletedBool(task['completed']);
       _subtasks[index] = task;
-      _isCompleted = _subtasks.isNotEmpty &&
-          _subtasks.every((task) => _parseCompletedBool(task['completed']));
+      _setCompletion(_subtasks.isNotEmpty &&
+          _subtasks.every((task) => _parseCompletedBool(task['completed'])));
       _hasPendingEdit = true;
     });
     _updateData();
@@ -102,6 +109,7 @@ class _TaskCardState extends State<TaskCard> {
       widget.onUpdate!(widget.cardId!, widget.configIndex!, {
         'is_completed': _isCompleted,
         'subtasks': _subtasks,
+        'completed_at': _completedAt,
       });
     }
   }
@@ -114,6 +122,14 @@ class _TaskCardState extends State<TaskCard> {
     final dueDateLabel = dueDate == null
         ? widget.data['due_date']?.toString()
         : DateFormat.yMd(UserStorage.l10n.localeName).add_Hm().format(dueDate);
+    final completedAtDate = parseLocalDateTime(_completedAt);
+    final completedAtLabel = completedAtDate == null
+        ? null
+        : DateFormat.yMd(UserStorage.l10n.localeName)
+            .add_Hm()
+            .format(completedAtDate);
+    final footerLabel =
+        _isCompleted ? (completedAtLabel ?? dueDateLabel) : dueDateLabel;
 
     return GlassCard(
       onTap: widget.onTap,
@@ -219,11 +235,11 @@ class _TaskCardState extends State<TaskCard> {
               );
             }),
           ] else ...[
-            if (dueDateLabel != null && dueDateLabel.isNotEmpty)
+            if (footerLabel != null && footerLabel.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8, left: 32),
                 child: Text(
-                  dueDateLabel,
+                  footerLabel,
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF99A1AF),

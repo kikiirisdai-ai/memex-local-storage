@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:memex/ui/core/cards/templates/temporal/task_card.dart';
+import 'package:memex/utils/user_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Builds a fresh Map literal each call — mirrors NativeCardFactory.build's
 /// `mergedData`, which is a new object every rebuild even when its content
@@ -13,6 +16,12 @@ Map<String, dynamic> _freshData({required bool isCompleted}) => {
     };
 
 void main() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({'language': 'en'});
+    await initializeDateFormatting('en');
+    await UserStorage.initL10n();
+  });
+
   testWidgets(
       'a same-content rebuild before the write round-trips back does not '
       'revert an optimistic tap (regression: used to flicker back to '
@@ -116,5 +125,35 @@ void main() {
       ),
       [true, true],
     );
+  });
+
+  testWidgets('tapping complete sets completed_at, tapping again clears it',
+      (tester) async {
+    final updates = <Map<String, dynamic>>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TaskCard(
+            cardId: 'task-1',
+            configIndex: 0,
+            data: const {'title': 'Buy bananas', 'is_completed': false},
+            onUpdate: (_, __, data) => updates.add(data),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('task_card_toggle_task-1')));
+    await tester.pump();
+    expect(updates.last['is_completed'], isTrue);
+    expect(updates.last['completed_at'], isNotNull);
+    expect(DateTime.tryParse(updates.last['completed_at'] as String),
+        isNotNull);
+
+    await tester.tap(find.byKey(const ValueKey('task_card_toggle_task-1')));
+    await tester.pump();
+    expect(updates.last['is_completed'], isFalse);
+    expect(updates.last['completed_at'], isNull);
   });
 }

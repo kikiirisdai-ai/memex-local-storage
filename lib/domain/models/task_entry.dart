@@ -12,6 +12,7 @@ class TaskEntry {
     required this.title,
     required this.isCompleted,
     required this.dueDate,
+    required this.completedAt,
     required this.priority,
     required this.timestamp,
   });
@@ -21,6 +22,7 @@ class TaskEntry {
   final String title;
   final bool isCompleted;
   final DateTime? dueDate;
+  final DateTime? completedAt;
 
   /// e.g. "high", or null when unset.
   final String? priority;
@@ -42,6 +44,7 @@ class TaskEntry {
             : (card.title ?? ''),
         isCompleted: data['is_completed'] == true,
         dueDate: parseLocalDateTime(data['due_date']),
+        completedAt: parseLocalDateTime(data['completed_at']),
         priority: data['priority'] as String?,
         timestamp: card.timestamp,
       );

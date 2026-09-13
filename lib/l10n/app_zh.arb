@@ -705,6 +705,7 @@
   "taskEntryTitleRequired": "请输入标题",
   "taskEntryDueDateLabel": "无截止日期",
   "taskEntryPriorityLabel": "标记为重要",
+  "taskCompletedAtPrefix": "完成于 ",
   "characterName": "角色名称",
   "characterNameHint": "给角色起个好听的名字",
   "pleaseEnterCharacterName": "请输入角色名称",

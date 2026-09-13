@@ -2940,6 +2940,12 @@ abstract class AppLocalizations {
   /// **'Mark as important'**
   String get taskEntryPriorityLabel;
 
+  /// No description provided for @taskCompletedAtPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed '**
+  String get taskCompletedAtPrefix;
+
   /// No description provided for @characterName.
   ///
   /// In en, this message translates to:

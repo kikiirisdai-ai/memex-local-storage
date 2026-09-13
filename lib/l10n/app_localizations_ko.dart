@@ -1555,6 +1555,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get taskEntryPriorityLabel => 'Mark as important';
 
   @override
+  String get taskCompletedAtPrefix => 'Completed ';
+
+  @override
   String get characterName => '캐릭터 이름';
 
   @override

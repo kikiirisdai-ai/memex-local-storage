@@ -1595,6 +1595,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taskEntryPriorityLabel => 'Mark as important';
 
   @override
+  String get taskCompletedAtPrefix => 'Completed ';
+
+  @override
   String get characterName => 'Имя персонажа';
 
   @override

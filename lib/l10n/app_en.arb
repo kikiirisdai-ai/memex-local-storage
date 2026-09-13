@@ -704,6 +704,7 @@
   "taskEntryTitleRequired": "Please enter a title",
   "taskEntryDueDateLabel": "No due date",
   "taskEntryPriorityLabel": "Mark as important",
+  "taskCompletedAtPrefix": "Completed ",
   "characterName": "Character name",
   "characterNameHint": "Give your character a name",
   "pleaseEnterCharacterName": "Please enter character name",

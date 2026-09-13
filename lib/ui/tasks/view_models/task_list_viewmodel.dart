@@ -131,8 +131,10 @@ class TaskListViewModel extends ChangeNotifier {
   }
 
   Future<void> toggleCompleted(TaskEntry entry) async {
+    final newCompleted = !entry.isCompleted;
     await _updateUiConfig(entry.cardId, entry.configIndex, {
-      'is_completed': !entry.isCompleted,
+      'is_completed': newCompleted,
+      'completed_at': newCompleted ? DateTime.now().toIso8601String() : null,
     });
     await load();
   }
