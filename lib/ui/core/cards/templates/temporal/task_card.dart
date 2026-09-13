@@ -29,6 +29,15 @@ class _TaskCardState extends State<TaskCard> {
   late bool _isCompleted;
   late List<dynamic> _subtasks;
 
+  /// Set on a local tap, before the async persist round-trips back through
+  /// `widget.data`. `NativeCardFactory.build` rebuilds `data` as a fresh Map
+  /// literal on every parent rebuild (identical content or not), so
+  /// `widget.data != oldWidget.data` is true almost every rebuild — an
+  /// unrelated rebuild racing the in-flight write would otherwise revert
+  /// this card straight back to its pre-tap state until the real update
+  /// arrives, reading as "tap does nothing, then flips a moment later".
+  bool _hasPendingEdit = false;
+
   @override
   void initState() {
     super.initState();
@@ -38,9 +47,16 @@ class _TaskCardState extends State<TaskCard> {
   @override
   void didUpdateWidget(TaskCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.data != oldWidget.data) {
-      _initializeState();
+    if (widget.data == oldWidget.data) return;
+    if (_hasPendingEdit) {
+      // Only accept the incoming snapshot once it actually reflects our
+      // pending edit — otherwise it's a stale rebuild that raced the write.
+      if (_parseCompletedBool(widget.data['is_completed']) != _isCompleted) {
+        return;
+      }
+      _hasPendingEdit = false;
     }
+    _initializeState();
   }
 
   void _initializeState() {
@@ -59,6 +75,7 @@ class _TaskCardState extends State<TaskCard> {
   void _toggleCompletion() {
     setState(() {
       _isCompleted = !_isCompleted;
+      _hasPendingEdit = true;
       if (_subtasks.isNotEmpty) {
         _subtasks = _setSubtasksCompletion(_subtasks, completed: _isCompleted);
       }
@@ -73,6 +90,7 @@ class _TaskCardState extends State<TaskCard> {
       _subtasks[index] = task;
       _isCompleted = _subtasks.isNotEmpty &&
           _subtasks.every((task) => _parseCompletedBool(task['completed']));
+      _hasPendingEdit = true;
     });
     _updateData();
   }
