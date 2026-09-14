@@ -1,12 +1,29 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:logging/logging.dart';
 import 'package:memex/utils/logger.dart';
 import 'package:memex/utils/user_storage.dart';
 import 'package:memex/data/services/file_system_service.dart';
+import 'package:memex/domain/models/card_model.dart';
 import 'package:memex/domain/models/event_bus_message.dart';
 import 'package:memex/data/services/card_renderer.dart';
 import 'package:memex/domain/models/card_detail_model.dart';
 
 final Logger _logger = getLogger('CheckProcessingCardsHandler');
+
+/// A "processing" placeholder is considered abandoned once it's been stuck
+/// this long — a card only stays in 'processing' while some agent
+/// run/background task is actively working on it, so if that process was
+/// killed (e.g. hit the task executor's own execution timeout) without
+/// ever finishing, the card would otherwise sit showing "处理中" forever.
+const Duration processingCardStaleness = Duration(minutes: 5);
+
+@visibleForTesting
+bool isStaleProcessingCard(CardData card, {required DateTime now}) {
+  final startedAtSeconds = card.createdAt ?? card.timestamp;
+  final startedAt =
+      DateTime.fromMillisecondsSinceEpoch(startedAtSeconds * 1000);
+  return now.difference(startedAt) >= processingCardStaleness;
+}
 
 /// Handle client request to check processing-status cards
 /// Maps to backend _handle_check_processing_cards
@@ -86,6 +103,16 @@ Future<void> handleCheckProcessingCards(
           } catch (e) {
             _logger.warning(
                 'Failed to render and send card update for $cardId: $e');
+          }
+        } else if (isStaleProcessingCard(cardData, now: DateTime.now())) {
+          try {
+            await fileSystemService.deleteCard(userId, cardId);
+            emitEvent(CardDeletedMessage(id: cardId));
+            _logger.info(
+                'Deleted stale processing card $cardId (stuck > $processingCardStaleness with no update)');
+          } catch (e) {
+            _logger.warning(
+                'Failed to delete stale processing card $cardId: $e');
           }
         }
       } catch (e) {

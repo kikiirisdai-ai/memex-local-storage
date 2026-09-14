@@ -285,6 +285,7 @@ class TimelineViewModel extends ChangeNotifier {
     final eventBus = EventBusService.instance;
     eventBus.addHandler(EventBusMessageType.cardUpdated, _handleCardUpdated);
     eventBus.addHandler(EventBusMessageType.cardAdded, _handleCardAdded);
+    eventBus.addHandler(EventBusMessageType.cardDeleted, _handleCardDeleted);
     eventBus.addHandler(
       EventBusMessageType.attachmentsChanged,
       _handleAttachmentsChanged,
@@ -319,6 +320,12 @@ class TimelineViewModel extends ChangeNotifier {
       );
       addCard(newCard);
       fetchTags();
+    }
+  }
+
+  void _handleCardDeleted(EventBusMessage message) {
+    if (message is CardDeletedMessage) {
+      removeCardById(message.id);
     }
   }
 
@@ -717,6 +724,10 @@ class TimelineViewModel extends ChangeNotifier {
         _handleCardUpdated,
       );
       eventBus.removeHandler(EventBusMessageType.cardAdded, _handleCardAdded);
+      eventBus.removeHandler(
+        EventBusMessageType.cardDeleted,
+        _handleCardDeleted,
+      );
       eventBus.removeHandler(
         EventBusMessageType.attachmentsChanged,
         _handleAttachmentsChanged,

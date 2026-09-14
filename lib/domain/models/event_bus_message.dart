@@ -4,6 +4,7 @@ import 'timeline_card_model.dart';
 enum EventBusMessageType {
   cardUpdated('card_updated'),
   cardAdded('card_added'),
+  cardDeleted('card_deleted'),
   cardDetailUpdated('card_detail_updated'),
   newInsight('new_insight'),
   scheduleAggregationUpdated('schedule_aggregation_updated'),
@@ -46,6 +47,8 @@ abstract class EventBusMessage {
         return CardUpdatedMessage.fromJson(json);
       case EventBusMessageType.cardAdded:
         return CardAddedMessage.fromJson(json);
+      case EventBusMessageType.cardDeleted:
+        return CardDeletedMessage.fromJson(json);
       case EventBusMessageType.cardDetailUpdated:
         return CardDetailUpdatedMessage.fromJson(json);
       case EventBusMessageType.newInsight:
@@ -219,6 +222,23 @@ class CardAddedMessage extends EventBusMessage {
       rawText: data['raw_text'] as String?,
       address: data['address'] as String?,
     );
+  }
+}
+
+/// A card was removed (e.g. stale "processing" placeholder cleanup) —
+/// notifies any open timeline/detail views to drop it live.
+class CardDeletedMessage extends EventBusMessage {
+  final String id;
+
+  CardDeletedMessage({required this.id})
+    : super(
+        type: EventBusMessageType.cardDeleted,
+        data: {'id': id},
+      );
+
+  factory CardDeletedMessage.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>;
+    return CardDeletedMessage(id: data['id'] as String);
   }
 }
 
