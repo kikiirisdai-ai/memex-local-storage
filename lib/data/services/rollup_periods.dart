@@ -41,12 +41,32 @@ const List<String> _weekdayNames = ['一', '二', '三', '四', '五', '六', '�
 /// without a mood. The engine's own `RollupService.sparkline` is label-free;
 /// the weekly UI/tests expect the weekday-labeled form, so it's rebuilt here
 /// from `RollupService.barFor` + the weekday labels.
+///
+/// Kept for callers that still want the compact single-line form; the
+/// weekly card body itself now uses [weeklyMoodBreakdown] instead — a row
+/// of tiny bar glyphs packed on one line reads as noise at card font size,
+/// not a curve you can actually compare day to day.
 String weeklySparkline(List<int?> scores) {
   final parts = <String>[];
   for (var i = 0; i < 7; i++) {
     parts.add('${_weekdayNames[i]}${RollupService.barFor(scores[i])}');
   }
   return parts.join(' ');
+}
+
+/// One bullet per day — "- 周一 ▃ 6/10" / "- 周三 · 无记录" — instead of
+/// [weeklySparkline]'s single cramped line. Renders correctly with plain
+/// commonmark (bullet lists), so it doesn't need the app's MarkdownBody
+/// instances to opt into GFM tables.
+String weeklyMoodBreakdown(List<int?> scores) {
+  final lines = <String>[];
+  for (var i = 0; i < 7; i++) {
+    final score = i < scores.length ? scores[i] : null;
+    final bar = RollupService.barFor(score);
+    final label = score == null ? '无记录' : '$score/10';
+    lines.add('- 周${_weekdayNames[i]} $bar $label');
+  }
+  return lines.join('\n');
 }
 
 const String _weeklySystemPrompt = '''
@@ -196,7 +216,9 @@ class _WeeklyRollupPeriod implements RollupPeriod {
 
     final avg = RollupService.averageScore(scores);
     if (avg != null) {
-      buffer.write('\n\n**情绪曲线** ${weeklySparkline(scores)}（均值 $avg/10）');
+      buffer.write(
+        '\n\n**情绪曲线**\n${weeklyMoodBreakdown(scores)}\n\n（均值 $avg/10）',
+      );
     }
 
     final nextWeek = _stringList(decision['next_week']);
