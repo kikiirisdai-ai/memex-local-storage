@@ -33,7 +33,8 @@ class _DeviceCalendarPluginAdapter implements CalendarPluginAdapter {
       _plugin.deleteEvent(calendarId, eventId);
 }
 
-/// One-way sync of task-card due dates to a system calendar event.
+/// One-way sync of task-card due dates and event-card start/end times to a
+/// system calendar event.
 ///
 /// Best-effort background sync, not a user-facing action: it silently
 /// no-ops when calendar permission hasn't been granted rather than
@@ -85,6 +86,58 @@ class CalendarSyncService {
         title: (title?.trim().isNotEmpty ?? false) ? title : 'Memex',
         start: TZDateTime.from(dueDate, local),
         end: TZDateTime.from(dueDate.add(const Duration(hours: 1)), local),
+      );
+
+      final result = await _plugin.createOrUpdateEvent(event);
+      final newEventId = result?.data;
+      if (result?.isSuccess == true && newEventId != null) {
+        map[factId] = newEventId;
+        await _saveMap(map);
+      } else {
+        _logger.warning(
+          'Failed to sync calendar event for $factId: ${result?.errors}',
+        );
+      }
+    } catch (e, st) {
+      _logger.warning('Calendar sync error for $factId', e, st);
+    }
+  }
+
+  /// Create/update the calendar event for an event-card (title/start_time/
+  /// end_time/location), or remove any previously-synced event if the card
+  /// has no start time or was deleted. Shares the same factId->eventId map
+  /// as [syncTaskCard] — a card is only ever one template, so there's no
+  /// collision between the two.
+  Future<void> syncEventCard({
+    required String factId,
+    required String? title,
+    required DateTime? startTime,
+    required DateTime? endTime,
+    required String? location,
+    required bool isDeleted,
+  }) async {
+    if (!await _isPermissionGranted()) return;
+
+    try {
+      if (isDeleted || startTime == null) {
+        await _removeMappedEvent(factId);
+        return;
+      }
+
+      final calendarId = await _resolveCalendarId();
+      if (calendarId == null) return;
+
+      final map = await _loadMap();
+      final event = Event(
+        calendarId,
+        eventId: map[factId],
+        title: (title?.trim().isNotEmpty ?? false) ? title : 'Memex',
+        start: TZDateTime.from(startTime, local),
+        end: TZDateTime.from(
+          endTime ?? startTime.add(const Duration(hours: 1)),
+          local,
+        ),
+        location: (location?.trim().isNotEmpty ?? false) ? location : null,
       );
 
       final result = await _plugin.createOrUpdateEvent(event);

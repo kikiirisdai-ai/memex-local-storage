@@ -89,6 +89,44 @@ void main() {
         ),
       );
     });
+
+    test('does not throw for an event card with a start time', () async {
+      final card = _eventCard(factId: 'fact_2');
+
+      await handleCalendarSyncOnCardChanged(
+        'test_user',
+        SystemEvent<DataChangeRecord>(
+          type: SystemEventTypes.dataChanged,
+          source: 'test',
+          payload: DataChangeRecord(
+            op: DataChangeOp.insert,
+            ns: DataChangeNs.card,
+            documentKey: card.factId,
+            after: card.toJson(),
+          ),
+        ),
+      );
+    });
+
+    test('does not throw when an event card is deleted', () async {
+      final card = _eventCard(factId: 'fact_2');
+      final deleted = card.toJson()..['deleted'] = true;
+
+      await handleCalendarSyncOnCardChanged(
+        'test_user',
+        SystemEvent<DataChangeRecord>(
+          type: SystemEventTypes.dataChanged,
+          source: 'test',
+          payload: DataChangeRecord(
+            op: DataChangeOp.update,
+            ns: DataChangeNs.card,
+            documentKey: card.factId,
+            before: card.toJson(),
+            after: deleted,
+          ),
+        ),
+      );
+    });
   });
 
   group('handleCalendarSyncOnCardUiConfigUpdated', () {
@@ -135,6 +173,31 @@ void main() {
         ),
       );
     });
+
+    test('does not throw for an event template update', () async {
+      await handleCalendarSyncOnCardUiConfigUpdated(
+        'test_user',
+        SystemEvent<CardUiConfigUpdatedPayload>(
+          type: SystemEventTypes.cardUiConfigUpdated,
+          source: 'test',
+          payload: CardUiConfigUpdatedPayload(
+            cardId: 'fact_2',
+            configIndex: 0,
+            templateId: 'event',
+            updates: const {'location': 'Kenmore · Home'},
+            previousData: const {
+              'title': '朋友们来看乐熙',
+              'start_time': '2026-09-13T15:00:00',
+            },
+            updatedData: const {
+              'title': '朋友们来看乐熙',
+              'start_time': '2026-09-13T15:00:00',
+              'location': 'Kenmore · Home',
+            },
+          ),
+        ),
+      );
+    });
   });
 }
 
@@ -165,6 +228,22 @@ CardData _taskCard({
           'title': 'Buy skincare',
           'due_date': '2026-05-27T09:00:00',
           'is_completed': isCompleted,
+        },
+      ),
+    ],
+  );
+}
+
+CardData _eventCard({required String factId}) {
+  return _card(
+    factId: factId,
+    uiConfigs: [
+      const UiConfig(
+        templateId: 'event',
+        data: {
+          'title': '朋友们来看乐熙',
+          'start_time': '2026-09-13T15:00:00',
+          'location': 'Kenmore · Home',
         },
       ),
     ],

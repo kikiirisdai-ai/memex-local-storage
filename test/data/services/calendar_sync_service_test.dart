@@ -240,4 +240,106 @@ void main() {
 
     expect(plugin.events, isEmpty);
   });
+
+  group('syncEventCard', () {
+    Calendar writableCalendar() => Calendar()
+      ..id = 'cal_1'
+      ..isDefault = true
+      ..isReadOnly = false;
+
+    test('creates a calendar event with title/start/end/location', () async {
+      final plugin = _FakeCalendarPlugin(calendars: [writableCalendar()]);
+      final service = _buildService(plugin: plugin);
+
+      await service.syncEventCard(
+        factId: 'fact_2',
+        title: '朋友们来看乐熙',
+        startTime: DateTime(2026, 9, 13, 15),
+        endTime: DateTime(2026, 9, 13, 17),
+        location: 'Kenmore · Home',
+        isDeleted: false,
+      );
+
+      expect(plugin.events, hasLength(1));
+      final event = plugin.events.values.single;
+      expect(event.title, '朋友们来看乐熙');
+      expect(event.location, 'Kenmore · Home');
+      expect(
+        event.end!.toUtc().difference(event.start!.toUtc()),
+        const Duration(hours: 2),
+      );
+    });
+
+    test('defaults the end time to start + 1 hour when unset', () async {
+      final plugin = _FakeCalendarPlugin(calendars: [writableCalendar()]);
+      final service = _buildService(plugin: plugin);
+
+      await service.syncEventCard(
+        factId: 'fact_2',
+        title: '朋友们来看乐熙',
+        startTime: DateTime(2026, 9, 13, 15),
+        endTime: null,
+        location: null,
+        isDeleted: false,
+      );
+
+      final event = plugin.events.values.single;
+      expect(
+        event.end!.toUtc().difference(event.start!.toUtc()),
+        const Duration(hours: 1),
+      );
+    });
+
+    test('removes the mapped event once the card is deleted', () async {
+      final plugin = _FakeCalendarPlugin(calendars: [writableCalendar()]);
+      final service = _buildService(plugin: plugin);
+
+      await service.syncEventCard(
+        factId: 'fact_2',
+        title: '朋友们来看乐熙',
+        startTime: DateTime(2026, 9, 13, 15),
+        endTime: null,
+        location: null,
+        isDeleted: false,
+      );
+      expect(plugin.events, hasLength(1));
+
+      await service.syncEventCard(
+        factId: 'fact_2',
+        title: '朋友们来看乐熙',
+        startTime: DateTime(2026, 9, 13, 15),
+        endTime: null,
+        location: null,
+        isDeleted: true,
+      );
+
+      expect(plugin.events, isEmpty);
+      expect(plugin.deletedEventIds, hasLength(1));
+    });
+
+    test('removes the mapped event once the start time is cleared',
+        () async {
+      final plugin = _FakeCalendarPlugin(calendars: [writableCalendar()]);
+      final service = _buildService(plugin: plugin);
+
+      await service.syncEventCard(
+        factId: 'fact_2',
+        title: '朋友们来看乐熙',
+        startTime: DateTime(2026, 9, 13, 15),
+        endTime: null,
+        location: null,
+        isDeleted: false,
+      );
+      await service.syncEventCard(
+        factId: 'fact_2',
+        title: '朋友们来看乐熙',
+        startTime: null,
+        endTime: null,
+        location: null,
+        isDeleted: false,
+      );
+
+      expect(plugin.events, isEmpty);
+    });
+  });
 }
