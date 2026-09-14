@@ -17,7 +17,10 @@ Future<TimelineCardModel?> getTimelineCard(String cardId) async {
       return null;
     }
 
-    return await hydrateCard(userId, cardId);
+    // A single-card fetch by known id is used for the detail screen from
+    // any list (including the Archive list), so archived cards must still
+    // resolve — only the aggregate timeline listing excludes them.
+    return await hydrateCard(userId, cardId, includeArchived: true);
   } catch (e) {
     _logger.severe('Failed to fetch timeline card $cardId: $e');
     return null;

@@ -23,6 +23,45 @@ void main() {
       });
     });
 
+    test('archivedAt round-trips through toJson/fromJson', () {
+      const card = CardData(
+        factId: 'f1',
+        timestamp: 100,
+        status: 'completed',
+        tags: [],
+        uiConfigs: [],
+        archivedAt: 500,
+      );
+
+      expect(card.toJson()['archived_at'], 500);
+      expect(CardData.fromJson(card.toJson()).archivedAt, 500);
+    });
+
+    test('archivedAt absent stays null and is omitted from JSON', () {
+      const card = CardData(
+        factId: 'f1',
+        timestamp: 100,
+        status: 'completed',
+        tags: [],
+        uiConfigs: [],
+      );
+      expect(card.toJson().containsKey('archived_at'), isFalse);
+      expect(CardData.fromJson(card.toJson()).archivedAt, isNull);
+    });
+
+    test('copyWith(clearArchivedAt: true) clears an existing archivedAt', () {
+      const card = CardData(
+        factId: 'f1',
+        timestamp: 100,
+        status: 'completed',
+        tags: [],
+        uiConfigs: [],
+        archivedAt: 500,
+      );
+      final cleared = card.copyWith(clearArchivedAt: true);
+      expect(cleared.archivedAt, isNull);
+    });
+
     test('absent metadata stays null and is omitted from JSON', () {
       const card = CardData(
         factId: 'f1',

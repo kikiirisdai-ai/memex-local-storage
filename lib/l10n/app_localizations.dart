@@ -2202,6 +2202,72 @@ abstract class AppLocalizations {
   /// **'Deleted successfully'**
   String get deleteSuccess;
 
+  /// No description provided for @archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archive;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @cardArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get cardArchived;
+
+  /// No description provided for @cardDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get cardDeleted;
+
+  /// No description provided for @archiveListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archiveListTitle;
+
+  /// No description provided for @archiveListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No archived records yet'**
+  String get archiveListEmpty;
+
+  /// No description provided for @archiveSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get archiveSelectAll;
+
+  /// No description provided for @archiveDeselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect all'**
+  String get archiveDeselectAll;
+
+  /// No description provided for @archiveRestoreToTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore to timeline'**
+  String get archiveRestoreToTimeline;
+
+  /// No description provided for @archiveRetentionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived records older than {days} days are automatically deleted'**
+  String archiveRetentionNotice(int days);
+
+  /// No description provided for @archivedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived {date}'**
+  String archivedAtLabel(String date);
+
   /// No description provided for @deleteFailed.
   ///
   /// In en, this message translates to:

@@ -104,6 +104,11 @@ class CardData {
   final bool? deleted;
   final String? failureReason;
 
+  /// Unix seconds this card was archived (swiped out of the timeline into
+  /// the Archive list), or null when not archived. Archived cards past 30
+  /// days old are automatically hard-deleted by a background purge task.
+  final int? archivedAt;
+
   /// Machine-readable structured fields (see [CardMetadataKeys]) that power
   /// aggregation features (mood trends, rollup summaries) without polluting
   /// the user-visible tags. Absent on cards written before this field existed.
@@ -127,6 +132,7 @@ class CardData {
     this.insight,
     this.deleted,
     this.failureReason,
+    this.archivedAt,
     this.metadata,
   })  : assets = assets ?? const [],
         comments = comments ?? const [];
@@ -207,6 +213,7 @@ class CardData {
       insight: insightData,
       deleted: json['deleted'] as bool?,
       failureReason: json['failure_reason'] as String?,
+      archivedAt: json['archived_at'] as int?,
       metadata: metadata,
     );
   }
@@ -234,6 +241,7 @@ class CardData {
     if (insight != null) m['insight'] = insight!.toJson();
     if (deleted == true) m['deleted'] = deleted;
     if (failureReason != null) m['failure_reason'] = failureReason;
+    if (archivedAt != null) m['archived_at'] = archivedAt;
     if (metadata != null && metadata!.isNotEmpty) m['metadata'] = metadata;
     return m;
   }
@@ -257,6 +265,8 @@ class CardData {
     bool? deleted,
     String? failureReason,
     bool clearFailureReason = false,
+    int? archivedAt,
+    bool clearArchivedAt = false,
     Map<String, dynamic>? metadata,
   }) {
     return CardData(
@@ -278,6 +288,7 @@ class CardData {
       deleted: deleted ?? this.deleted,
       failureReason:
           clearFailureReason ? null : failureReason ?? this.failureReason,
+      archivedAt: clearArchivedAt ? null : archivedAt ?? this.archivedAt,
       metadata: metadata ?? this.metadata,
     );
   }

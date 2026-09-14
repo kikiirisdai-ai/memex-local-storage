@@ -50,6 +50,8 @@ import 'package:memex/data/services/file_system_service.dart';
 import 'package:memex/data/services/local_task_executor.dart';
 import 'package:memex/data/services/global_event_bus.dart';
 import 'package:memex/data/services/task_handlers/daily_summary_handler.dart';
+import 'package:memex/data/services/task_handlers/archive_purge_handler.dart';
+import 'package:memex/data/services/archive_purge_service.dart';
 import 'package:memex/data/services/task_handlers/monthly_summary_handler.dart';
 import 'package:memex/data/services/task_handlers/weekly_summary_handler.dart';
 import 'package:memex/data/services/task_handlers/yearly_summary_handler.dart';
@@ -62,6 +64,7 @@ import 'package:memex/data/services/task_handlers/custom_agent_task_handler.dart
 import 'package:memex/data/services/custom_agent_config_service.dart';
 import 'package:memex/data/repositories/get_tags.dart';
 import 'package:memex/data/repositories/get_timeline_cards.dart';
+import 'package:memex/data/repositories/get_archived_cards.dart';
 import 'package:memex/data/repositories/get_aggregated_timeline.dart';
 import 'package:memex/data/repositories/get_cards_by_ids.dart';
 import 'package:memex/data/repositories/card.dart';
@@ -341,6 +344,11 @@ class MemexRouter {
     executor.registerHandler(
       'daily_summary_task',
       handleDailySummaryImpl,
+      concurrencyPolicy: TaskConcurrencyPolicy.byUser(),
+    );
+    executor.registerHandler(
+      archivePurgeTaskType,
+      handleArchivePurgeImpl,
       concurrencyPolicy: TaskConcurrencyPolicy.byUser(),
     );
     executor.registerHandler(
@@ -965,6 +973,53 @@ class MemexRouter {
       _logger.severe('Failed to delete card $id: $e');
       return false;
     }
+  }
+
+  /// Archives a card (removes it from the main timeline into the Archive
+  /// list) by stamping `archived_at`. The card file is kept, not deleted.
+  Future<bool> archiveCard(String id) async {
+    await _ensureInitialized();
+    final userId = await UserStorage.getUserId();
+    if (userId == null) return false;
+
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final updated = await FileSystemService.instance.updateCardFile(
+        userId,
+        id,
+        (card) => card.copyWith(archivedAt: now),
+      );
+      return updated != null;
+    } catch (e) {
+      _logger.severe('Failed to archive card $id: $e');
+      return false;
+    }
+  }
+
+  /// Restores an archived card back to the main timeline.
+  Future<bool> unarchiveCard(String id) async {
+    await _ensureInitialized();
+    final userId = await UserStorage.getUserId();
+    if (userId == null) return false;
+
+    try {
+      final updated = await FileSystemService.instance.updateCardFile(
+        userId,
+        id,
+        (card) => card.copyWith(clearArchivedAt: true),
+      );
+      return updated != null;
+    } catch (e) {
+      _logger.severe('Failed to unarchive card $id: $e');
+      return false;
+    }
+  }
+
+  Future<Result<List<TimelineCardModel>>> fetchArchivedCards() async {
+    return runResult(() async {
+      await _ensureInitialized();
+      return getArchivedCards();
+    });
   }
 
   Future<bool> updateCardUiConfig(

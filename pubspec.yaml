@@ -48,6 +48,9 @@ dependencies:
   # Calendar sync (task due-dates -> system calendar events)
   device_calendar: ^4.3.3
 
+  # Swipe actions on timeline cards (delete / archive)
+  flutter_slidable: ^3.1.1
+
   # WebView (for future HTML card rendering)
   webview_flutter: ^4.4.4
 

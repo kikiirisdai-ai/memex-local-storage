@@ -56,6 +56,7 @@ import 'package:memex/routing/router.dart';
 import 'package:memex/routing/routes.dart';
 import 'package:memex/data/services/onboarding_service.dart';
 import 'package:memex/data/services/daily_summary_service.dart';
+import 'package:memex/data/services/archive_purge_service.dart';
 import 'package:memex/data/services/rollup_periods.dart';
 import 'package:memex/data/services/rollup_service.dart';
 import 'package:memex/data/services/summary_notification_service.dart';
@@ -596,6 +597,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       unawaited(WeeklySummaryService.instance.maybeSchedule());
       unawaited(RollupService.instance.maybeSchedule(monthlyRollup));
       unawaited(RollupService.instance.maybeSchedule(yearlyRollup));
+      unawaited(ArchivePurgeService.instance.maybeSchedule());
       unawaited(SummaryNotificationService.instance.reschedule());
     });
 
@@ -1616,6 +1618,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       unawaited(WeeklySummaryService.instance.maybeSchedule());
       unawaited(RollupService.instance.maybeSchedule(monthlyRollup));
       unawaited(RollupService.instance.maybeSchedule(yearlyRollup));
+      unawaited(ArchivePurgeService.instance.maybeSchedule());
       unawaited(SummaryNotificationService.instance.reschedule());
       // Consume any app action that arrived while in background. Use a
       // synchronous check because platform callbacks normally fire before

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:memex/routing/routes.dart';
 import 'package:memex/ui/insight/view_models/insight_viewmodel.dart';
 import 'package:memex/ui/insight/widgets/user_stats_page.dart';
+import 'package:memex/ui/archive/widgets/archive_list_screen.dart';
 import 'package:memex/ui/media_library/widgets/media_library_screen.dart';
 import 'package:memex/ui/tasks/widgets/task_list_screen.dart';
 import 'package:memex/utils/user_storage.dart';
@@ -78,6 +79,13 @@ class _InsightScreenState extends State<InsightScreen> {
                   titleBuilder: _memoryTitle,
                   route: AppRoutes.memory,
                 ),
+                SizedBox(height: 10),
+                _InsightEntryTile(
+                  key: ValueKey('insight_entry_archive'),
+                  icon: Icons.archive_outlined,
+                  titleBuilder: _archiveTitle,
+                  onTap: openArchiveList,
+                ),
               ],
             ),
           ),
@@ -101,6 +109,7 @@ String _goalsTitle() => UserStorage.l10n.goalsPageTitle;
 String _taskListTitle() => UserStorage.l10n.taskListTitle;
 String _mediaLibraryTitle() => UserStorage.l10n.mediaLibraryTitle;
 String _memoryTitle() => UserStorage.l10n.memoryTitle;
+String _archiveTitle() => UserStorage.l10n.archiveListTitle;
 
 /// A single tappable row entry shown above the Activity Stats sections,
 /// linking out to a related full-screen feature (goals, media library).

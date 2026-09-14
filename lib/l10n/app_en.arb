@@ -511,6 +511,27 @@
   "confirmDeleteSessionMessage": "Delete this conversation? This cannot be undone.",
   "delete": "Delete",
   "deleteSuccess": "Deleted successfully",
+  "archive": "Archive",
+  "undo": "Undo",
+  "cardArchived": "Archived",
+  "cardDeleted": "Deleted",
+  "archiveListTitle": "Archive",
+  "archiveListEmpty": "No archived records yet",
+  "archiveSelectAll": "Select all",
+  "archiveDeselectAll": "Deselect all",
+  "archiveRestoreToTimeline": "Restore to timeline",
+  "archiveRetentionNotice": "Archived records older than {days} days are automatically deleted",
+  "@archiveRetentionNotice": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "archivedAtLabel": "Archived {date}",
+  "@archivedAtLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
   "@deleteFailed": {
     "placeholders": {
       "error": {}

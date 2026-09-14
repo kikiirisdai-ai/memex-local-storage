@@ -1145,6 +1145,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteSuccess => '删除成功';
 
   @override
+  String get archive => '归档';
+
+  @override
+  String get undo => '撤销';
+
+  @override
+  String get cardArchived => '已归档';
+
+  @override
+  String get cardDeleted => '已删除';
+
+  @override
+  String get archiveListTitle => '已归档';
+
+  @override
+  String get archiveListEmpty => '还没有归档的记录';
+
+  @override
+  String get archiveSelectAll => '全选';
+
+  @override
+  String get archiveDeselectAll => '取消全选';
+
+  @override
+  String get archiveRestoreToTimeline => '放回时间线';
+
+  @override
+  String archiveRetentionNotice(int days) {
+    return '归档超过 $days 天的记录会被自动删除';
+  }
+
+  @override
+  String archivedAtLabel(String date) {
+    return '归档于 $date';
+  }
+
+  @override
   String deleteFailed(Object error) {
     return '删除失败: $error';
   }

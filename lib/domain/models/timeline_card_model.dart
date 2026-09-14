@@ -22,6 +22,9 @@ class TimelineCardModel {
   final String? address; // Location name
   final String? failureReason;
 
+  /// Unix seconds this card was archived, or null when not archived.
+  final int? archivedAt;
+
   TimelineCardModel({
     required this.id,
     this.html,
@@ -34,6 +37,7 @@ class TimelineCardModel {
     this.rawText,
     this.address,
     this.failureReason,
+    this.archivedAt,
   });
 
   factory TimelineCardModel.fromJson(Map<String, dynamic> json) {

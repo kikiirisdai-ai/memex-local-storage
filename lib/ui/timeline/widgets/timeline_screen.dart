@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:memex/ui/core/themes/app_colors.dart';
 
 import 'package:memex/config/app_config.dart';
 import 'package:memex/routing/routes.dart';
@@ -717,7 +720,7 @@ class TimelineScreenState extends State<TimelineScreen> {
           final entry = entries[index];
           final card = entry.card;
           final isDemoTarget = DemoService.instance.isDemoTargetCardId(card.id);
-          return TimelineEntryItem(
+          final entryWidget = TimelineEntryItem(
             key: ValueKey(card.id),
             card: card,
             isDemoTarget: isDemoTarget,
@@ -774,9 +777,80 @@ class TimelineScreenState extends State<TimelineScreen> {
               }
             },
           );
+
+          if (_isScheduleBriefingCard(card)) return entryWidget;
+
+          return Slidable(
+            key: ValueKey('slidable_${card.id}'),
+            startActionPane: ActionPane(
+              motion: const StretchMotion(),
+              extentRatio: 0.25,
+              children: [
+                SlidableAction(
+                  key: ValueKey('archive_${card.id}'),
+                  onPressed: (_) => _archiveCard(vm, card),
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  icon: Icons.archive_outlined,
+                  label: UserStorage.l10n.archive,
+                ),
+              ],
+            ),
+            endActionPane: ActionPane(
+              motion: const StretchMotion(),
+              extentRatio: 0.25,
+              children: [
+                SlidableAction(
+                  key: ValueKey('delete_${card.id}'),
+                  onPressed: (_) => _deleteCardWithUndo(vm, card),
+                  backgroundColor: AppColors.danger,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete_outline,
+                  label: UserStorage.l10n.delete,
+                ),
+              ],
+            ),
+            child: entryWidget,
+          );
         },
       ),
     );
+  }
+
+  Future<void> _archiveCard(TimelineViewModel vm, TimelineCardModel card) async {
+    vm.removeCardById(card.id);
+    final ok = await MemexRouter().archiveCard(card.id);
+    if (!mounted) return;
+    if (ok) {
+      ToastHelper.showSuccess(context, UserStorage.l10n.cardArchived);
+    } else {
+      ToastHelper.showError(context, UserStorage.l10n.updateFailed('archive'));
+      vm.loadCards(refresh: true);
+    }
+  }
+
+  void _deleteCardWithUndo(TimelineViewModel vm, TimelineCardModel card) {
+    vm.removeCardById(card.id);
+    var undone = false;
+
+    final controller = ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(UserStorage.l10n.cardDeleted),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: UserStorage.l10n.undo,
+          onPressed: () {
+            undone = true;
+            vm.loadCards(refresh: true);
+          },
+        ),
+      ),
+    );
+
+    controller.closed.then((_) async {
+      if (undone || !mounted) return;
+      await MemexRouter().deleteCard(card.id);
+    });
   }
 
   List<_TimelineFeedEntry> _buildTimelineFeedEntries(

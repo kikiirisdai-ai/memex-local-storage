@@ -11,7 +11,11 @@ final _logger = getLogger('HydrateCard');
 ///
 /// Returns null if the card file is missing or unreadable.
 /// Shared by getTimelineCards, getCardsByIds, and searchCards.
-Future<TimelineCardModel?> hydrateCard(String userId, String factId) async {
+Future<TimelineCardModel?> hydrateCard(
+  String userId,
+  String factId, {
+  bool includeArchived = false,
+}) async {
   final fs = FileSystemService.instance;
 
   final cardData = await fs.readCardFile(userId, factId);
@@ -21,6 +25,7 @@ Future<TimelineCardModel?> hydrateCard(String userId, String factId) async {
   }
 
   if (cardData.deleted == true) return null;
+  if (cardData.archivedAt != null && !includeArchived) return null;
 
   final timestamp = cardData.timestamp;
 
@@ -49,5 +54,6 @@ Future<TimelineCardModel?> hydrateCard(String userId, String factId) async {
     rawText: rawText,
     address: cardData.address,
     failureReason: cardData.failureReason,
+    archivedAt: cardData.archivedAt,
   );
 }

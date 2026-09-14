@@ -1154,6 +1154,43 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deleteSuccess => '正常に削除しました';
 
   @override
+  String get archive => 'Archive';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get cardArchived => 'Archived';
+
+  @override
+  String get cardDeleted => 'Deleted';
+
+  @override
+  String get archiveListTitle => 'Archive';
+
+  @override
+  String get archiveListEmpty => 'No archived records yet';
+
+  @override
+  String get archiveSelectAll => 'Select all';
+
+  @override
+  String get archiveDeselectAll => 'Deselect all';
+
+  @override
+  String get archiveRestoreToTimeline => 'Restore to timeline';
+
+  @override
+  String archiveRetentionNotice(int days) {
+    return 'Archived records older than $days days are automatically deleted';
+  }
+
+  @override
+  String archivedAtLabel(String date) {
+    return 'Archived $date';
+  }
+
+  @override
   String deleteFailed(Object error) {
     return '削除に失敗しました: $error';
   }

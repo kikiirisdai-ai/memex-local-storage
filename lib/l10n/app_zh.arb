@@ -512,6 +512,27 @@
   "confirmDeleteSessionMessage": "确定要删除这个会话吗？此操作不可恢复。",
   "delete": "删除",
   "deleteSuccess": "删除成功",
+  "archive": "归档",
+  "undo": "撤销",
+  "cardArchived": "已归档",
+  "cardDeleted": "已删除",
+  "archiveListTitle": "已归档",
+  "archiveListEmpty": "还没有归档的记录",
+  "archiveSelectAll": "全选",
+  "archiveDeselectAll": "取消全选",
+  "archiveRestoreToTimeline": "放回时间线",
+  "archiveRetentionNotice": "归档超过 {days} 天的记录会被自动删除",
+  "@archiveRetentionNotice": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "archivedAtLabel": "归档于 {date}",
+  "@archivedAtLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
   "@deleteFailed": {
     "placeholders": {
       "error": {}
