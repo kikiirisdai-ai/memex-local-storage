@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:memex/data/services/backup_service.dart';
 import 'package:memex/data/services/event_bus_service.dart';
 import 'package:memex/l10n/app_localizations.dart';
 import 'package:memex/ui/settings/widgets/backup_restore_page.dart';
 import 'package:memex/utils/user_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// Mirrors the tile's own date formatting (`backup_restore_page.dart`'s
+/// `_formatDateTime`) — the stored-backup tile's title is now the short
+/// type label, not the raw filename, so tests identify a listed snapshot
+/// by its rendered date instead of `snapshot.name`.
+String _expectedDateText(DateTime dateTime) =>
+    DateFormat.yMd(UserStorage.l10n.localeName).add_Hm().format(dateTime);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -127,17 +135,21 @@ void main() {
         filePath: '/tmp/$manualName',
       );
 
+      final autoDate = _expectedDateText(autoSnapshot.createdAt);
+      final safetyDate = _expectedDateText(safetySnapshot.createdAt);
+      final manualDate = _expectedDateText(manualSnapshot.createdAt);
+
       await _pumpBackupPage(
         tester,
         listStoredBackups: () async =>
             [safetySnapshot, autoSnapshot, manualSnapshot],
       );
-      await _scrollUntilVisible(tester, find.text(autoName));
-      await _scrollUntilVisible(tester, find.text(manualName));
+      await _scrollUntilVisible(tester, find.text(autoDate));
+      await _scrollUntilVisible(tester, find.text(manualDate));
 
-      expect(find.text(autoName), findsOneWidget);
-      expect(find.text(safetyName), findsOneWidget);
-      expect(find.text(manualName), findsOneWidget);
+      expect(find.text(autoDate), findsOneWidget);
+      expect(find.text(safetyDate), findsOneWidget);
+      expect(find.text(manualDate), findsOneWidget);
       expect(find.textContaining(UserStorage.l10n.backupTypeAutoSnapshot),
           findsOneWidget);
       expect(find.textContaining(UserStorage.l10n.backupTypeSafetySnapshot),
@@ -147,7 +159,7 @@ void main() {
       expect(find.textContaining('3 B'), findsWidgets);
       expect(find.byTooltip(UserStorage.l10n.restoreThisBackup), findsWidgets);
 
-      await tester.ensureVisible(find.text(autoName));
+      await tester.ensureVisible(find.text(autoDate));
       await tester.pump();
       await tester.tap(
         find.byTooltip(UserStorage.l10n.restoreThisBackup).first,
@@ -192,6 +204,9 @@ void main() {
       oldAutoSnapshot,
     ];
     final deletedIds = <String>[];
+    final oldAutoDate = _expectedDateText(oldAutoSnapshot.createdAt);
+    final latestAutoDate = _expectedDateText(latestAutoSnapshot.createdAt);
+    final safetyDate = _expectedDateText(safetySnapshot.createdAt);
 
     await _pumpBackupPage(
       tester,
@@ -203,7 +218,7 @@ void main() {
       },
     );
 
-    await _scrollUntilVisible(tester, find.text(oldAutoName));
+    await _scrollUntilVisible(tester, find.text(oldAutoDate));
     await tester.tap(find.byKey(const ValueKey('backup-delete-old-auto')));
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -217,7 +232,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(deletedIds, isEmpty);
-    expect(find.text(oldAutoName), findsOneWidget);
+    expect(find.text(oldAutoDate), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('backup-delete-old-auto')));
     await tester.pump(const Duration(milliseconds: 300));
@@ -229,9 +244,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(deletedIds, ['old-auto']);
-    expect(find.text(oldAutoName), findsNothing);
-    expect(find.text(latestAutoName), findsOneWidget);
-    expect(find.text(safetyName), findsOneWidget);
+    expect(find.text(oldAutoDate), findsNothing);
+    expect(find.text(latestAutoDate), findsOneWidget);
+    expect(find.text(safetyDate), findsOneWidget);
 
     await _scrollUntilVisible(
       tester,
@@ -272,9 +287,10 @@ void main() {
     );
 
     await tester.tap(find.text(UserStorage.l10n.createSnapshotNow));
-    await _scrollUntilVisible(tester, find.text(snapshot.name));
+    final dateText = _expectedDateText(snapshot.createdAt);
+    await _scrollUntilVisible(tester, find.text(dateText));
 
-    expect(find.text(snapshot.name), findsOneWidget);
+    expect(find.text(dateText), findsOneWidget);
     await _scrollUntilVisible(
       tester,
       find.text(UserStorage.l10n.autoBackupCreated(snapshot.name)),
@@ -318,7 +334,10 @@ void main() {
     expect(estimateCalls, 1);
 
     await tester.tap(find.text(UserStorage.l10n.createSnapshotNow));
-    await _scrollUntilVisible(tester, find.text(snapshot.name));
+    await _scrollUntilVisible(
+      tester,
+      find.text(_expectedDateText(snapshot.createdAt)),
+    );
 
     expect(estimateCalls, 1);
   });
@@ -340,7 +359,8 @@ void main() {
       listStoredBackups: () async => List<BackupSnapshot>.of(snapshots),
     );
 
-    expect(find.text(snapshot.name), findsNothing);
+    final dateText = _expectedDateText(snapshot.createdAt);
+    expect(find.text(dateText), findsNothing);
 
     snapshots.add(snapshot);
     EventBusService.instance.emitEvent(
@@ -352,8 +372,8 @@ void main() {
     });
     await tester.pump();
 
-    await _scrollUntilVisible(tester, find.text(snapshot.name));
-    expect(find.text(snapshot.name), findsOneWidget);
+    await _scrollUntilVisible(tester, find.text(dateText));
+    expect(find.text(dateText), findsOneWidget);
   });
 
   testWidgets('shows Android backup location picker menu', (tester) async {

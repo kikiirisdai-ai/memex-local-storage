@@ -1687,32 +1687,63 @@ class _StoredBackupTile extends StatelessWidget {
           border: Border.all(color: const Color(0xFFE5E7EB)),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
-          leading: Icon(
-            snapshot.isSafetySnapshot
-                ? Icons.health_and_safety_outlined
-                : Icons.inventory_2_outlined,
-            color: AppColors.primary,
-          ),
-          title: Text(
-            snapshot.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-          subtitle: Text(
-            '$typeText - $dateText - $sizeText',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+        // A custom Row/Column instead of ListTile: ListTile's subtitle slot
+        // assumes at most ~2 lines of fixed height, which was silently
+        // clipping the second (size) line once the distinguishing date text
+        // needed its own full line — a plain Column has no such assumption
+        // and simply grows to fit both lines.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Icon(
+                snapshot.isSafetySnapshot
+                    ? Icons.health_and_safety_outlined
+                    : Icons.inventory_2_outlined,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 12),
+              // The raw snapshot filename (e.g.
+              // "memex_safety_wipe_2026-09-13T23-25-…") is not how two
+              // backups get told apart in the UI — its distinguishing
+              // suffix is exactly what a single-line ellipsis cuts off
+              // first. The type label is short and always fits; the actual
+              // distinguishing timestamp gets its own full-width line below
+              // instead of sharing one truncatable line with type and size.
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      typeText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      dateText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    Text(
+                      sizeText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               IconButton(
                 key: ValueKey('backup-restore-${snapshot.id}'),
                 tooltip: l10n.restoreThisBackup,
