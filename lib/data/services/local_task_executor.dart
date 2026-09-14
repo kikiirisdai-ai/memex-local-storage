@@ -127,6 +127,14 @@ typedef TaskFailureHandler = Future<void> Function(
   StackTrace? stackTrace,
 );
 
+/// Hard ceiling on a single task-handler execution. Guards against a
+/// handler hanging forever on a stuck network/LLM call (which the existing
+/// retry-count cap alone can't catch, since a handler that never returns
+/// never reaches the retry-count check) — the executor's normal
+/// retry/failure bookkeeping picks up the resulting [TimeoutException]
+/// exactly like any other handler error.
+const Duration taskExecutionTimeout = Duration(minutes: 5);
+
 class LocalTaskExecutor {
   static LocalTaskExecutor? _instance;
   static LocalTaskExecutor get instance {
@@ -136,16 +144,22 @@ class LocalTaskExecutor {
 
   LocalTaskExecutor._()
       : _testDb = null,
-        _queueOwnerId = _newQueueOwnerId('foreground');
+        _queueOwnerId = _newQueueOwnerId('foreground'),
+        _executionTimeout = taskExecutionTimeout;
 
   @visibleForTesting
-  LocalTaskExecutor.forTesting({AppDatabase? db, String? queueOwnerId})
-      : _testDb = db,
-        _queueOwnerId = queueOwnerId ?? _newQueueOwnerId('test');
+  LocalTaskExecutor.forTesting({
+    AppDatabase? db,
+    String? queueOwnerId,
+    Duration? executionTimeout,
+  })  : _testDb = db,
+        _queueOwnerId = queueOwnerId ?? _newQueueOwnerId('test'),
+        _executionTimeout = executionTimeout ?? taskExecutionTimeout;
 
   final Logger _logger = getLogger('LocalTaskExecutor');
   final AppDatabase? _testDb;
   final String _queueOwnerId;
+  final Duration _executionTimeout;
   // Dynamic getter to ensure we always use the current active DB instance (handling user switches)
   AppDatabase get _db => _testDb ?? AppDatabase.instance;
   String? _currentUserId; // Track current user ID for worker context
@@ -1018,6 +1032,12 @@ class LocalTaskExecutor {
         currentUserId,
         payloadMap,
         TaskContext(taskId: task.id, taskType: task.type, bizId: task.bizId),
+      ).timeout(
+        _executionTimeout,
+        onTimeout: () => throw TimeoutException(
+          'Task ${task.id} (${task.type}) exceeded $_executionTimeout',
+          _executionTimeout,
+        ),
       );
 
       // Success

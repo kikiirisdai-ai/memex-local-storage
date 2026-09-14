@@ -713,6 +713,39 @@ void main() {
       },
     );
 
+    test(
+      'a handler that never completes is aborted after the execution '
+      'timeout instead of hanging the queue forever',
+      () async {
+        final timeoutExecutor = LocalTaskExecutor.forTesting(
+          executionTimeout: const Duration(milliseconds: 50),
+        );
+        addTearDown(timeoutExecutor.stop);
+
+        timeoutExecutor.registerHandler('hangs_forever_task', (
+          userId,
+          payload,
+          context,
+        ) async {
+          // Never resolves — simulates a stuck network/LLM call.
+          await Completer<void>().future;
+        });
+
+        await timeoutExecutor.start(userId: 'user-a');
+        final taskId = await timeoutExecutor.enqueueTask(
+          userId: 'user-a',
+          taskType: 'hangs_forever_task',
+          payload: {'value': 1},
+          maxRetries: 1,
+        );
+
+        final task = await _waitForTaskStatus(db, taskId, 'retrying');
+
+        expect(task.retryCount, 1);
+        expect(task.error, contains('exceeded'));
+      },
+    );
+
     test('first crash-like restart requeues stale processing task', () async {
       final task = await _insertTask(
         db,
