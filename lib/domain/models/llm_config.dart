@@ -287,7 +287,12 @@ class LLMConfig {
           'openai/gpt-5.4',
         ];
       case typeOllama:
-        return const ['qwen2.5:7b', 'llama3.1:8b', 'gemma3:12b'];
+        return const [
+          'qwen2.5vl:7b',
+          'gemma3:12b',
+          'qwen2.5:7b',
+          'llama3.1:8b',
+        ];
       case typeMimo:
         return const [
           'mimo-v2.5',
@@ -402,6 +407,16 @@ class LLMConfig {
             id.contains('mimo-v2.5') ||
             id.contains('mimo-v2-omni') ||
             (id.contains('glm-') && id.contains('v'));
+      case typeOllama:
+        // Common locally-runnable vision model families. gemma3:1b is the
+        // one text-only size in the gemma3 family — every other gemma3
+        // size (4b/12b/27b) is multimodal.
+        return id.contains('vl') ||
+            id.contains('vision') ||
+            id.contains('llava') ||
+            id.contains('minicpm-v') ||
+            id.contains('pixtral') ||
+            (id.startsWith('gemma3') && !id.contains(':1b'));
       default:
         return false;
     }

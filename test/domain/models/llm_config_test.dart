@@ -116,4 +116,45 @@ void main() {
       expect(validConfig.copyWith(baseUrl: '').isValid, isFalse);
     });
   });
+
+  group('Ollama provider (local, private, free)', () {
+    test('is API-key-free and lists model-listing support', () {
+      expect(LLMConfig.requiresApiKey(LLMConfig.typeOllama), isFalse);
+      expect(LLMConfig.supportsModelListing(LLMConfig.typeOllama), isTrue);
+      expect(
+        LLMConfig.defaultBaseUrl(LLMConfig.typeOllama),
+        'http://localhost:11434/v1',
+      );
+    });
+
+    test('recognizes common local vision models as multimodal', () {
+      for (final id in [
+        'qwen2.5vl:7b',
+        'qwen2.5vl:3b',
+        'llava:13b',
+        'llama3.2-vision:11b',
+        'minicpm-v:8b',
+        'pixtral:12b',
+        'gemma3:12b',
+        'gemma3:4b',
+        'gemma3:27b',
+      ]) {
+        expect(
+          LLMConfig.isKnownMultimodal(LLMConfig.typeOllama, id),
+          isTrue,
+          reason: '$id should be recognized as multimodal',
+        );
+      }
+    });
+
+    test('text-only models (including gemma3:1b) are not multimodal', () {
+      for (final id in ['qwen2.5:7b', 'llama3.1:8b', 'gemma3:1b']) {
+        expect(
+          LLMConfig.isKnownMultimodal(LLMConfig.typeOllama, id),
+          isFalse,
+          reason: '$id should not be recognized as multimodal',
+        );
+      }
+    });
+  });
 }
