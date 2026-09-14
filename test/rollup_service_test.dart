@@ -129,6 +129,10 @@ class _FakePeriod implements RollupPeriod {
       DateTime(anchor.year, anchor.month, anchor.day, 23, 59);
 
   @override
+  List<String> chartLabels(DateTime anchor, int scoreCount) =>
+      List.generate(scoreCount, (i) => 'P${i + 1}');
+
+  @override
   String? compose(Map<String, dynamic> decision, List<int?> scores) {
     final narrative = (decision['narrative'] as String?)?.trim();
     if (narrative == null || narrative.isEmpty) return null;

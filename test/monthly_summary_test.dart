@@ -219,8 +219,6 @@ void main() {
       expect(md, isNotNull);
       expect(md, contains('这个月过得很充实。'));
       expect(md, contains('**本月亮点**'));
-      expect(md, contains('**情绪走势**'));
-      expect(md, contains('（均值 8/10）'));
       expect(md, contains('**下月展望**'));
       expect(md, contains('本月心情:满足 😊'));
     });
@@ -398,9 +396,9 @@ void main() {
       final text = card.uiConfigs.first.data['text'] as String;
       expect(text, contains('这个月既有攀登也有沉淀。'));
       expect(text, contains('**本月亮点**'));
-      expect(text, contains('**情绪走势**'));
       expect(text, contains('**下月展望**'));
       expect(text, contains('本月心情:满足 😊'));
+      expect(card.uiConfigs[1].templateId, 'mood_curve');
     });
 
     test('regeneration updates the same card (idempotent)', () async {

@@ -4,9 +4,7 @@ import 'package:dart_agent_core/dart_agent_core.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/widgets.dart';
-import 'package:memex/data/services/daily_summary_service.dart';
 import 'package:memex/data/services/file_system_service.dart';
-import 'package:memex/data/services/rollup_periods.dart' show weeklyMoodBreakdown;
 import 'package:memex/data/services/weekly_summary_service.dart';
 import 'package:memex/db/app_database.dart';
 import 'package:memex/domain/models/card_model.dart';
@@ -173,22 +171,6 @@ void main() {
       expect(line, '一▁ 二█ 三· 四▄ 五· 六· 日▆');
     });
 
-    test(
-        'weeklyMoodBreakdown renders one bullet per day with the actual '
-        'score (regression: the old single-line bar sparkline read as '
-        'noise, not a comparable curve)', () {
-      final breakdown =
-          weeklyMoodBreakdown([1, 10, null, 5, null, null, 8]);
-      expect(breakdown, '''
-- 周一 ▁ 1/10
-- 周二 █ 10/10
-- 周三 · 无记录
-- 周四 ▄ 5/10
-- 周五 · 无记录
-- 周六 · 无记录
-- 周日 ▆ 8/10'''
-          .trim());
-    });
   });
 
   group('composeMarkdown', () {
@@ -203,10 +185,6 @@ void main() {
       ]);
       expect(md, contains('这一周过得很充实。'));
       expect(md, contains('**本周亮点**'));
-      expect(md, contains('**情绪曲线**'));
-      expect(md, contains('- 周一 ▆ 7/10'));
-      expect(md, contains('- 周三 · 无记录'));
-      expect(md, contains('（均值 8/10）'));
       expect(md, contains('**下周展望**'));
       expect(md, contains('本周心情:充实 💪'));
     });
@@ -308,8 +286,11 @@ void main() {
       expect(card.metadata?[CardMetadataKeys.moodScore], 8);
       expect(card.metadata?[CardMetadataKeys.moodLabel], '满足 😊');
       final text = card.uiConfigs.first.data['text'] as String;
-      expect(text, contains('**情绪曲线**'));
       expect(text, contains('**本周亮点**'));
+      expect(card.uiConfigs[1].templateId, 'mood_curve');
+      expect(card.uiConfigs[1].data['scores'], contains(8));
+      expect(card.uiConfigs[1].data['labels'], hasLength(7));
+      expect(card.uiConfigs[1].data['average'], 8);
     });
 
     test('regeneration updates the same card (idempotent)', () async {

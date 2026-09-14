@@ -42,31 +42,15 @@ const List<String> _weekdayNames = ['一', '二', '三', '四', '五', '六', '�
 /// the weekly UI/tests expect the weekday-labeled form, so it's rebuilt here
 /// from `RollupService.barFor` + the weekday labels.
 ///
-/// Kept for callers that still want the compact single-line form; the
-/// weekly card body itself now uses [weeklyMoodBreakdown] instead — a row
-/// of tiny bar glyphs packed on one line reads as noise at card font size,
-/// not a curve you can actually compare day to day.
+/// No longer used by the weekly card body itself — that now renders a real
+/// `mood_curve` chart card instead — but kept as a public, tested pure
+/// function for callers that still want the compact text form.
 String weeklySparkline(List<int?> scores) {
   final parts = <String>[];
   for (var i = 0; i < 7; i++) {
     parts.add('${_weekdayNames[i]}${RollupService.barFor(scores[i])}');
   }
   return parts.join(' ');
-}
-
-/// One bullet per day — "- 周一 ▃ 6/10" / "- 周三 · 无记录" — instead of
-/// [weeklySparkline]'s single cramped line. Renders correctly with plain
-/// commonmark (bullet lists), so it doesn't need the app's MarkdownBody
-/// instances to opt into GFM tables.
-String weeklyMoodBreakdown(List<int?> scores) {
-  final lines = <String>[];
-  for (var i = 0; i < 7; i++) {
-    final score = i < scores.length ? scores[i] : null;
-    final bar = RollupService.barFor(score);
-    final label = score == null ? '无记录' : '$score/10';
-    lines.add('- 周${_weekdayNames[i]} $bar $label');
-  }
-  return lines.join('\n');
 }
 
 const String _weeklySystemPrompt = '''
@@ -202,6 +186,10 @@ class _WeeklyRollupPeriod implements RollupPeriod {
       DateTime(anchor.year, anchor.month, anchor.day + 6, 23, 59);
 
   @override
+  List<String> chartLabels(DateTime anchor, int scoreCount) =>
+      List.generate(7, (i) => '周${_weekdayNames[i]}');
+
+  @override
   String? compose(Map<String, dynamic> decision, List<int?> scores) {
     final narrative = (decision['narrative'] as String?)?.trim();
     if (narrative == null || narrative.isEmpty) return null;
@@ -212,13 +200,6 @@ class _WeeklyRollupPeriod implements RollupPeriod {
     if (highlights.isNotEmpty) {
       buffer.write('\n\n**本周亮点**\n');
       buffer.writeAll(highlights.map((h) => '- ${h.trim()}'), '\n');
-    }
-
-    final avg = RollupService.averageScore(scores);
-    if (avg != null) {
-      buffer.write(
-        '\n\n**情绪曲线**\n${weeklyMoodBreakdown(scores)}\n\n（均值 $avg/10）',
-      );
     }
 
     final nextWeek = _stringList(decision['next_week']);
@@ -529,6 +510,10 @@ class _MonthlyRollupPeriod implements RollupPeriod {
       DateTime(anchor.year, anchor.month + 1, 0, 23, 59);
 
   @override
+  List<String> chartLabels(DateTime anchor, int scoreCount) =>
+      List.generate(scoreCount, (i) => '第${i + 1}周');
+
+  @override
   String? compose(Map<String, dynamic> decision, List<int?> scores) {
     final narrative = (decision['narrative'] as String?)?.trim();
     if (narrative == null || narrative.isEmpty) return null;
@@ -539,12 +524,6 @@ class _MonthlyRollupPeriod implements RollupPeriod {
     if (highlights.isNotEmpty) {
       buffer.write('\n\n**本月亮点**\n');
       buffer.writeAll(highlights.map((h) => '- ${h.trim()}'), '\n');
-    }
-
-    final avg = RollupService.averageScore(scores);
-    if (avg != null) {
-      buffer
-          .write('\n\n**情绪走势** ${RollupService.sparkline(scores)}（均值 $avg/10）');
     }
 
     final nextMonth = _stringList(decision['next_month']);
@@ -732,6 +711,10 @@ class _YearlyRollupPeriod implements RollupPeriod {
       DateTime(anchor.year, 12, 31, 23, 59);
 
   @override
+  List<String> chartLabels(DateTime anchor, int scoreCount) =>
+      List.generate(12, (i) => '${i + 1}月');
+
+  @override
   String? compose(Map<String, dynamic> decision, List<int?> scores) {
     final narrative = (decision['narrative'] as String?)?.trim();
     if (narrative == null || narrative.isEmpty) return null;
@@ -742,12 +725,6 @@ class _YearlyRollupPeriod implements RollupPeriod {
     if (highlights.isNotEmpty) {
       buffer.write('\n\n**年度亮点**\n');
       buffer.writeAll(highlights.map((h) => '- ${h.trim()}'), '\n');
-    }
-
-    final avg = RollupService.averageScore(scores);
-    if (avg != null) {
-      buffer
-          .write('\n\n**情绪走势** ${RollupService.sparkline(scores)}（均值 $avg/10）');
     }
 
     final nextYear = _stringList(decision['next_year']);

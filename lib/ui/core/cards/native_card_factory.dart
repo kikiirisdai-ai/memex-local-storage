@@ -15,6 +15,7 @@ import 'package:memex/ui/core/cards/templates/visual/canvas_card.dart';
 import 'package:memex/ui/core/cards/templates/quantifiable/metric_card.dart';
 import 'package:memex/ui/core/cards/templates/quantifiable/rating_card.dart';
 import 'package:memex/ui/core/cards/templates/quantifiable/mood_card.dart';
+import 'package:memex/ui/core/cards/templates/quantifiable/mood_curve_card.dart';
 import 'package:memex/ui/core/cards/templates/quantifiable/progress_card.dart';
 import 'package:memex/ui/core/cards/templates/temporal/event_card.dart';
 import 'package:memex/ui/core/cards/templates/temporal/duration_card.dart';
@@ -132,6 +133,11 @@ class NativeCardFactory {
         );
       case 'mood':
         return MoodCard(
+          data: mergedData,
+          onTap: onTap,
+        );
+      case 'mood_curve':
+        return MoodCurveCard(
           data: mergedData,
           onTap: onTap,
         );

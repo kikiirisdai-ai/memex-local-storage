@@ -58,6 +58,11 @@ abstract class RollupPeriod {
   /// Recovers the anchor date from a previously enqueued task payload.
   DateTime? anchorFromPayload(Map<String, dynamic> payload);
 
+  /// One label per entry in [collectContext]'s `scores` — e.g. weekday
+  /// names for the weekly period — used as the x-axis of the mood-curve
+  /// chart appended to the generated card.
+  List<String> chartLabels(DateTime anchor, int scoreCount);
+
   /// Fact-line text stamped on the generated card (shown as card-detail
   /// body), for the period anchored at [anchor]. Periods with a
   /// user-facing fact string (e.g. weekly's `'每周总结 <key>'`) override
@@ -222,6 +227,13 @@ class RollupService {
             period.cardTimestamp(anchor).millisecondsSinceEpoch ~/ 1000,
         uiConfigs: [
           UiConfig(templateId: 'snippet', data: {'text': markdown}),
+          if (avgScore != null)
+            UiConfig(templateId: 'mood_curve', data: {
+              'scores': collected.scores,
+              'labels':
+                  period.chartLabels(anchor, collected.scores.length),
+              'average': avgScore,
+            }),
         ],
       ),
     );
