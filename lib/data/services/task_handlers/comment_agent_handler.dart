@@ -196,6 +196,19 @@ Future<void> handleProcessAiReplyImpl(
     content: content,
   );
 
+  final forceReply = targetCharacterId != null;
+
+  final settings = await CommentSettingsService.load(userId);
+  if (shouldSkipAiCommentReply(
+    forceReply: forceReply,
+    characterCommentsEnabled: settings.enableCharacterComment,
+  )) {
+    _logger.info(
+      'Character comments disabled — skipping AI reply for $cardId',
+    );
+    return;
+  }
+
   await processAICommentReply(
     cardId: cardId,
     userId: userId,
@@ -205,7 +218,7 @@ Future<void> handleProcessAiReplyImpl(
     inputDateTime: inputDateTime,
     locationContextReminder: locationContextReminder,
     withMemoryManagement: true,
-    forceReply: targetCharacterId != null,
+    forceReply: forceReply,
   );
 }
 
@@ -246,4 +259,18 @@ Future<String?> _resolveMentionedCharacterId({
     _logger.warning('Failed to resolve character mention: $e');
     return null;
   }
+}
+
+/// Whether to skip an AI reply for a posted comment.
+///
+/// [forceReply] means the user explicitly routed this turn to a character
+/// (via @mention, or replying to one of its existing comments) — that
+/// always answers regardless of the setting, mirroring
+/// [handleCommentAgentImpl]'s "directly mentioned characters still answer"
+/// rule. Otherwise, respect the user's "enable character comment" toggle.
+bool shouldSkipAiCommentReply({
+  required bool forceReply,
+  required bool characterCommentsEnabled,
+}) {
+  return !forceReply && !characterCommentsEnabled;
 }
