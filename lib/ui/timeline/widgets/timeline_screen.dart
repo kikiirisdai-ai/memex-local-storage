@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -829,25 +831,37 @@ class TimelineScreenState extends State<TimelineScreen> {
     }
   }
 
+  /// Drives dismissal with our own [Timer] instead of relying on
+  /// [SnackBar.duration]/`.closed` — that future didn't reliably resolve
+  /// at 4s in practice (SnackBar's own dismiss animation is tied to a
+  /// ticker, which can stall independently of wall-clock time), leaving
+  /// the "undo" snackbar visibly stuck long past its stated duration.
   void _deleteCardWithUndo(TimelineViewModel vm, TimelineCardModel card) {
     vm.removeCardById(card.id);
-    var undone = false;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
 
-    final controller = ScaffoldMessenger.of(context).showSnackBar(
+    var undone = false;
+    Timer? deleteTimer;
+
+    messenger.showSnackBar(
       SnackBar(
         content: Text(UserStorage.l10n.cardDeleted),
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 10), // real dismissal is the timer below
         action: SnackBarAction(
           label: UserStorage.l10n.undo,
           onPressed: () {
             undone = true;
+            deleteTimer?.cancel();
+            messenger.hideCurrentSnackBar();
             vm.loadCards(refresh: true);
           },
         ),
       ),
     );
 
-    controller.closed.then((_) async {
+    deleteTimer = Timer(const Duration(seconds: 4), () async {
+      messenger.hideCurrentSnackBar();
       if (undone || !mounted) return;
       await MemexRouter().deleteCard(card.id);
     });
