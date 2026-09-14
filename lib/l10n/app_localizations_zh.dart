@@ -664,13 +664,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayTimeFlow => '今日时间流';
 
   @override
-  String get aiInputHint => '无论是回忆还是当下，我都准备好了...';
+  String get aiInputHint => '写下发生的事，想说的话...';
 
   @override
   String get actionCreateCard => '建卡';
 
   @override
-  String get actionCreateCardTriggerHint => '小技巧：以「待办：」或「日程：」开头，可直接生成待办/日程卡片';
+  String get actionCreateCardTriggerHint => '以「待办：」或「日程：」开头建卡，可以直接生成待办/日程卡片';
 
   @override
   String get actionAiInteract => 'AI';

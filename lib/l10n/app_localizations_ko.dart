@@ -676,7 +676,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get actionCreateCardTriggerHint =>
-      'Tip: start with \"todo:\" or \"schedule:\" to create a task or event card directly';
+      'Start with \"todo:\" or \"schedule:\" and tap Create card to generate a task or event card directly';
 
   @override
   String get actionAiInteract => 'AI chat';

@@ -446,7 +446,7 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byTooltip(UserStorage.l10n.chatHistory), findsNothing);
       expect(
-        find.text(UserStorage.l10n.actionCreateCardTriggerHint),
+        find.textContaining(UserStorage.l10n.actionCreateCardTriggerHint),
         findsOneWidget,
       );
       expect(
@@ -478,20 +478,23 @@ void main() {
     });
 
     testWidgets(
-        'hides the 待办/日程 trigger-phrase hint once the user starts typing',
-        (tester) async {
+        'shows the 待办/日程 trigger-phrase tip banner and auto-dismisses '
+        'it after 5 seconds', (tester) async {
       await _pumpDialog(tester);
 
       expect(
-        find.text(UserStorage.l10n.actionCreateCardTriggerHint),
+        find.byKey(const ValueKey('agent_chat_trigger_hint_banner')),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(UserStorage.l10n.actionCreateCardTriggerHint),
         findsOneWidget,
       );
 
-      await tester.enterText(find.byType(TextField), '待办：买牛奶');
-      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
 
       expect(
-        find.text(UserStorage.l10n.actionCreateCardTriggerHint),
+        find.byKey(const ValueKey('agent_chat_trigger_hint_banner')),
         findsNothing,
       );
     });

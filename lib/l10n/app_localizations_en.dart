@@ -674,15 +674,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayTimeFlow => 'Today\'s time flow';
 
   @override
-  String get aiInputHint =>
-      'Whether it\'s memories or the present, I\'m here...';
+  String get aiInputHint => 'Write down what happened, what\'s on your mind...';
 
   @override
   String get actionCreateCard => 'Create card';
 
   @override
   String get actionCreateCardTriggerHint =>
-      'Tip: start with \"todo:\" or \"schedule:\" to create a task or event card directly';
+      'Start with \"todo:\" or \"schedule:\" and tap Create card to generate a task or event card directly';
 
   @override
   String get actionAiInteract => 'AI chat';

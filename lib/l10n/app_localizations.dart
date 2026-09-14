@@ -1328,7 +1328,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiInputHint.
   ///
   /// In en, this message translates to:
-  /// **'Whether it\'s memories or the present, I\'m here...'**
+  /// **'Write down what happened, what\'s on your mind...'**
   String get aiInputHint;
 
   /// No description provided for @actionCreateCard.
@@ -1340,7 +1340,7 @@ abstract class AppLocalizations {
   /// No description provided for @actionCreateCardTriggerHint.
   ///
   /// In en, this message translates to:
-  /// **'Tip: start with \"todo:\" or \"schedule:\" to create a task or event card directly'**
+  /// **'Start with \"todo:\" or \"schedule:\" and tap Create card to generate a task or event card directly'**
   String get actionCreateCardTriggerHint;
 
   /// No description provided for @actionAiInteract.

@@ -501,6 +501,8 @@ class _AgentChatDialogState extends State<AgentChatDialog>
   StreamSubscription<ChatEvent>? _chatSubscription;
   final List<StreamSubscription<ChatEvent>> _queuedSendSubscriptions = [];
   Timer? _draftSaveDebounce;
+  bool _showTriggerHintBanner = true;
+  Timer? _triggerHintBannerTimer;
   bool _isApplyingDraft = false;
   bool _isLoadingPhotoSuggestions = false;
   bool _hasLoadedPhotoSuggestions = false;
@@ -575,6 +577,10 @@ class _AgentChatDialogState extends State<AgentChatDialog>
     if (_currentSessionId != null) {
       _loadSessionHistory();
     }
+
+    _triggerHintBannerTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) setState(() => _showTriggerHintBanner = false);
+    });
   }
 
   void _handleEntranceAnimationStatus(AnimationStatus status) {
@@ -586,6 +592,7 @@ class _AgentChatDialogState extends State<AgentChatDialog>
 
   @override
   void dispose() {
+    _triggerHintBannerTimer?.cancel();
     _voiceAudioSub?.cancel();
     _voiceStreamingTranscriber?.dispose();
     _voiceRecorder.dispose();
@@ -1880,6 +1887,7 @@ class _AgentChatDialogState extends State<AgentChatDialog>
                     child: Column(
                       children: [
                         _buildHeader(),
+                        if (_showTriggerHintBanner) _buildTriggerHintBanner(),
                         Expanded(
                           child: GestureDetector(
                             behavior: HitTestBehavior.translucent,
@@ -1970,23 +1978,49 @@ class _AgentChatDialogState extends State<AgentChatDialog>
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildAgentMark(size: 32),
-          const SizedBox(height: 6),
-          Text(
-            UserStorage.l10n.aiInputHint,
-            style: const TextStyle(
-              color: AppColors.textTertiary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+    // SingleChildScrollView instead of a bare Column: when other chrome
+    // above/below (the trigger-hint banner, a selected-image thumbnail
+    // strip, ...) leaves this area little vertical room, the content
+    // scrolls instead of throwing a hard RenderFlex overflow.
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildAgentMark(size: 32),
+            const SizedBox(height: 6),
+            Text(
+              UserStorage.l10n.aiInputHint,
+              style: const TextStyle(
+                color: AppColors.textTertiary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Ephemeral tip banner shown at the top of the dialog for 5 seconds on
+  /// open (see [_triggerHintBannerTimer] in initState), surfacing the
+  /// 待办：/日程： trigger phrases without permanently occupying space near
+  /// the input.
+  Widget _buildTriggerHintBanner() {
+    return Container(
+      key: const ValueKey('agent_chat_trigger_hint_banner'),
+      width: double.infinity,
+      color: const Color(0xFFFFF8E1),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Text(
+        '💡 ${UserStorage.l10n.actionCreateCardTriggerHint}',
+        style: const TextStyle(
+          fontSize: 12,
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
@@ -2288,18 +2322,6 @@ class _AgentChatDialogState extends State<AgentChatDialog>
                     contentPadding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
-                if (_messageController.text.trim().isEmpty)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      UserStorage.l10n.actionCreateCardTriggerHint,
-                      style: const TextStyle(
-                        color: AppColors.textTertiary,
-                        fontSize: 11,
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
                 const SizedBox(height: 8),
                 InputActionButtons(
                   enabled: _messageController.text.trim().isNotEmpty,
