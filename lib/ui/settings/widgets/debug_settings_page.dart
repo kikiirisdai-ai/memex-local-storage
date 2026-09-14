@@ -21,12 +21,14 @@ class DebugSettingsPage extends StatelessWidget {
   final Future<void> Function() onReprocessCards;
   final Future<void> Function() onReprocessComments;
   final Future<void> Function() onRebuildSearchIndex;
+  final Future<void> Function() onRegenerateWeeklySummary;
   final bool isClearingData;
   final bool isClearingFailedAgentContexts;
   final bool isCloningTestUser;
   final bool isReprocessingCards;
   final bool isReprocessingComments;
   final bool isRebuildingSearchIndex;
+  final bool isRegeneratingWeeklySummary;
 
   const DebugSettingsPage({
     super.key,
@@ -37,12 +39,14 @@ class DebugSettingsPage extends StatelessWidget {
     required this.onReprocessCards,
     required this.onReprocessComments,
     required this.onRebuildSearchIndex,
+    required this.onRegenerateWeeklySummary,
     required this.isClearingData,
     required this.isClearingFailedAgentContexts,
     required this.isCloningTestUser,
     required this.isReprocessingCards,
     required this.isReprocessingComments,
     required this.isRebuildingSearchIndex,
+    required this.isRegeneratingWeeklySummary,
   });
 
   Future<void> _deleteSpeechModel(BuildContext context) async {
@@ -255,6 +259,14 @@ class DebugSettingsPage extends StatelessWidget {
             title: UserStorage.l10n.regenerateComments,
             onTap: onReprocessComments,
             isLoading: isReprocessingComments,
+          ),
+          const SizedBox(height: 12),
+          _buildFunctionTab(
+            context: context,
+            icon: Icons.calendar_view_week_outlined,
+            title: 'Regenerate this week\'s summary',
+            onTap: onRegenerateWeeklySummary,
+            isLoading: isRegeneratingWeeklySummary,
           ),
           const SizedBox(height: 12),
           _buildFunctionTab(

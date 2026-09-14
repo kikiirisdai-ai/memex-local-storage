@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:memex/data/repositories/memex_router.dart';
 import 'package:memex/data/services/sandbox_user_clone_service.dart';
+import 'package:memex/data/services/weekly_summary_service.dart';
 import 'package:memex/ui/settings/widgets/reprocess_cards_dialog.dart';
 import 'package:memex/utils/result.dart';
 import 'package:memex/utils/user_storage.dart';
@@ -171,6 +172,7 @@ class DebugSettingsViewModel extends ChangeNotifier {
   bool _isReprocessingCards = false;
   bool _isReprocessingComments = false;
   bool _isRebuildingSearchIndex = false;
+  bool _isRegeneratingWeeklySummary = false;
 
   bool get isClearingData => _isClearingData;
   bool get isClearingFailedAgentContexts => _isClearingFailedAgentContexts;
@@ -178,6 +180,7 @@ class DebugSettingsViewModel extends ChangeNotifier {
   bool get isReprocessingCards => _isReprocessingCards;
   bool get isReprocessingComments => _isReprocessingComments;
   bool get isRebuildingSearchIndex => _isRebuildingSearchIndex;
+  bool get isRegeneratingWeeklySummary => _isRegeneratingWeeklySummary;
 
   Future<void> clearToken() async {
     await UserStorage.clearUser();
@@ -257,6 +260,28 @@ class DebugSettingsViewModel extends ChangeNotifier {
           taskType: 'reprocess_comments_task',
           payload: options.toTaskPayload(),
           bizId: _createBizId('reprocess_comments'),
+        );
+      },
+    );
+    return true;
+  }
+
+  /// Re-runs the current ISO week's summary generation, overwriting the
+  /// existing card in place (weekly generation is idempotent per week) —
+  /// a debug-only way to preview compose-time formatting changes without
+  /// waiting for the natural weekly schedule.
+  Future<bool> createRegenerateWeeklySummaryTask() async {
+    if (_isRegeneratingWeeklySummary) return false;
+
+    await _runWithLoading(
+      setLoading: (value) => _isRegeneratingWeeklySummary = value,
+      action: () async {
+        await _ensureUser();
+        final monday = WeeklySummaryService.mondayOf(DateTime.now());
+        await _dataController.enqueueTask(
+          taskType: weeklySummaryTaskType,
+          payload: {'week_monday': monday.toIso8601String()},
+          bizId: _createBizId('weekly_summary'),
         );
       },
     );

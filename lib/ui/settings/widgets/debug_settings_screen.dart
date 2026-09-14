@@ -325,6 +325,30 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
     }
   }
 
+  Future<void> _regenerateWeeklySummary() async {
+    try {
+      final created = await _viewModel.createRegenerateWeeklySummaryTask();
+      if (!mounted || !created) return;
+      ToastHelper.showSuccessWithKey(
+        _scaffoldMessengerKey,
+        UserStorage.l10n.regenerateCommentsTaskCreated,
+      );
+    } on DebugSettingsUserNotFoundException {
+      if (!mounted) return;
+      ToastHelper.showErrorWithKey(
+        _scaffoldMessengerKey,
+        UserStorage.l10n.userIdNotFound,
+      );
+    } catch (e, stack) {
+      _logger.severe('Error regenerating weekly summary: $e', e, stack);
+      if (!mounted) return;
+      ToastHelper.showErrorWithKey(
+        _scaffoldMessengerKey,
+        UserStorage.l10n.createTaskFailed(e),
+      );
+    }
+  }
+
   Future<void> _rebuildSearchIndex() async {
     if (_viewModel.isRebuildingSearchIndex) return;
 
@@ -531,6 +555,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
             onReprocessCards: _reprocessCards,
             onReprocessComments: _reprocessComments,
             onRebuildSearchIndex: _rebuildSearchIndex,
+            onRegenerateWeeklySummary: _regenerateWeeklySummary,
             isClearingData: _viewModel.isClearingData,
             isClearingFailedAgentContexts:
                 _viewModel.isClearingFailedAgentContexts,
@@ -538,6 +563,8 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
             isReprocessingCards: _viewModel.isReprocessingCards,
             isReprocessingComments: _viewModel.isReprocessingComments,
             isRebuildingSearchIndex: _viewModel.isRebuildingSearchIndex,
+            isRegeneratingWeeklySummary:
+                _viewModel.isRegeneratingWeeklySummary,
           );
         },
       ),
