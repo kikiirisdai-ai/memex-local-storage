@@ -1337,6 +1337,12 @@ abstract class AppLocalizations {
   /// **'Create card'**
   String get actionCreateCard;
 
+  /// No description provided for @actionCreateCardTriggerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: start with \"todo:\" or \"schedule:\" to create a task or event card directly'**
+  String get actionCreateCardTriggerHint;
+
   /// No description provided for @actionAiInteract.
   ///
   /// In en, this message translates to:

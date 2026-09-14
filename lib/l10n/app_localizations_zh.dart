@@ -670,6 +670,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionCreateCard => '建卡';
 
   @override
+  String get actionCreateCardTriggerHint => '小技巧：以「待办：」或「日程：」开头，可直接生成待办/日程卡片';
+
+  @override
   String get actionAiInteract => 'AI';
 
   @override

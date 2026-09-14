@@ -304,6 +304,7 @@
   "todayTimeFlow": "Today's time flow",
   "aiInputHint": "Whether it's memories or the present, I'm here...",
   "actionCreateCard": "Create card",
+  "actionCreateCardTriggerHint": "Tip: start with \"todo:\" or \"schedule:\" to create a task or event card directly",
   "actionAiInteract": "AI chat",
   "actionPolish": "Polish",
   "modelOfflineToast": "Model not connected",

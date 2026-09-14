@@ -95,4 +95,24 @@ void main() {
     );
     expect(pol, 0);
   });
+
+  testWidgets(
+      'create-card button carries a tooltip hinting the 待办：/日程： '
+      'trigger phrases', (tester) async {
+    await tester.pumpWidget(buildTestableWidget(
+      InputActionButtons(
+        enabled: true,
+        onCreateCard: () {},
+        onAiInteract: () {},
+        onPolish: () {},
+      ),
+    ));
+
+    final tooltip = tester.widget<Tooltip>(find.ancestor(
+      of: find.byKey(const ValueKey('action_create_card')),
+      matching: find.byType(Tooltip),
+    ));
+    expect(tooltip.message, contains('待办：'));
+    expect(tooltip.message, contains('日程：'));
+  });
 }

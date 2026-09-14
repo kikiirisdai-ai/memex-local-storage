@@ -61,6 +61,47 @@ class QuickCaptureResult {
   final List<GoalSuggestion> goalSuggestions;
 }
 
+/// A trigger phrase that deterministically routes quick-capture to a
+/// specific timeline card template, bypassing the model's card-shape
+/// decision entirely.
+enum QuickCaptureTriggerKind { task, event }
+
+/// Prefixes users can type in "建卡" to force a `task` or `event` card —
+/// checked before anything else in [QuickCaptureService.run] so the routing
+/// is 100% deterministic (never subject to the general model call's
+/// judgment or its rate-limit/timeout failure modes). Order matters when
+/// one prefix is a substring of another; none currently are.
+const Map<String, QuickCaptureTriggerKind> _triggerPrefixes = {
+  '待办：': QuickCaptureTriggerKind.task,
+  '待办:': QuickCaptureTriggerKind.task,
+  'todo：': QuickCaptureTriggerKind.task,
+  'todo:': QuickCaptureTriggerKind.task,
+  '日程：': QuickCaptureTriggerKind.event,
+  '日程:': QuickCaptureTriggerKind.event,
+  'schedule：': QuickCaptureTriggerKind.event,
+  'schedule:': QuickCaptureTriggerKind.event,
+};
+
+/// Detects a leading trigger prefix (case-insensitive for the ASCII forms)
+/// and returns its kind plus the remaining text with the prefix stripped
+/// and trimmed. Returns null when the message has no matching prefix.
+@visibleForTesting
+({QuickCaptureTriggerKind kind, String remainder})? detectTrigger(
+  String message,
+) {
+  final trimmed = message.trimLeft();
+  final lower = trimmed.toLowerCase();
+  for (final entry in _triggerPrefixes.entries) {
+    if (lower.startsWith(entry.key.toLowerCase())) {
+      return (
+        kind: entry.value,
+        remainder: trimmed.substring(entry.key.length).trim(),
+      );
+    }
+  }
+  return null;
+}
+
 /// Fast path for simple fragments: one LLM call decides record-vs-chat and,
 /// for records, produces the timeline card directly — bypassing the
 /// multi-call super-agent orchestration. Anything the gate or the model is
@@ -129,6 +170,19 @@ class QuickCaptureService {
   }) async {
     final isVoiceNote = audioFsFilename != null && audioFsFilename.isNotEmpty;
     try {
+      final trigger = detectTrigger(message);
+      if (trigger != null) {
+        return await _writeTriggeredCard(
+          userId: userId,
+          kind: trigger.kind,
+          remainder: trigger.remainder,
+          originalMessage: message,
+          userMessageTime: userMessageTime,
+          imageFsFilenames: imageFsFilenames,
+          audioFsFilename: audioFsFilename,
+        );
+      }
+
       final activeGoals = await _fetchActiveGoals();
       final resources = await _loadResources();
       final decision = await _callModel(
@@ -374,15 +428,23 @@ Respond with STRICT JSON only, no markdown fences, one of:
       _parseDecision(raw);
 
   static Map<String, dynamic>? _parseDecision(String? raw) {
+    final decoded = _parseJsonObject(raw);
+    if (decoded == null || decoded['type'] is! String) return null;
+    return decoded;
+  }
+
+  /// Extracts and decodes the first `{...}` JSON object found in [raw].
+  /// Shared by the general card/reply decision (which additionally
+  /// requires a `type` key) and the trigger-phrase extraction calls (which
+  /// don't).
+  static Map<String, dynamic>? _parseJsonObject(String? raw) {
     if (raw == null) return null;
     final start = raw.indexOf('{');
     final end = raw.lastIndexOf('}');
     if (start < 0 || end <= start) return null;
     try {
       final decoded = jsonDecode(raw.substring(start, end + 1));
-      if (decoded is! Map<String, dynamic>) return null;
-      if (decoded['type'] is! String) return null;
-      return decoded;
+      return decoded is Map<String, dynamic> ? decoded : null;
     } catch (_) {
       return null;
     }
@@ -571,5 +633,149 @@ Respond with STRICT JSON only, no markdown fences, one of:
       replyText: (reply == null || reply.isEmpty) ? null : reply,
       goalSuggestions: goalSuggestions,
     );
+  }
+
+  static String _taskExtractionPrompt(DateTime now) => '''
+You are Memex quick-capture's TODO extractor. The user typed a "待办：/todo:"
+trigger phrase — the rest of their message describes one task. The current
+date/time is ${now.toIso8601String()} (no timezone offset = local time) —
+use it to resolve relative expressions like "明天", "下周三", "3天后",
+"tomorrow", "next Friday" into an absolute date.
+
+Respond with STRICT JSON only, no markdown fences:
+{"title":"<short actionable task title, user's language, strip filler words like the trigger phrase itself>","due_date":"<ISO8601 datetime string (local, no Z suffix) if the text states or implies a deadline/time, else null>"}''';
+
+  static String _eventExtractionPrompt(DateTime now) => '''
+You are Memex quick-capture's calendar-event extractor. The user typed a
+"日程：/schedule:" trigger phrase — the rest of their message describes one
+event. The current date/time is ${now.toIso8601String()} (no timezone
+offset = local time) — use it to resolve relative expressions like
+"明天下午3点", "周五晚上", "下周一上午10点", "tomorrow at 3pm" into an
+absolute date/time.
+
+Respond with STRICT JSON only, no markdown fences:
+{"title":"<short event title, user's language>","start_time":"<ISO8601 datetime string (local, no Z suffix), REQUIRED — your best resolution of when this starts; if no time is stated at all, default to 09:00 on the implied or current date>","end_time":"<ISO8601 datetime string if an end time or duration is stated or implied, else null>","location":"<location if mentioned, else null>"}''';
+
+  Future<Map<String, dynamic>?> _callExtraction({
+    required ({LLMClient client, ModelConfig modelConfig}) resources,
+    required String systemPrompt,
+    required String remainder,
+  }) async {
+    Future<Map<String, dynamic>?> attempt({required bool strict}) async {
+      final response = await resources.client.generate(
+        [
+          SystemMessage(strict
+              ? '$systemPrompt\n\nYour previous output was not valid JSON. '
+                  'Output exactly one JSON object and nothing else.'
+              : systemPrompt),
+          UserMessage([TextPart(remainder)]),
+        ],
+        modelConfig: resources.modelConfig,
+        jsonOutput: true,
+      );
+      return _parseJsonObject(response.textOutput);
+    }
+
+    return await attempt(strict: false) ?? await attempt(strict: true);
+  }
+
+  /// Deterministically builds a `task` or `event` card from a trigger-phrase
+  /// message: the template choice never goes through the model — only the
+  /// title/time/location extraction from the remainder text does.
+  Future<QuickCaptureResult> _writeTriggeredCard({
+    required String userId,
+    required QuickCaptureTriggerKind kind,
+    required String remainder,
+    required String originalMessage,
+    required DateTime userMessageTime,
+    List<String> imageFsFilenames = const [],
+    String? audioFsFilename,
+  }) async {
+    if (remainder.isEmpty) return const QuickCaptureResult.escalate();
+
+    final resources = await _loadResources();
+    final extracted = await _callExtraction(
+      resources: resources,
+      systemPrompt: kind == QuickCaptureTriggerKind.task
+          ? _taskExtractionPrompt(userMessageTime)
+          : _eventExtractionPrompt(userMessageTime),
+      remainder: remainder,
+    );
+    if (extracted == null) return const QuickCaptureResult.escalate();
+
+    final title = _asTrimmedString(extracted['title']) ?? remainder;
+    Map<String, dynamic> templateData;
+    if (kind == QuickCaptureTriggerKind.task) {
+      final dueDate = _asTrimmedString(extracted['due_date']);
+      templateData = {
+        'title': title,
+        'is_completed': false,
+        if (dueDate != null) 'due_date': dueDate,
+      };
+    } else {
+      final startTime = _asTrimmedString(extracted['start_time']);
+      if (startTime == null) return const QuickCaptureResult.escalate();
+      final endTime = _asTrimmedString(extracted['end_time']);
+      final location = _asTrimmedString(extracted['location']);
+      templateData = {
+        'title': title,
+        'start_time': startTime,
+        if (endTime != null) 'end_time': endTime,
+        if (location != null) 'location': location,
+      };
+    }
+
+    final factId = await _fs.allocateCardFactId(userId);
+    final timestampSecs = userMessageTime.millisecondsSinceEpoch ~/ 1000;
+    CardData? cardData;
+    try {
+      cardData = await _fs.updateCardFile(
+        userId,
+        factId,
+        createIfNotExists: true,
+        (card) => card.copyWith(
+          status: 'completed',
+          title: title,
+          fact: originalMessage.trim(),
+          timestamp: timestampSecs,
+          assets: (imageFsFilenames.isNotEmpty || audioFsFilename != null)
+              ? [
+                  for (final f in imageFsFilenames) '![image](fs://$f)',
+                  if (audioFsFilename != null)
+                    '[audio](fs://$audioFsFilename)',
+                ]
+              : null,
+          uiConfigs: [
+            UiConfig(
+              templateId:
+                  kind == QuickCaptureTriggerKind.task ? 'task' : 'event',
+              data: templateData,
+            ),
+          ],
+        ),
+      );
+    } catch (e, stack) {
+      _logger.warning('Trigger card write threw for $factId', e, stack);
+      cardData = null;
+    }
+    if (cardData == null) {
+      try {
+        await _fs.deleteCard(userId, factId);
+      } catch (_) {}
+      return const QuickCaptureResult.escalate();
+    }
+    await emitTimelineCardAdded(
+      userId: userId,
+      cardId: factId,
+      cardData: cardData,
+    );
+
+    try {
+      await MemorySyncService.instance.enqueueFact(userId, factId);
+    } catch (e) {
+      _logger.warning('Failed to enqueue memory sync for $factId: $e');
+    }
+
+    return QuickCaptureResult.card(factId);
   }
 }

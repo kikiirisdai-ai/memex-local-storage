@@ -446,6 +446,10 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byTooltip(UserStorage.l10n.chatHistory), findsNothing);
       expect(
+        find.text(UserStorage.l10n.actionCreateCardTriggerHint),
+        findsOneWidget,
+      );
+      expect(
         find.byTooltip(UserStorage.l10n.enterFullScreenTooltip),
         findsOneWidget,
       );
@@ -470,6 +474,25 @@ void main() {
       expect(
         decoration.borderRadius,
         const BorderRadius.vertical(top: Radius.circular(32)),
+      );
+    });
+
+    testWidgets(
+        'hides the 待办/日程 trigger-phrase hint once the user starts typing',
+        (tester) async {
+      await _pumpDialog(tester);
+
+      expect(
+        find.text(UserStorage.l10n.actionCreateCardTriggerHint),
+        findsOneWidget,
+      );
+
+      await tester.enterText(find.byType(TextField), '待办：买牛奶');
+      await tester.pump();
+
+      expect(
+        find.text(UserStorage.l10n.actionCreateCardTriggerHint),
+        findsNothing,
       );
     });
 
@@ -835,6 +858,10 @@ void main() {
       expect(find.text('PKM/Projects/memex.md'), findsOneWidget);
       expect(find.text(UserStorage.l10n.scheduleBriefingOpen), findsOneWidget);
 
+      await tester.ensureVisible(
+        find.text(UserStorage.l10n.scheduleBriefingOpen),
+      );
+      await tester.pump();
       await tester.tap(find.text(UserStorage.l10n.scheduleBriefingOpen));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));

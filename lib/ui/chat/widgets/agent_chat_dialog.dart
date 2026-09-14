@@ -2288,6 +2288,18 @@ class _AgentChatDialogState extends State<AgentChatDialog>
                     contentPadding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
+                if (_messageController.text.trim().isEmpty)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      UserStorage.l10n.actionCreateCardTriggerHint,
+                      style: const TextStyle(
+                        color: AppColors.textTertiary,
+                        fontSize: 11,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 8),
                 InputActionButtons(
                   enabled: _messageController.text.trim().isNotEmpty,

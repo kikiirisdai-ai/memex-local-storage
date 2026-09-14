@@ -305,6 +305,7 @@
   "todayTimeFlow": "今日时间流",
   "aiInputHint": "无论是回忆还是当下，我都准备好了...",
   "actionCreateCard": "建卡",
+  "actionCreateCardTriggerHint": "小技巧：以「待办：」或「日程：」开头，可直接生成待办/日程卡片",
   "actionAiInteract": "AI",
   "actionPolish": "润色",
   "modelOfflineToast": "模型未连接",

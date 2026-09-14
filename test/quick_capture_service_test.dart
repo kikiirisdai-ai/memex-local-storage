@@ -207,6 +207,41 @@ void main() {
     });
   });
 
+  group('detectTrigger', () {
+    test('matches the Chinese task prefix and strips it', () {
+      final result = detectTrigger('待办：买牛奶');
+      expect(result?.kind, QuickCaptureTriggerKind.task);
+      expect(result?.remainder, '买牛奶');
+    });
+
+    test('matches the Chinese event prefix and strips it', () {
+      final result = detectTrigger('日程：明天下午3点开会');
+      expect(result?.kind, QuickCaptureTriggerKind.event);
+      expect(result?.remainder, '明天下午3点开会');
+    });
+
+    test('matches the English prefixes case-insensitively', () {
+      final task = detectTrigger('TODO: buy milk');
+      expect(task?.kind, QuickCaptureTriggerKind.task);
+      expect(task?.remainder, 'buy milk');
+
+      final event = detectTrigger('Schedule: team sync tomorrow 3pm');
+      expect(event?.kind, QuickCaptureTriggerKind.event);
+      expect(event?.remainder, 'team sync tomorrow 3pm');
+    });
+
+    test('ignores leading whitespace before the prefix', () {
+      final result = detectTrigger('   待办: 洗车');
+      expect(result?.kind, QuickCaptureTriggerKind.task);
+      expect(result?.remainder, '洗车');
+    });
+
+    test('returns null when there is no matching prefix', () {
+      expect(detectTrigger('今天买了牛奶'), isNull);
+      expect(detectTrigger('todo without colon'), isNull);
+    });
+  });
+
   group('QuickCaptureService.run', () {
     late Directory tempRoot;
     late String userId;
@@ -867,6 +902,110 @@ void main() {
       // Title/mood still come from the model decision.
       expect(card.title, '标题');
       expect(card.metadata?[CardMetadataKeys.moodLabel], '开心');
+    });
+  });
+
+  group('QuickCaptureService.run trigger phrases', () {
+    late Directory tempRoot;
+    late String userId;
+    late AppDatabase db;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      userId = 'quick_capture_trigger_${DateTime.now().millisecondsSinceEpoch}';
+      await UserStorage.saveUser(userId);
+      tempRoot = await Directory.systemTemp.createTemp('memex_quick_capture_');
+      await FileSystemService.init(tempRoot.path);
+      db = AppDatabase.forTesting(NativeDatabase.memory());
+      AppDatabase.setTestInstance(db);
+    });
+
+    tearDown(() async {
+      await db.close();
+      await tempRoot.delete(recursive: true);
+    });
+
+    test('待办： builds a task card deterministically, never asking the '
+        'general model for the card shape', () async {
+      final client = _ScriptedClient([
+        '{"title":"买牛奶","due_date":"2026-08-31T00:00:00"}',
+      ]);
+      final result = await _serviceWith(client).run(
+        userId: userId,
+        message: '待办：明天买牛奶',
+        userMessageTime: DateTime(2026, 8, 30, 10, 0),
+      );
+
+      expect(result.outcome, QuickCaptureOutcome.card);
+      expect(client.calls, 1);
+      final card = await FileSystemService.instance
+          .readCardFile(userId, result.cardFactId!);
+      expect(card!.uiConfigs.first.templateId, 'task');
+      expect(card.uiConfigs.first.data['title'], '买牛奶');
+      expect(card.uiConfigs.first.data['due_date'], '2026-08-31T00:00:00');
+      expect(card.uiConfigs.first.data['is_completed'], false);
+      expect(card.title, '买牛奶');
+    });
+
+    test('日程： builds an event card deterministically', () async {
+      final client = _ScriptedClient([
+        '{"title":"团队会议","start_time":"2026-08-31T15:00:00",'
+            '"end_time":"2026-08-31T16:00:00","location":"会议室A"}',
+      ]);
+      final result = await _serviceWith(client).run(
+        userId: userId,
+        message: '日程：明天下午3点团队会议在会议室A',
+        userMessageTime: DateTime(2026, 8, 30, 10, 0),
+      );
+
+      expect(result.outcome, QuickCaptureOutcome.card);
+      final card = await FileSystemService.instance
+          .readCardFile(userId, result.cardFactId!);
+      expect(card!.uiConfigs.first.templateId, 'event');
+      expect(card.uiConfigs.first.data['title'], '团队会议');
+      expect(card.uiConfigs.first.data['start_time'], '2026-08-31T15:00:00');
+      expect(card.uiConfigs.first.data['end_time'], '2026-08-31T16:00:00');
+      expect(card.uiConfigs.first.data['location'], '会议室A');
+    });
+
+    test('event extraction with no resolvable start_time escalates',
+        () async {
+      final client = _ScriptedClient([
+        '{"title":"团队会议","start_time":null}',
+      ]);
+      final result = await _serviceWith(client).run(
+        userId: userId,
+        message: '日程：团队会议',
+        userMessageTime: DateTime(2026, 8, 30, 10, 0),
+      );
+
+      expect(result.outcome, QuickCaptureOutcome.escalate);
+    });
+
+    test('unparseable extraction output escalates instead of writing a '
+        'broken card', () async {
+      final client = _ScriptedClient(['not json', 'still not json']);
+      final result = await _serviceWith(client).run(
+        userId: userId,
+        message: '待办：买牛奶',
+        userMessageTime: DateTime(2026, 8, 30, 10, 0),
+      );
+
+      expect(result.outcome, QuickCaptureOutcome.escalate);
+      expect(client.calls, 2);
+    });
+
+    test('a trigger prefix with nothing after it escalates without calling '
+        'the model', () async {
+      final client = _ScriptedClient(const []);
+      final result = await _serviceWith(client).run(
+        userId: userId,
+        message: '待办：',
+        userMessageTime: DateTime(2026, 8, 30, 10, 0),
+      );
+
+      expect(result.outcome, QuickCaptureOutcome.escalate);
+      expect(client.calls, 0);
     });
   });
 }

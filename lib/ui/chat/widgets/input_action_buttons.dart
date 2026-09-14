@@ -35,11 +35,15 @@ class InputActionButtons extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _buildActionButton(
-            key: const ValueKey('action_create_card'),
-            icon: Icons.style_outlined,
-            label: l10n.actionCreateCard,
-            onPressed: _enabled ? _onCreateCard : null,
+          child: Tooltip(
+            message: l10n.actionCreateCardTriggerHint,
+            triggerMode: TooltipTriggerMode.longPress,
+            child: _buildActionButton(
+              key: const ValueKey('action_create_card'),
+              icon: Icons.style_outlined,
+              label: l10n.actionCreateCard,
+              onPressed: _enabled ? _onCreateCard : null,
+            ),
           ),
         ),
         const SizedBox(width: 8),
