@@ -13,6 +13,7 @@ import 'package:memex/data/services/file_system_service.dart';
 import 'package:memex/utils/logger.dart';
 import 'package:memex/utils/time_context.dart';
 import 'package:uuid/uuid.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 
 final _logger = getLogger('SuperAgentChild');
 
@@ -468,7 +469,9 @@ Future<SuperAgentChildResult> runSuperAgentChild({
   DelegateProgressSink? progressSink,
 }) async {
   StatefulAgent? agent;
-  final cancelToken = CancelToken();
+  // Inherit the owning task's token so terminating AI work also aborts the
+  // child's in-flight LLM request, not just the parent turn's.
+  final cancelToken = TaskCancelScope.current ?? CancelToken();
   try {
     agent = createSuperAgentChild(
       config: config,

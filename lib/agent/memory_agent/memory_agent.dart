@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:memex/agent/memory/memory_management.dart';
 import 'package:memex/agent/state_util.dart';
 import 'package:memex/agent/agent_controller.util.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 
 class MemoryAgent {
   static final Logger _logger = Logger('MemoryAgent');
@@ -117,7 +118,7 @@ Please analyze the user content batch and extract long-term memories using the `
 ''')
     ]);
 
-    await agent.run([inputMessage]);
+    await agent.run([inputMessage], cancelToken: TaskCancelScope.current);
     _logger.info('MemoryAgent analysis complete.');
   }
 }

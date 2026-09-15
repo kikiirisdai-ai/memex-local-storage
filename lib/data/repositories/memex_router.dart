@@ -700,6 +700,13 @@ class MemexRouter {
     }
   }
 
+  /// Terminates every queued and running task, aborting in-flight LLM
+  /// requests. Returns the number of tasks terminated.
+  Future<int> cancelAllActiveAiTasks() async {
+    await _ensureInitialized();
+    return LocalTaskExecutor.instance.cancelAllActiveTasks();
+  }
+
   /// Clears all workspace data for the current user.
   Future<void> clearData() async {
     await _ensureInitialized();

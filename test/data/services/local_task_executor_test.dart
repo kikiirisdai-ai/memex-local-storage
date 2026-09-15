@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memex/data/services/local_task_executor.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 import 'package:memex/db/app_database.dart';
+import 'package:memex/domain/models/task_exceptions.dart';
 
 void main() {
   late AppDatabase db;
@@ -268,15 +271,16 @@ void main() {
 
       expect(
         snapshot,
-        const TaskActivitySnapshot(
+        TaskActivitySnapshot(
           pending: 1,
           processing: 1,
           retrying: 1,
-          activeTaskIds: {
+          activeTaskIds: const {
             'pending-task',
             'processing-task',
             'retrying-task',
           },
+          oldestActiveAt: now,
         ),
       );
       expect(snapshot.total, 3);
@@ -929,6 +933,225 @@ void main() {
         expect(await executor.getTaskExecutionMarkerForTesting(), isNull);
       },
     );
+  });
+
+  group('LocalTaskExecutor manual cancellation', () {
+    Future<void> insertTask(
+      String id,
+      String status, {
+      String type = 'cancellable_task',
+    }) async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await db.into(db.tasks).insert(TasksCompanion.insert(
+            id: id,
+            type: type,
+            payload: const Value('{}'),
+            status: status,
+            createdAt: Value(now),
+            scheduledAt: Value(now),
+          ));
+    }
+
+    Future<String?> statusOf(String id) async {
+      final row = await (db.select(db.tasks)..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
+      return row?.status;
+    }
+
+    // The executor clears its crash-guard marker at the very end of
+    // _executeTask. Waiting on that keeps the trailing async cleanup inside
+    // the test body instead of racing tearDown's db.close().
+    Future<void> waitForExecutorIdle() async {
+      final deadline = DateTime.now().add(const Duration(seconds: 3));
+      while (await executor.getTaskExecutionMarkerForTesting() != null) {
+        if (DateTime.now().isAfter(deadline)) {
+          fail('Executor did not finish its per-task cleanup in time');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+
+    test('flips every active status to cancelled and returns the count',
+        () async {
+      await insertTask('t-pending', 'pending');
+      await insertTask('t-processing', 'processing');
+      await insertTask('t-retrying', 'retrying');
+
+      final cancelled = await executor.cancelAllActiveTasks();
+
+      expect(cancelled, 3);
+      expect(await statusOf('t-pending'), 'cancelled');
+      expect(await statusOf('t-processing'), 'cancelled');
+      expect(await statusOf('t-retrying'), 'cancelled');
+    });
+
+    test('leaves already-terminal tasks untouched and out of the count',
+        () async {
+      await insertTask('t-completed', 'completed');
+      await insertTask('t-failed', 'failed');
+      await insertTask('t-pending', 'pending');
+
+      final cancelled = await executor.cancelAllActiveTasks();
+
+      expect(cancelled, 1);
+      expect(await statusOf('t-completed'), 'completed');
+      expect(await statusOf('t-failed'), 'failed');
+    });
+
+    test('returns zero and no-ops when nothing is active', () async {
+      await insertTask('t-completed', 'completed');
+
+      expect(await executor.cancelAllActiveTasks(), 0);
+      expect(await statusOf('t-completed'), 'completed');
+    });
+
+    test('records a cancellation reason and completion time', () async {
+      await insertTask('t-pending', 'pending');
+
+      await executor.cancelAllActiveTasks();
+
+      final row = await (db.select(db.tasks)
+            ..where((t) => t.id.equals('t-pending')))
+          .getSingle();
+      expect(row.error, contains('Cancelled'));
+      expect(row.completedAt, isNotNull);
+    });
+
+    test('cancels the cancel scope installed for a running handler', () async {
+      final handlerStarted = Completer<void>();
+      CancelToken? seenToken;
+
+      executor.registerHandler('cancellable_task', (_, __, ___) async {
+        seenToken = TaskCancelScope.current;
+        if (!handlerStarted.isCompleted) handlerStarted.complete();
+        final blocked = Completer<void>();
+        seenToken?.whenCancel.then((_) {
+          if (!blocked.isCompleted) blocked.complete();
+        });
+        await blocked.future;
+        throw TaskCancelledException();
+      });
+
+      await insertTask('t-running', 'pending');
+      await executor.start(userId: 'user-1');
+      await handlerStarted.future.timeout(const Duration(seconds: 5));
+
+      expect(seenToken, isNotNull);
+      expect(seenToken!.isCancelled, isFalse);
+
+      await executor.cancelAllActiveTasks();
+
+      expect(seenToken!.isCancelled, isTrue);
+      await waitForExecutorIdle();
+    });
+
+    test('does not reschedule a retry for a task cancelled mid-flight',
+        () async {
+      final handlerStarted = Completer<void>();
+      final releaseHandler = Completer<void>();
+
+      executor.registerHandler('cancellable_task', (_, __, ___) async {
+        if (!handlerStarted.isCompleted) handlerStarted.complete();
+        await releaseHandler.future;
+        throw Exception('network died while cancelled');
+      });
+
+      await insertTask('t-running', 'pending');
+      await executor.start(userId: 'user-1');
+      await handlerStarted.future.timeout(const Duration(seconds: 5));
+
+      await executor.cancelAllActiveTasks();
+      releaseHandler.complete();
+      await waitForExecutorIdle();
+
+      expect(await statusOf('t-running'), 'cancelled');
+    });
+
+    test('a cancelled dependency no longer blocks dependent tasks', () async {
+      final dependentRan = Completer<void>();
+      executor.registerHandler('dependent_task', (_, __, ___) async {
+        if (!dependentRan.isCompleted) dependentRan.complete();
+      });
+
+      await insertTask('t-dependency', 'pending');
+      await executor.cancelAllActiveTasks();
+      expect(await statusOf('t-dependency'), 'cancelled');
+
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await db.into(db.tasks).insert(TasksCompanion.insert(
+            id: 't-dependent',
+            type: 'dependent_task',
+            payload: const Value('{}'),
+            status: 'pending',
+            createdAt: Value(now),
+            scheduledAt: Value(now),
+            dependencies: Value(jsonEncode(['t-dependency'])),
+          ));
+
+      await executor.start(userId: 'user-1');
+      await dependentRan.future.timeout(const Duration(seconds: 5));
+      await waitForExecutorIdle();
+    });
+  });
+
+  group('LocalTaskExecutor active-task age', () {
+    Future<void> insertTask(
+      String id,
+      String status, {
+      required int createdAt,
+    }) async {
+      await db.into(db.tasks).insert(TasksCompanion.insert(
+            id: id,
+            type: 'aging_task',
+            payload: const Value('{}'),
+            status: status,
+            createdAt: Value(createdAt),
+            scheduledAt: Value(createdAt),
+          ));
+    }
+
+    test('reports the oldest active task creation time', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await insertTask('t-newer', 'pending', createdAt: now - 30);
+      await insertTask('t-oldest', 'retrying', createdAt: now - 600);
+      await insertTask('t-middle', 'processing', createdAt: now - 120);
+
+      final snapshot = await executor.getTaskActivitySnapshot();
+
+      expect(snapshot.oldestActiveAt, now - 600);
+      expect(snapshot.oldestActiveSince,
+          DateTime.fromMillisecondsSinceEpoch((now - 600) * 1000));
+    });
+
+    test('ignores terminal tasks when computing the oldest active time',
+        () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await insertTask('t-ancient-done', 'completed', createdAt: now - 9000);
+      await insertTask('t-ancient-failed', 'failed', createdAt: now - 8000);
+      await insertTask('t-active', 'pending', createdAt: now - 45);
+
+      final snapshot = await executor.getTaskActivitySnapshot();
+
+      expect(snapshot.oldestActiveAt, now - 45);
+    });
+
+    test('is null when nothing is active', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await insertTask('t-done', 'completed', createdAt: now - 60);
+
+      final snapshot = await executor.getTaskActivitySnapshot();
+
+      expect(snapshot.oldestActiveAt, isNull);
+      expect(snapshot.oldestActiveSince, isNull);
+      expect(snapshot.hasActiveTasks, isFalse);
+    });
+
+    test('empty snapshot carries no active age', () {
+      const snapshot = TaskActivitySnapshot.empty();
+
+      expect(snapshot.oldestActiveAt, isNull);
+      expect(snapshot.oldestActiveSince, isNull);
+    });
   });
 }
 

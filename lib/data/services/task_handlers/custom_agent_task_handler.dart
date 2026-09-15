@@ -20,6 +20,7 @@ import 'package:memex/domain/models/llm_config.dart';
 import 'package:memex/utils/logger.dart';
 import 'package:memex/utils/time_context.dart';
 import 'package:memex/utils/user_storage.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 
 final Logger _logger = getLogger('CustomAgentTaskHandler');
 
@@ -202,7 +203,8 @@ Future<void> _handleCustomAgentTask(
   }
 
   try {
-    final responses = await agent.run([userMessage]);
+    final responses = await agent
+        .run([userMessage], cancelToken: TaskCancelScope.current);
 
     // Extract text result from agent output.
     String? resultText;

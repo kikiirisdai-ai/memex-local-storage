@@ -497,6 +497,42 @@ abstract class AppLocalizations {
   /// **'Model usage stats'**
   String get modelUsageStats;
 
+  /// No description provided for @aiTasksStuckTerminate.
+  ///
+  /// In en, this message translates to:
+  /// **'AI has been working for a while — terminate?'**
+  String get aiTasksStuckTerminate;
+
+  /// No description provided for @cancelAllAiTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminate all AI tasks'**
+  String get cancelAllAiTasks;
+
+  /// No description provided for @cancelAllAiTasksConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop every queued and running AI task? Work already in progress will be discarded, and cards still being generated will not be saved.'**
+  String get cancelAllAiTasksConfirm;
+
+  /// No description provided for @cancelAllAiTasksDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminated {count} AI task(s)'**
+  String cancelAllAiTasksDone(int count);
+
+  /// No description provided for @cancelAllAiTasksNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No AI tasks are running'**
+  String get cancelAllAiTasksNone;
+
+  /// No description provided for @cancelAllAiTasksFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to terminate AI tasks: {error}'**
+  String cancelAllAiTasksFailed(Object error);
+
   /// No description provided for @asyncTaskList.
   ///
   /// In en, this message translates to:

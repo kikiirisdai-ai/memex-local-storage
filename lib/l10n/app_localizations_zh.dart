@@ -218,6 +218,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modelUsageStats => '模型使用统计';
 
   @override
+  String get aiTasksStuckTerminate => 'AI 已经跑了一会儿 — 要终止吗?';
+
+  @override
+  String get cancelAllAiTasks => '终止全部 AI 任务';
+
+  @override
+  String get cancelAllAiTasksConfirm =>
+      '要停止所有排队中和正在运行的 AI 任务吗?正在进行的工作会被丢弃,还没生成完的卡片不会保存。';
+
+  @override
+  String cancelAllAiTasksDone(int count) {
+    return '已终止 $count 个 AI 任务';
+  }
+
+  @override
+  String get cancelAllAiTasksNone => '当前没有正在运行的 AI 任务';
+
+  @override
+  String cancelAllAiTasksFailed(Object error) {
+    return '终止 AI 任务失败:$error';
+  }
+
+  @override
   String get asyncTaskList => '异步任务列表';
 
   @override

@@ -232,6 +232,52 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
     }
   }
 
+  Future<void> _cancelAllAiTasks() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(UserStorage.l10n.cancelAllAiTasks),
+        content: Text(UserStorage.l10n.cancelAllAiTasksConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(UserStorage.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(UserStorage.l10n.cancelAllAiTasks),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final cancelled = await _viewModel.cancelAllAiTasks();
+      if (!mounted) return;
+      if (cancelled > 0) {
+        ToastHelper.showSuccessWithKey(
+          _scaffoldMessengerKey,
+          UserStorage.l10n.cancelAllAiTasksDone(cancelled),
+        );
+      } else {
+        ToastHelper.showInfoWithKey(
+          _scaffoldMessengerKey,
+          UserStorage.l10n.cancelAllAiTasksNone,
+        );
+      }
+    } catch (e, stack) {
+      _logger.severe('Error cancelling AI tasks: $e', e, stack);
+      if (!mounted) return;
+      ToastHelper.showErrorWithKey(
+        _scaffoldMessengerKey,
+        UserStorage.l10n.cancelAllAiTasksFailed(e),
+      );
+    }
+  }
+
   Future<void> _cloneToTestUser() async {
     if (_viewModel.isCloningTestUser) return;
 
@@ -551,6 +597,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen> {
             onClearToken: _clearToken,
             onClearData: _clearData,
             onClearFailedAgentContexts: _clearFailedAgentContexts,
+            onCancelAllAiTasks: _cancelAllAiTasks,
             onCloneToTestUser: _cloneToTestUser,
             onReprocessCards: _reprocessCards,
             onReprocessComments: _reprocessComments,

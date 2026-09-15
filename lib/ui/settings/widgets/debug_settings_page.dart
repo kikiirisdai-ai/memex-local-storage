@@ -17,6 +17,7 @@ class DebugSettingsPage extends StatelessWidget {
   final Future<void> Function() onClearToken;
   final Future<void> Function() onClearData;
   final Future<void> Function() onClearFailedAgentContexts;
+  final Future<void> Function() onCancelAllAiTasks;
   final Future<void> Function() onCloneToTestUser;
   final Future<void> Function() onReprocessCards;
   final Future<void> Function() onReprocessComments;
@@ -35,6 +36,7 @@ class DebugSettingsPage extends StatelessWidget {
     required this.onClearToken,
     required this.onClearData,
     required this.onClearFailedAgentContexts,
+    required this.onCancelAllAiTasks,
     required this.onCloneToTestUser,
     required this.onReprocessCards,
     required this.onReprocessComments,
@@ -135,6 +137,13 @@ class DebugSettingsPage extends StatelessWidget {
                 ),
               );
             },
+          ),
+          const SizedBox(height: 12),
+          _buildFunctionTab(
+            context: context,
+            icon: Icons.stop_circle_outlined,
+            title: UserStorage.l10n.cancelAllAiTasks,
+            onTap: onCancelAllAiTasks,
           ),
           const SizedBox(height: 12),
           _buildFunctionTab(

@@ -13,6 +13,7 @@ import 'package:memex/utils/logger.dart';
 import 'package:memex/utils/tavern_macro.dart';
 import 'package:memex/utils/time_context.dart';
 import 'package:memex/utils/user_storage.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 
 /// Companion chat agent implemented with StatefulAgent for architecture parity
 /// with other scene agents (e.g., CommentAgent).
@@ -152,7 +153,8 @@ class CompanionAgent {
       final input = [
         UserMessage([TextPart(timedUserMessage)])
       ];
-      final resultHistory = await agent.run(input, useStream: false);
+      final resultHistory = await agent.run(input,
+          useStream: false, cancelToken: TaskCancelScope.current);
       if (resultHistory.isNotEmpty && resultHistory.last is ModelMessage) {
         final text = (resultHistory.last as ModelMessage).textOutput ?? '';
         if (text.isNotEmpty) {

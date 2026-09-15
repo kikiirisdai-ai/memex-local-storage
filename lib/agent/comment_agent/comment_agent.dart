@@ -17,6 +17,7 @@ import 'package:memex/utils/logger.dart';
 import 'package:logging/logging.dart';
 import 'package:memex/utils/tavern_macro.dart';
 import 'package:memex/utils/time_context.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 
 class CommentAgent {
   static final Logger _logger = getLogger('CommentAgent');
@@ -239,7 +240,8 @@ class CommentAgent {
     List<LLMMessage> history = [];
     if (state.isRunning) {
       _logger.info("CommentAgent resume, sessionId:${state.sessionId}");
-      history = await agent.resume(useStream: false);
+      history = await agent.resume(
+          useStream: false, cancelToken: TaskCancelScope.current);
     } else {
       _logger.info("CommentAgent run, sessionId:${state.sessionId}");
 
@@ -261,7 +263,8 @@ class CommentAgent {
         // Event logging failure should not break agent execution
       }
 
-      history = await agent.run([userMessage], useStream: false);
+      history = await agent.run([userMessage],
+          useStream: false, cancelToken: TaskCancelScope.current);
     }
 
     // Post-run: check if compression is needed based on real token usage.

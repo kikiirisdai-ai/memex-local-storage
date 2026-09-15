@@ -23,6 +23,8 @@ abstract interface class DebugSettingsDataController {
 
   Future<int> clearFailedAgentConversationContexts();
 
+  Future<int> cancelAllAiTasks();
+
   Future<SandboxUserCloneResult> cloneToTestUser({
     required String targetUserId,
     required bool overwriteTarget,
@@ -117,6 +119,9 @@ class MemexRouterDebugSettingsDataController
   }
 
   @override
+  Future<int> cancelAllAiTasks() => _router.cancelAllActiveAiTasks();
+
+  @override
   Future<void> rebuildAllFtsIndexes() => _router.rebuildAllFtsIndexes();
 
   @override
@@ -208,6 +213,8 @@ class DebugSettingsViewModel extends ChangeNotifier {
       action: _dataController.clearFailedAgentConversationContexts,
     );
   }
+
+  Future<int> cancelAllAiTasks() => _dataController.cancelAllAiTasks();
 
   Future<SandboxUserCloneResult?> cloneToTestUser({
     required String targetUserId,

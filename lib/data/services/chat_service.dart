@@ -33,6 +33,7 @@ import 'package:memex/utils/token_usage_utils.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:memex/data/model/chat_events.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 
 export 'package:memex/data/model/chat_events.dart';
 
@@ -1118,7 +1119,9 @@ class ChatService {
 
     await DelegateProgressContext.run(progressSink, () async {
       try {
-        final cancelToken = CancelToken();
+        // The executor's token: cancelling it aborts the in-flight LLM
+        // request instead of letting it hang until the task timeout.
+        final cancelToken = TaskCancelScope.current ?? CancelToken();
         final agentFuture = resumeExistingRun
             ? activeAgent.resume(
                 cancelToken: cancelToken,

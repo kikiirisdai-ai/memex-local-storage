@@ -10,6 +10,7 @@ import 'package:memex/utils/user_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _barKey = ValueKey('agent_activity_loading_bar');
+const _terminateKey = ValueKey('agent_activity_terminate_button');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ void main() {
     TaskActivitySnapshot initialTaskSnapshot =
         const TaskActivitySnapshot.empty(),
     Stream<TaskActivitySnapshot>? taskActivitySnapshotStream,
+    Future<int> Function()? onTerminateTasks,
   }) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -39,6 +41,7 @@ void main() {
             initialTaskSnapshot: initialTaskSnapshot,
             taskActivitySnapshotStream: taskActivitySnapshotStream ??
                 const Stream<TaskActivitySnapshot>.empty(),
+            onTerminateTasks: onTerminateTasks,
           ),
         ),
       ),
@@ -122,6 +125,151 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(_barKey), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await taskSnapshots.close();
+  });
+
+
+  TaskActivitySnapshot activeSnapshot({required Duration age}) {
+    final since = DateTime.now().subtract(age);
+    return TaskActivitySnapshot(
+      pending: 0,
+      processing: 1,
+      retrying: 0,
+      activeTaskIds: const {'stuck-task'},
+      oldestActiveAt: since.millisecondsSinceEpoch ~/ 1000,
+    );
+  }
+
+  testWidgets('hides the terminate button while AI work is still young', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildHost(
+        initialTaskSnapshot: activeSnapshot(age: const Duration(seconds: 30)),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(_barKey), findsOneWidget);
+    expect(find.byKey(_terminateKey), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('shows the terminate button once work passes the threshold', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildHost(
+        initialTaskSnapshot: activeSnapshot(
+          age: kStuckAiTasksThreshold + const Duration(seconds: 5),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(_terminateKey), findsOneWidget);
+    expect(find.text(UserStorage.l10n.aiTasksStuckTerminate), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('confirming the terminate button runs the terminate action', (
+    tester,
+  ) async {
+    var terminateCalls = 0;
+
+    await tester.pumpWidget(
+      buildHost(
+        initialTaskSnapshot: activeSnapshot(
+          age: kStuckAiTasksThreshold + const Duration(seconds: 5),
+        ),
+        onTerminateTasks: () async {
+          terminateCalls += 1;
+          return 3;
+        },
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(_terminateKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The confirm dialog guards the destructive action.
+    expect(find.text(UserStorage.l10n.cancelAllAiTasksConfirm), findsOneWidget);
+    expect(terminateCalls, 0);
+
+    await tester.tap(find.text(UserStorage.l10n.cancelAllAiTasks).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(terminateCalls, 1);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('dismissing the confirm dialog leaves tasks running', (
+    tester,
+  ) async {
+    var terminateCalls = 0;
+
+    await tester.pumpWidget(
+      buildHost(
+        initialTaskSnapshot: activeSnapshot(
+          age: kStuckAiTasksThreshold + const Duration(seconds: 5),
+        ),
+        onTerminateTasks: () async {
+          terminateCalls += 1;
+          return 3;
+        },
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(_terminateKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text(UserStorage.l10n.cancel));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(terminateCalls, 0);
+    expect(find.byKey(_terminateKey), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('terminate button disappears when the work finishes', (
+    tester,
+  ) async {
+    final taskSnapshots = StreamController<TaskActivitySnapshot>.broadcast();
+
+    await tester.pumpWidget(
+      buildHost(
+        initialTaskSnapshot: activeSnapshot(
+          age: kStuckAiTasksThreshold + const Duration(seconds: 5),
+        ),
+        taskActivitySnapshotStream: taskSnapshots.stream,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(_terminateKey), findsOneWidget);
+
+    taskSnapshots.add(const TaskActivitySnapshot.empty());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.byKey(_terminateKey), findsNothing);
+    expect(find.byKey(_barKey), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

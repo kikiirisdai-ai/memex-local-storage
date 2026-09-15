@@ -167,6 +167,16 @@ void main() {
     expect(dataController.rebuildAllFtsIndexesCount, 1);
   });
 
+  test('cancelAllAiTasks delegates to data controller and returns the count',
+      () async {
+    final dataController = _RecordingDebugSettingsDataController();
+    final viewModel = DebugSettingsViewModel(dataController: dataController);
+
+    final cancelled = await viewModel.cancelAllAiTasks();
+
+    expect(cancelled, 7);
+    expect(dataController.cancelAllAiTasksCount, 1);
+  });
 }
 
 class _QueuedDebugTask {
@@ -266,6 +276,14 @@ class _RecordingDebugSettingsDataController
   @override
   Future<void> rebuildAllFtsIndexes() async {
     rebuildAllFtsIndexesCount++;
+  }
+
+  var cancelAllAiTasksCount = 0;
+
+  @override
+  Future<int> cancelAllAiTasks() async {
+    cancelAllAiTasksCount += 1;
+    return 7;
   }
 
   @override

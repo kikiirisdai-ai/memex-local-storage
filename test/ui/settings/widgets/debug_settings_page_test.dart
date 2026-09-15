@@ -45,6 +45,32 @@ void main() {
     expect(clearCount, 1);
   });
 
+  testWidgets('terminate all AI tasks tile invokes its callback', (
+    tester,
+  ) async {
+    var cancelCount = 0;
+
+    await _pumpDebugPage(
+      tester,
+      onCancelAllAiTasks: () async {
+        cancelCount += 1;
+      },
+    );
+
+    final cancelTile = find.text(UserStorage.l10n.cancelAllAiTasks);
+    await tester.scrollUntilVisible(
+      cancelTile,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(cancelTile, findsOneWidget);
+
+    await tester.tap(cancelTile);
+    await tester.pump();
+
+    expect(cancelCount, 1);
+  });
+
   testWidgets('disables clear failed contexts while loading', (tester) async {
     var clearCount = 0;
 
@@ -263,6 +289,14 @@ class _RecordingDebugSettingsDataController
     );
   }
 
+  var cancelAllAiTasksCount = 0;
+
+  @override
+  Future<int> cancelAllAiTasks() async {
+    cancelAllAiTasksCount += 1;
+    return cancelAllAiTasksCount;
+  }
+
   @override
   Future<void> rebuildAllFtsIndexes() async {}
 
@@ -273,6 +307,7 @@ class _RecordingDebugSettingsDataController
 Future<void> _pumpDebugPage(
   WidgetTester tester, {
   Future<void> Function()? onClearFailedAgentContexts,
+  Future<void> Function()? onCancelAllAiTasks,
   bool isClearingFailedAgentContexts = false,
 }) async {
   await tester.pumpWidget(
@@ -281,6 +316,7 @@ Future<void> _pumpDebugPage(
         onClearToken: () async {},
         onClearData: () async {},
         onClearFailedAgentContexts: onClearFailedAgentContexts ?? () async {},
+        onCancelAllAiTasks: onCancelAllAiTasks ?? () async {},
         onCloneToTestUser: () async {},
         onReprocessCards: () async {},
         onReprocessComments: () async {},

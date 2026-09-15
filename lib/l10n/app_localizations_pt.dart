@@ -230,6 +230,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String get modelUsageStats => 'Estatísticas de uso de modelo';
 
   @override
+  String get aiTasksStuckTerminate =>
+      'AI has been working for a while — terminate?';
+
+  @override
+  String get cancelAllAiTasks => 'Terminate all AI tasks';
+
+  @override
+  String get cancelAllAiTasksConfirm =>
+      'Stop every queued and running AI task? Work already in progress will be discarded, and cards still being generated will not be saved.';
+
+  @override
+  String cancelAllAiTasksDone(int count) {
+    return 'Terminated $count AI task(s)';
+  }
+
+  @override
+  String get cancelAllAiTasksNone => 'No AI tasks are running';
+
+  @override
+  String cancelAllAiTasksFailed(Object error) {
+    return 'Failed to terminate AI tasks: $error';
+  }
+
+  @override
   String get asyncTaskList => 'Lista de tarefas assíncronas';
 
   @override

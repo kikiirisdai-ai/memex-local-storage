@@ -52,3 +52,15 @@ class NonRetryableAgentLoopException implements NonRetryableTaskException {
     return buf.toString();
   }
 }
+
+/// Thrown when the user manually terminates a running task. Non-retryable so
+/// a cancelled task does not come back on the next poll.
+class TaskCancelledException implements NonRetryableTaskException {
+  @override
+  final String message;
+
+  TaskCancelledException([this.message = 'Task cancelled by user']);
+
+  @override
+  String toString() => 'TaskCancelledException: $message';
+}

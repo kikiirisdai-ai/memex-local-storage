@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:memex/data/services/agent_foreground_task_tracker.dart';
 import 'package:memex/data/services/sqlite_busy_retry.dart';
+import 'package:memex/data/services/task_cancel_scope.dart';
 import 'package:memex/db/app_database.dart';
 import 'package:memex/domain/models/task_exceptions.dart';
 import 'package:memex/utils/logger.dart';
@@ -27,22 +29,34 @@ class TaskActivitySnapshot {
   final int retrying;
   final Set<String> activeTaskIds;
 
+  /// Creation time (epoch seconds) of the oldest task still active, or null
+  /// when nothing is active. Lets the UI tell "AI is working" apart from
+  /// "AI has been stuck for a while" across app restarts, since it is real
+  /// wall-clock time rather than how long this screen has been watching.
+  final int? oldestActiveAt;
+
   const TaskActivitySnapshot({
     required this.pending,
     required this.processing,
     required this.retrying,
     this.activeTaskIds = const <String>{},
+    this.oldestActiveAt,
   });
 
   const TaskActivitySnapshot.empty()
       : pending = 0,
         processing = 0,
         retrying = 0,
-        activeTaskIds = const <String>{};
+        activeTaskIds = const <String>{},
+        oldestActiveAt = null;
 
   int get total => pending + processing + retrying;
 
   bool get hasActiveTasks => total > 0;
+
+  DateTime? get oldestActiveSince => oldestActiveAt == null
+      ? null
+      : DateTime.fromMillisecondsSinceEpoch(oldestActiveAt! * 1000);
 
   @override
   bool operator ==(Object other) {
@@ -50,6 +64,7 @@ class TaskActivitySnapshot {
         other.pending == pending &&
         other.processing == processing &&
         other.retrying == retrying &&
+        other.oldestActiveAt == oldestActiveAt &&
         setEquals(other.activeTaskIds, activeTaskIds);
   }
 
@@ -58,6 +73,7 @@ class TaskActivitySnapshot {
         pending,
         processing,
         retrying,
+        oldestActiveAt,
         Object.hashAllUnordered(activeTaskIds),
       );
 }
@@ -170,6 +186,7 @@ class LocalTaskExecutor {
   final Map<String, TaskConcurrencyPolicy> _concurrencyPolicies = {};
   final Set<String> _activeConcurrencyKeys = <String>{};
   final Map<String, Timer> _taskHeartbeatTimers = {};
+  final Map<String, CancelToken> _activeCancelTokens = {};
 
   // Failure handlers registry
   final Map<String, TaskFailureHandler> _failureHandlers = {};
@@ -341,11 +358,21 @@ class LocalTaskExecutor {
           break;
       }
     }
+    int? oldestActiveAt;
+    for (final task in tasks) {
+      final startedAt = task.createdAt ?? task.scheduledAt;
+      if (startedAt == null) continue;
+      if (oldestActiveAt == null || startedAt < oldestActiveAt) {
+        oldestActiveAt = startedAt;
+      }
+    }
+
     return TaskActivitySnapshot(
       pending: pending,
       processing: processing,
       retrying: retrying,
       activeTaskIds: tasks.map((task) => task.id).toSet(),
+      oldestActiveAt: oldestActiveAt,
     );
   }
 
@@ -396,6 +423,61 @@ class LocalTaskExecutor {
     if (_autoPollEnabled) {
       _scheduleNextPoll();
     }
+  }
+
+  /// Terminal status for tasks the user manually terminated.
+  static const String cancelledStatus = 'cancelled';
+
+  static const List<String> _activeStatuses = [
+    'pending',
+    'processing',
+    'retrying',
+  ];
+
+  /// Terminates every active task. Flips them to [cancelledStatus] so the
+  /// poller will not pick them up again, and cancels the [CancelToken] of any
+  /// task already mid-flight so its LLM request aborts at the network layer
+  /// instead of waiting out [taskExecutionTimeout].
+  ///
+  /// Returns the number of tasks terminated.
+  Future<int> cancelAllActiveTasks({
+    String reason = 'Cancelled by user',
+  }) async {
+    final activeTasks = await (_db.select(_db.tasks)
+          ..where((t) => t.status.isIn(_activeStatuses)))
+        .get();
+    if (activeTasks.isEmpty) return 0;
+
+    final activeIds = activeTasks.map((t) => t.id).toList();
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    await (_db.update(_db.tasks)..where((t) => t.id.isIn(activeIds))).write(
+      TasksCompanion(
+        status: const Value(cancelledStatus),
+        error: Value(reason),
+        completedAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
+
+    for (final id in activeIds) {
+      final token = _activeCancelTokens.remove(id);
+      if (token != null && !token.isCancelled) {
+        token.cancel(reason);
+      }
+      _stopTaskHeartbeat(id);
+      await AgentForegroundTaskTracker.instance.markTaskCompleted(id);
+    }
+
+    _logger.info('Cancelled ${activeIds.length} active task(s): $reason');
+    return activeIds.length;
+  }
+
+  Future<bool> _isTaskCancelled(String taskId) async {
+    final row = await (_db.select(_db.tasks)
+          ..where((t) => t.id.equals(taskId)))
+        .getSingleOrNull();
+    return row?.status == cancelledStatus;
   }
 
   /// Reset tasks that are stuck in 'processing' state to 'pending'
@@ -999,7 +1081,7 @@ class LocalTaskExecutor {
       final pendingDepsQuery = _db.selectOnly(_db.tasks)
         ..addColumns([_db.tasks.id.count()])
         ..where(_db.tasks.id.isIn(deps))
-        ..where(_db.tasks.status.isNotIn(['completed', 'failed']));
+        ..where(_db.tasks.status.isNotIn(['completed', 'failed', 'cancelled']));
 
       final pendingCount = await pendingDepsQuery.getSingle();
       return (pendingCount.read(_db.tasks.id.count()) ?? 0) == 0;
@@ -1028,10 +1110,23 @@ class LocalTaskExecutor {
 
       await AgentForegroundTaskTracker.instance.clearPause();
 
-      await handler(
-        currentUserId,
-        payloadMap,
-        TaskContext(taskId: task.id, taskType: task.type, bizId: task.bizId),
+      // Installed as a zone value so nested agent runs can abort their
+      // in-flight LLM requests when the user terminates AI work; see
+      // [TaskCancelScope] and [cancelAllActiveTasks].
+      final cancelToken = CancelToken();
+      _activeCancelTokens[task.id] = cancelToken;
+
+      await TaskCancelScope.run(
+        cancelToken,
+        () => handler(
+          currentUserId,
+          payloadMap,
+          TaskContext(
+            taskId: task.id,
+            taskType: task.type,
+            bizId: task.bizId,
+          ),
+        ),
       ).timeout(
         _executionTimeout,
         onTimeout: () => throw TimeoutException(
@@ -1053,6 +1148,13 @@ class LocalTaskExecutor {
 
       _logger.info('Task ${task.id} completed');
     } catch (e, stack) {
+      if (await _isTaskCancelled(task.id)) {
+        _logger.info(
+          'Task ${task.id} was cancelled while running; keeping cancelled status',
+        );
+        return;
+      }
+
       _logger.severe('Task ${task.id} failed', e, stack);
 
       // Retry Logic
@@ -1082,6 +1184,7 @@ class LocalTaskExecutor {
         _logger.severe('Task ${task.id} permanently failed');
       }
     } finally {
+      _activeCancelTokens.remove(task.id);
       _stopTaskHeartbeat(task.id);
       await _clearTaskExecutionMarker(task.id);
       if (concurrencyKey != null) {
