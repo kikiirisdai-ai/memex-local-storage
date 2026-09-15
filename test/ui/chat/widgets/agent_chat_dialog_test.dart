@@ -54,6 +54,47 @@ void main() {
       );
     });
 
+    test('keeps the sheet header clear of the status bar with a keyboard up',
+        () {
+      const viewport = Size(390, 800);
+      // Without reserving the inset the sheet would be 480 tall and its top
+      // edge would land at y=0, under the status bar.
+      expect(
+        resolveAgentChatDialogHeight(
+          viewport,
+          isFullScreen: false,
+          keyboardInset: 320,
+          topInset: 59,
+        ),
+        421,
+      );
+    });
+
+    test('full screen leaves the inset to SafeArea instead of shrinking', () {
+      const viewport = Size(390, 800);
+      expect(
+        resolveAgentChatDialogHeight(
+          viewport,
+          isFullScreen: true,
+          keyboardInset: 320,
+          topInset: 59,
+        ),
+        480,
+      );
+    });
+
+    test('ignores the inset when no keyboard is shown', () {
+      const viewport = Size(390, 800);
+      expect(
+        resolveAgentChatDialogHeight(
+          viewport,
+          isFullScreen: false,
+          topInset: 59,
+        ),
+        600,
+      );
+    });
+
     test('uses rounded sheet corners only outside full screen', () {
       expect(
         resolveAgentChatDialogBorderRadius(isFullScreen: false),

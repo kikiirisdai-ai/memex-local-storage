@@ -228,17 +228,27 @@ const Key superAgentPhotoSuggestionSlotKey =
 const double superAgentPhotoSuggestionSlotHeight = 68;
 
 @visibleForTesting
+/// Height of the chat dialog, which sits above the keyboard.
+///
+/// [topInset] is the status-bar/notch height. Outside full screen the sheet
+/// keeps clear of it, because a keyboard tall enough to squeeze the sheet
+/// would otherwise push its top edge to y=0 and slide the header — title,
+/// expand and close buttons — under the status bar. In full screen the
+/// surrounding `SafeArea(top: true)` already handles the inset.
 double resolveAgentChatDialogHeight(
   Size viewportSize, {
   required bool isFullScreen,
   double keyboardInset = 0,
+  double topInset = 0,
 }) {
   final baseHeight = isFullScreen
       ? viewportSize.height
       : viewportSize.height * _agentChatSheetHeightFactor;
   if (keyboardInset <= 0) return baseHeight;
 
-  final availableHeight = math.max(0.0, viewportSize.height - keyboardInset);
+  final reservedTop = isFullScreen ? 0.0 : topInset;
+  final availableHeight =
+      math.max(0.0, viewportSize.height - keyboardInset - reservedTop);
   if (availableHeight <= 0) return baseHeight;
   return math.min(baseHeight, availableHeight);
 }
@@ -1837,6 +1847,7 @@ class _AgentChatDialogState extends State<AgentChatDialog>
       viewportSize,
       isFullScreen: _isFullScreen,
       keyboardInset: keyboardBottomOffset,
+      topInset: MediaQuery.of(context).padding.top,
     );
     final borderRadius = resolveAgentChatDialogBorderRadius(
       isFullScreen: _isFullScreen,
