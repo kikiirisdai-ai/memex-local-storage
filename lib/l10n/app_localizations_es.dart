@@ -235,6 +235,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'AI has been working for a while — terminate?';
 
   @override
+  String get editCard => 'Edit card';
+
+  @override
+  String get editCardTitleLabel => 'Title';
+
+  @override
+  String get editCardBodyLabel => 'Body';
+
+  @override
+  String get editCardTitleHint => 'Untitled';
+
+  @override
+  String get editCardSaved => 'Card updated';
+
+  @override
   String get cancelAllAiTasks => 'Terminate all AI tasks';
 
   @override

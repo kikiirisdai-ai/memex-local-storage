@@ -221,6 +221,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiTasksStuckTerminate => 'AI 已经跑了一会儿 — 要终止吗?';
 
   @override
+  String get editCard => '编辑卡片';
+
+  @override
+  String get editCardTitleLabel => '标题';
+
+  @override
+  String get editCardBodyLabel => '正文';
+
+  @override
+  String get editCardTitleHint => '无标题';
+
+  @override
+  String get editCardSaved => '卡片已更新';
+
+  @override
   String get cancelAllAiTasks => '终止全部 AI 任务';
 
   @override

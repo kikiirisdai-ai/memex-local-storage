@@ -29,12 +29,15 @@ import 'package:memex/ui/core/cards/style/timeline_theme.dart';
 import 'package:memex/ui/core/themes/design_system.dart';
 import 'package:memex/ui/core/widgets/agent_logo_loading.dart';
 import 'package:memex/ui/character/widgets/persona_chat_screen.dart';
-import 'package:memex/ui/timeline/widgets/timeline_screen.dart' show kShowPersonaChat;
+import 'package:memex/ui/timeline/widgets/timeline_screen.dart'
+    show kShowPersonaChat;
 import 'package:memex/ui/timeline/widgets/card_mood_badge.dart';
 import 'package:memex/ui/timeline/widgets/media_status_badge.dart';
 import 'package:memex/utils/share_service.dart';
 import 'package:memex/ui/core/cards/native_card_factory.dart';
+import 'package:memex/domain/models/card_body_text_fields.dart';
 import 'package:memex/ui/core/input_sheet_metrics.dart';
+import 'package:memex/ui/timeline/widgets/card_edit_sheet.dart';
 
 /// Filters AI character comments out of [comments] when character comments
 /// are disabled via [CommentSettings.enableCharacterComment]. User comments
@@ -42,7 +45,8 @@ import 'package:memex/ui/core/input_sheet_metrics.dart';
 /// unit-testable independent of widget state.
 /// reversible: when `enableCharacterComment` is true, all comments pass
 /// through unchanged.
-List<Comment> visibleComments(List<Comment> comments, bool enableCharacterComment) {
+List<Comment> visibleComments(
+    List<Comment> comments, bool enableCharacterComment) {
   if (enableCharacterComment) return comments;
   return comments.where((c) => !c.isAi).toList();
 }
@@ -364,6 +368,82 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
     }
   }
 
+  Future<void> _editCardText() async {
+    final detail = _detail;
+    if (detail == null) return;
+    // A card the AI is still writing would have the user's edit overwritten
+    // when generation finishes.
+    if (detail.status != 'completed') return;
+
+    final bodyFields = editableBodyFields(detail.uiConfigs);
+    final edits = await showModalBottomSheet<CardTextEdits>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => CardEditSheet(
+        initialTitle: detail.title,
+        bodyFields: bodyFields,
+      ),
+    );
+    if (edits == null || edits.isEmpty || !mounted) return;
+
+    // Optimistic update, reverted on failure (same pattern as _editTime).
+    final oldDetail = _detail;
+    setState(() {
+      var updated = _detail!;
+      if (edits.title != null) updated = updated.copyWith(title: edits.title);
+      if (edits.bodies.isNotEmpty) {
+        final configs = updated.uiConfigs.toList();
+        for (final entry in edits.bodies.entries) {
+          final target = configs[entry.key];
+          final key = cardBodyTextFieldFor(target.templateId);
+          if (key == null) continue;
+          configs[entry.key] = UiConfig(
+            templateId: target.templateId,
+            data: {...target.data, key: entry.value},
+          );
+        }
+        updated = updated.copyWith(uiConfigs: configs);
+      }
+      _detail = updated;
+    });
+
+    var ok = true;
+    if (edits.title != null) {
+      ok = await _memexRouter.updateCardTitle(widget.cardId, edits.title!);
+    }
+    if (ok) {
+      for (final entry in edits.bodies.entries) {
+        final key = cardBodyTextFieldFor(
+          detail.uiConfigs[entry.key].templateId,
+        );
+        if (key == null) continue;
+        ok = await _memexRouter.updateCardUiConfig(
+          widget.cardId,
+          entry.key,
+          {key: entry.value},
+        );
+        if (!ok) break;
+      }
+    }
+
+    if (!mounted) return;
+    if (ok) {
+      ToastHelper.showSuccess(context, UserStorage.l10n.editCardSaved);
+    } else {
+      setState(() {
+        _detail = oldDetail;
+      });
+      ToastHelper.showError(
+        context,
+        UserStorage.l10n.updateFailed('card text'),
+      );
+    }
+  }
+
   Future<void> _editMood() async {
     if (_detail == null) return;
 
@@ -431,7 +511,8 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
       setState(() {
         _detail = oldDetail;
       });
-      ToastHelper.showError(context, UserStorage.l10n.updateFailed('media_status'));
+      ToastHelper.showError(
+          context, UserStorage.l10n.updateFailed('media_status'));
     }
   }
 
@@ -470,7 +551,8 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
       setState(() {
         _detail = oldDetail;
       });
-      ToastHelper.showError(context, UserStorage.l10n.updateFailed('media_rating'));
+      ToastHelper.showError(
+          context, UserStorage.l10n.updateFailed('media_rating'));
     }
   }
 
@@ -1197,6 +1279,24 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
                             ),
                           ),
                         ),
+                        if (detail.status == 'completed') ...[
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            key: const ValueKey('card_detail_edit_button'),
+                            onTap: _editCardText,
+                            child: const SizedBox(
+                              width: 36,
+                              height: 36,
+                              child: Center(
+                                child: Icon(
+                                  Icons.edit_outlined,
+                                  size: 20,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(width: 4),
                         GestureDetector(
                           onTap: _deleteCard,

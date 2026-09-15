@@ -7,6 +7,7 @@ import 'package:memex/data/repositories/get_schedule_briefing_timeline_card.dart
 import 'package:memex/data/repositories/migrate_cards_fact_assets.dart';
 import 'package:memex/data/repositories/update_card_ui_config.dart'
     as update_config_endpoint;
+import 'package:memex/data/repositories/update_card_title.dart';
 import 'package:memex/data/services/search_service.dart';
 import 'package:memex/data/services/embedding_index_service.dart';
 import 'package:memex/data/services/backup_service.dart';
@@ -1027,6 +1028,20 @@ class MemexRouter {
       await _ensureInitialized();
       return getArchivedCards();
     });
+  }
+
+  /// Corrects a card's title (AI-written wording the user wants changed).
+  /// A blank title clears it.
+  Future<bool> updateCardTitle(String cardId, String title) async {
+    await _ensureInitialized();
+    _logger.info('LocalMode: updateCardTitle called: cardId=$cardId');
+
+    try {
+      return await updateCardTitleEndpoint(cardId, title);
+    } catch (e) {
+      _logger.severe('Failed to update card title for $cardId: $e');
+      return false;
+    }
   }
 
   Future<bool> updateCardUiConfig(

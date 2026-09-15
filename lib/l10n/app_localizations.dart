@@ -503,6 +503,36 @@ abstract class AppLocalizations {
   /// **'AI has been working for a while — terminate?'**
   String get aiTasksStuckTerminate;
 
+  /// No description provided for @editCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit card'**
+  String get editCard;
+
+  /// No description provided for @editCardTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get editCardTitleLabel;
+
+  /// No description provided for @editCardBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Body'**
+  String get editCardBodyLabel;
+
+  /// No description provided for @editCardTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get editCardTitleHint;
+
+  /// No description provided for @editCardSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Card updated'**
+  String get editCardSaved;
+
   /// No description provided for @cancelAllAiTasks.
   ///
   /// In en, this message translates to:
