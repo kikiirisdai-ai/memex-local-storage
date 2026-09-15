@@ -250,6 +250,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get editCardSaved => 'Card updated';
 
   @override
+  String get aiTaskTerminatedByUser => 'Terminated';
+
+  @override
   String get cancelAllAiTasks => 'Terminate all AI tasks';
 
   @override

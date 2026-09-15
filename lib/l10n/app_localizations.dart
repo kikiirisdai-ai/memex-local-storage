@@ -533,6 +533,12 @@ abstract class AppLocalizations {
   /// **'Card updated'**
   String get editCardSaved;
 
+  /// No description provided for @aiTaskTerminatedByUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminated'**
+  String get aiTaskTerminatedByUser;
+
   /// No description provided for @cancelAllAiTasks.
   ///
   /// In en, this message translates to:

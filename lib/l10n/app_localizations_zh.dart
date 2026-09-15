@@ -236,6 +236,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get editCardSaved => '卡片已更新';
 
   @override
+  String get aiTaskTerminatedByUser => '已终止';
+
+  @override
   String get cancelAllAiTasks => '终止全部 AI 任务';
 
   @override

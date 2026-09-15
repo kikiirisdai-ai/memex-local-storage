@@ -559,6 +559,24 @@ class ChatService {
     yield* run.attach();
   }
 
+  /// Terminating a chat turn leaves its run stream open, so the dialog would
+  /// sit in its "thinking" state forever — a pending task's handler never ran
+  /// at all, so nothing else winds the stream down.
+  Future<void> handleSuperAgentChatTurnTaskCancelled(
+    String userId,
+    Map<String, dynamic> payload,
+    String taskId,
+  ) async {
+    final sessionId = payload['session_id'] as String?;
+    if (sessionId == null) return;
+    final run = _runRegistry[sessionId];
+    if (run == null || run.isClosed) return;
+
+    final turnId = payload['turn_id'] as String? ?? '';
+    run.add(ChatErrorEvent(turnId, UserStorage.l10n.aiTaskTerminatedByUser));
+    run.close();
+  }
+
   Future<void> handleSuperAgentChatTurnTask(
     String userId,
     Map<String, dynamic> payload,

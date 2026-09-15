@@ -134,6 +134,15 @@ class TaskConcurrencyPolicy {
   }
 }
 
+/// Called when the user terminates a task, so owners of user-visible state
+/// tied to that task (an open chat stream, say) can wind it down. Distinct
+/// from [TaskFailureHandler], which means the work genuinely failed.
+typedef TaskCancellationHandler = Future<void> Function(
+  String userId,
+  Map<String, dynamic> payload,
+  String taskId,
+);
+
 /// Failure handler function type - called when all retries are exhausted
 typedef TaskFailureHandler = Future<void> Function(
   String userId,
@@ -190,6 +199,7 @@ class LocalTaskExecutor {
 
   // Failure handlers registry
   final Map<String, TaskFailureHandler> _failureHandlers = {};
+  final Map<String, TaskCancellationHandler> _cancellationHandlers = {};
 
   // Worker state
   bool _isRunning = false;
@@ -395,6 +405,15 @@ class LocalTaskExecutor {
     _failureHandlers[taskType] = handler;
   }
 
+  /// Register a handler invoked when a task of [taskType] is terminated by the
+  /// user. See [TaskCancellationHandler].
+  void registerCancellationHandler(
+    String taskType,
+    TaskCancellationHandler handler,
+  ) {
+    _cancellationHandlers[taskType] = handler;
+  }
+
   /// Start the worker loop
   Future<void> start({
     String? userId,
@@ -460,17 +479,33 @@ class LocalTaskExecutor {
       ),
     );
 
-    for (final id in activeIds) {
-      final token = _activeCancelTokens.remove(id);
+    for (final task in activeTasks) {
+      final token = _activeCancelTokens.remove(task.id);
       if (token != null && !token.isCancelled) {
         token.cancel(reason);
       }
-      _stopTaskHeartbeat(id);
-      await AgentForegroundTaskTracker.instance.markTaskCompleted(id);
+      _stopTaskHeartbeat(task.id);
+      await AgentForegroundTaskTracker.instance.markTaskCompleted(task.id);
+      await _notifyCancellation(task);
     }
 
     _logger.info('Cancelled ${activeIds.length} active task(s): $reason');
     return activeIds.length;
+  }
+
+  /// A pending task's handler never ran, and a running one may be blocked
+  /// somewhere that ignores the token, so anything holding user-visible state
+  /// for this task has to be told explicitly.
+  Future<void> _notifyCancellation(Task task) async {
+    final handler = _cancellationHandlers[task.type];
+    if (handler == null) return;
+    final userId = _currentUserId;
+    if (userId == null) return;
+    try {
+      await handler(userId, _decodePayload(task), task.id);
+    } catch (e, stack) {
+      _logger.warning('Cancellation handler for ${task.id} failed', e, stack);
+    }
   }
 
   Future<bool> _isTaskCancelled(String taskId) async {
@@ -1116,6 +1151,15 @@ class LocalTaskExecutor {
       final cancelToken = CancelToken();
       _activeCancelTokens[task.id] = cancelToken;
 
+      // The row was already flipped to `processing` before we got here, so a
+      // terminate landing in that window would have written `cancelled`
+      // without finding a token to cancel — leaving the handler to run to the
+      // full execution timeout, the exact hang this exists to prevent.
+      if (await _isTaskCancelled(task.id)) {
+        _logger.info('Task ${task.id} was cancelled before execution started');
+        return;
+      }
+
       await TaskCancelScope.run(
         cancelToken,
         () => handler(
@@ -1134,6 +1178,13 @@ class LocalTaskExecutor {
           _executionTimeout,
         ),
       );
+
+      // A handler that swallows cancellation returns normally, so check before
+      // claiming success — otherwise the user's `cancelled` is overwritten.
+      if (await _isTaskCancelled(task.id)) {
+        _logger.info('Task ${task.id} finished after being cancelled');
+        return;
+      }
 
       // Success
       await (_db.update(_db.tasks)..where((t) => t.id.equals(task.id))).write(

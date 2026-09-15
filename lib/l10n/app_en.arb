@@ -93,6 +93,7 @@
   "editCardBodyLabel": "Body",
   "editCardTitleHint": "Untitled",
   "editCardSaved": "Card updated",
+  "aiTaskTerminatedByUser": "Terminated",
   "cancelAllAiTasks": "Terminate all AI tasks",
   "cancelAllAiTasksConfirm": "Stop every queued and running AI task? Work already in progress will be discarded, and cards still being generated will not be saved.",
   "cancelAllAiTasksDone": "Terminated {count} AI task(s)",

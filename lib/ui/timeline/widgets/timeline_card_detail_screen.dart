@@ -390,8 +390,8 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
     );
     if (edits == null || edits.isEmpty || !mounted) return;
 
-    // Optimistic update, reverted on failure (same pattern as _editTime).
-    final oldDetail = _detail;
+    // Optimistic update; a failure re-fetches instead of reverting, since
+    // writes are per-field and some may have already succeeded.
     setState(() {
       var updated = _detail!;
       if (edits.title != null) updated = updated.copyWith(title: edits.title);
@@ -434,13 +434,14 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
     if (ok) {
       ToastHelper.showSuccess(context, UserStorage.l10n.editCardSaved);
     } else {
-      setState(() {
-        _detail = oldDetail;
-      });
+      // Writes land one field at a time, so some may already be on disk.
+      // Re-read rather than restoring the pre-edit snapshot, which would show
+      // stale values for whatever did persist.
       ToastHelper.showError(
         context,
         UserStorage.l10n.updateFailed('card text'),
       );
+      await _fetchDetail();
     }
   }
 
@@ -1156,15 +1157,17 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             color: Colors.white,
-            child: _CommentInputWidget(
-              cardId: cardId,
-              replyToId: replyId,
-              replyToName: replyName,
-              onCommentPosted: () {
-                Navigator.pop(context);
-                _fetchDetail();
-              },
-              autofocus: true,
+            child: SingleChildScrollView(
+              child: _CommentInputWidget(
+                cardId: cardId,
+                replyToId: replyId,
+                replyToName: replyName,
+                onCommentPosted: () {
+                  Navigator.pop(context);
+                  _fetchDetail();
+                },
+                autofocus: true,
+              ),
             ),
           ),
         ),

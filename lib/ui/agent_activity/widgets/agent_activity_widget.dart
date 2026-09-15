@@ -110,7 +110,12 @@ class _AgentActivityWidgetState extends State<AgentActivityWidget> {
     if (_taskSnapshot.hasActiveTasks && !_isStuck) {
       _stuckTicker ??= Timer.periodic(
         const Duration(seconds: 10),
-        (_) => setState(() {}),
+        (_) {
+          setState(() {});
+          // Stuck is a one-way flip, so stop re-rendering once it is true
+          // rather than ticking on until the next snapshot arrives.
+          if (_isStuck) _syncStuckTicker();
+        },
       );
     } else {
       _stuckTicker?.cancel();

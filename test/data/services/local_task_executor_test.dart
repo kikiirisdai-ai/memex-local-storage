@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memex/data/services/local_task_executor.dart';
 import 'package:memex/data/services/task_cancel_scope.dart';
 import 'package:memex/db/app_database.dart';
-import 'package:memex/domain/models/task_exceptions.dart';
 
 void main() {
   late AppDatabase db;
@@ -1029,7 +1028,7 @@ void main() {
           if (!blocked.isCompleted) blocked.complete();
         });
         await blocked.future;
-        throw TaskCancelledException();
+        throw Exception('cancelled mid-flight');
       });
 
       await insertTask('t-running', 'pending');
@@ -1067,6 +1066,48 @@ void main() {
       expect(await statusOf('t-running'), 'cancelled');
     });
 
+    test('invokes the cancellation handler so owners can wind down state',
+        () async {
+      final seen = <String>[];
+      executor.registerCancellationHandler(
+        'cancellable_task',
+        (userId, payload, taskId) async => seen.add('$userId/$taskId'),
+      );
+
+      await insertTask('t-pending', 'pending');
+      await executor.start(userId: 'user-1');
+      await executor.cancelAllActiveTasks();
+
+      expect(seen, ['user-1/t-pending']);
+    });
+
+    test('a handler that swallows cancellation cannot claim success', () async {
+      final handlerStarted = Completer<void>();
+      final releaseHandler = Completer<void>();
+
+      // Mirrors runSuperAgentChild, which catches everything and returns a
+      // result rather than propagating the cancellation.
+      executor.registerHandler('cancellable_task', (_, __, ___) async {
+        if (!handlerStarted.isCompleted) handlerStarted.complete();
+        await releaseHandler.future;
+      });
+
+      await insertTask('t-running', 'pending');
+      await executor.start(userId: 'user-1');
+      await handlerStarted.future.timeout(const Duration(seconds: 5));
+
+      await executor.cancelAllActiveTasks();
+      releaseHandler.complete();
+      await waitForExecutorIdle();
+
+      expect(await statusOf('t-running'), 'cancelled');
+    });
+
+    // Load-bearing, not a nicety: every chat turn depends on the previous one
+    // via getLastTaskByType, which ignores status. If a cancelled dependency
+    // did not count as terminal, the first message sent after any terminate
+    // would be blocked forever, since the cancelled task can never reach
+    // completed/failed. Do not "fix" this back.
     test('a cancelled dependency no longer blocks dependent tasks', () async {
       final dependentRan = Completer<void>();
       executor.registerHandler('dependent_task', (_, __, ___) async {

@@ -469,9 +469,21 @@ Future<SuperAgentChildResult> runSuperAgentChild({
   DelegateProgressSink? progressSink,
 }) async {
   StatefulAgent? agent;
-  // Inherit the owning task's token so terminating AI work also aborts the
-  // child's in-flight LLM request, not just the parent turn's.
-  final cancelToken = TaskCancelScope.current ?? CancelToken();
+  // Child-local, because the timeout handler below cancels this token: sharing
+  // the task-wide token would let one child's timeout abort the parent turn
+  // and every sibling delegation, instead of returning a `failed` result the
+  // parent can still merge. Task-level termination is chained in instead.
+  final cancelToken = CancelToken();
+  final taskCancelToken = TaskCancelScope.current;
+  if (taskCancelToken != null) {
+    if (taskCancelToken.isCancelled) {
+      cancelToken.cancel('task cancelled');
+    } else {
+      unawaited(taskCancelToken.whenCancel.then((_) {
+        if (!cancelToken.isCancelled) cancelToken.cancel('task cancelled');
+      }));
+    }
+  }
   try {
     agent = createSuperAgentChild(
       config: config,
