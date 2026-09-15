@@ -29,12 +29,16 @@ A journal that doesn't ask you to sit down and write polished entries. You captu
 
 - **Quick capture** — text, photos, and voice notes become typed timeline cards in a single fast pass.
 - **Voice cards** — on-device transcription (SenseVoice via sherpa-onnx), with playback and a verbatim transcript.
+- **Optional polish** — rewrite a raw note into a plain or a more literary version, compare them side by side, and edit before saving. The original text is kept and can be toggled back on any card.
+- **Editable cards** — the model gets a word or an inference wrong sometimes, so a card's title and body stay editable after generation.
 - **Mood tracking** — per-entry mood scoring and a deterministic mood curve over time.
-- **Summaries** — automatic daily / weekly / monthly / yearly narrative rollups.
+- **Summaries** — automatic daily / weekly / monthly / yearly narrative rollups, with optional local reminders (including a year-end one; reminder copy is currently Chinese only).
 - **Search & Q&A** — hybrid keyword + semantic search (bge-m3 embeddings, RRF fusion) with tappable source cards.
 - **Memory book export** — export a date range to a cover + timeline PDF (with bundled CJK fonts) via the system share sheet.
-- **Goal & media cards** — track goals and log books, films, shows, and music.
+- **Goal & media cards** — track goals and log books, films, shows, and music, with a browsable media library.
+- **Calendar sync** — card due dates can be mirrored into the device calendar.
 - **Backups** — manual export, automatic daily on-device snapshots, and optional daily backup to a folder in iCloud Drive (rolling two copies) that survives an app reinstall.
+- **You can stop the AI** — when a model stops responding, terminate queued and running AI work instead of waiting out timeouts and retries.
 
 ## Tech stack
 

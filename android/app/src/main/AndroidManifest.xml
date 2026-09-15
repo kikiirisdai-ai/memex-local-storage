@@ -27,11 +27,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Health Connect permissions removed to comply with Google Play policy.
-         On Android, step counting uses ACTIVITY_RECOGNITION + pedometer package.
-         Full health data (HealthKit) is only available on iOS. -->
-    <!-- Activity Recognition permission for step counting (Android 10+) -->
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <application
         android:label="${appLabel}"
         android:name="${applicationName}"

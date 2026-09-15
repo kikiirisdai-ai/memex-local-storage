@@ -169,8 +169,6 @@ class _SystemAuthorizationPageState extends State<SystemAuthorizationPage> {
         if (status != null && !granted) {
           onTap();
         } else if (granted && reauthorizeWhenGranted) {
-          // The Fitness item also drives HealthKit data-type authorization,
-          // which may still be undetermined even when Motion is granted.
           onTap();
         } else if (granted) {
           // show toast or open settings

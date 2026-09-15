@@ -67,5 +67,4 @@ class AppConfig {
   //
   static bool get enableMemexModelService => AppFlavor.isGlobal;
   // static bool get enableICloudSync => AppFlavor.isGlobal;
-  // static bool get enableHealthKit  => AppFlavor.isGlobal;
 }
