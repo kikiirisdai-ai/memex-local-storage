@@ -34,6 +34,7 @@ import 'package:memex/ui/timeline/widgets/card_mood_badge.dart';
 import 'package:memex/ui/timeline/widgets/media_status_badge.dart';
 import 'package:memex/utils/share_service.dart';
 import 'package:memex/ui/core/cards/native_card_factory.dart';
+import 'package:memex/ui/core/input_sheet_metrics.dart';
 
 /// Filters AI character comments out of [comments] when character comments
 /// are disabled via [CommentSettings.enableCharacterComment]. User comments
@@ -1064,22 +1065,25 @@ class _TimelineCardDetailScreenState extends State<TimelineCardDetailScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          color: Colors.white,
-          child: _CommentInputWidget(
-            cardId: cardId,
-            replyToId: replyId,
-            replyToName: replyName,
-            onCommentPosted: () {
-              Navigator.pop(context);
-              _fetchDetail();
-            },
-            autofocus: true,
+      builder: (context) => ConstrainedBox(
+        constraints: inputSheetConstraints(context),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: _CommentInputWidget(
+              cardId: cardId,
+              replyToId: replyId,
+              replyToName: replyName,
+              onCommentPosted: () {
+                Navigator.pop(context);
+                _fetchDetail();
+              },
+              autofocus: true,
+            ),
           ),
         ),
       ),
