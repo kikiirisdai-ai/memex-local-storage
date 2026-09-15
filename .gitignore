@@ -104,3 +104,4 @@ deploy_android.sh
 # publish-snapshot.sh bookkeeping — tracks the last private commit published
 # to the public repo; local-only, never meant to be shared.
 .publish-snapshot-state
+.publish-snapshot-public-tip
